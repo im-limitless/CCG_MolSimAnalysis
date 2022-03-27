@@ -98,7 +98,11 @@ if strcmp(DoubleAnalType, 'MassDensity')
     % % get the O atom distribution and corresponding indices of DL atoms
     [Dens_O, ~, ~, ~, ~, z] = getDensityProfile(xyz, ABC);
     [FirstLayerIndx, SecondLayerIndx] = getWaterLayerIndices(Indx, XYZ, Dens_O, z);
-    
+
+
+%%%%%%%%%%%%%%%%%%%%%% Up to this point you get the graph from the initial successful modification  %%%%%%%%%%%%%%%%%%%%%% 
+
+
     for i = startConfig:nConfigs
         DL1st{i} = [FirstLayerIndx{i}];
         DL2nd{i} = [SecondLayerIndx{i}];
