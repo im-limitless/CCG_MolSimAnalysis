@@ -12,9 +12,9 @@ close all;
 % system = 'Pt_12H10F';
 % Trajectory = 'Pt_12H10F_0to9500_500step.xyz';
 
-BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/Young/MD/AIMD/EleventhTimeLucky/GEO_OPT/Al_AlO/AlO_water_1ML/';
-system = 'AlO';
-Trajectory = 'AlO.xyz';
+BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/Young/MD/AIMD/EleventhTimeLucky/GEO_OPT/Al_AlO/Al_water/';
+system = 'Al';
+Trajectory = 'Al.xyz';
 
 % BaseFldr = 'G:\Imperial\MattProjects\Edges\PostEquilibration\Vacuum\';
 % system = 'Pt_Bulk';
@@ -62,12 +62,12 @@ XYZ = wrapXYZ(XYZ, ABC);
 
 % % compute radial functions for OH, OF and HF
 RadFunOH = cell(nConfigs,1);
-% RadFunFH = cell(nConfigs,1);
+% RadFunAlH = cell(nConfigs,1);
 % RadFunFO = cell(nConfigs,1);
 RadFunAlO = cell(nConfigs,1);
 
 DistOH = cell(1,nConfigs);
-% DistFH = cell(1,nConfigs);
+% DistAlH = cell(1,nConfigs);
 % DistFO = cell(1,nConfigs);
 DistAlO = cell(1,nConfigs);
 
@@ -77,19 +77,21 @@ for snap = startConfig:nConfigs
     
     [VecAlO, DistAlO{snap}] = GetAtomCorrelation(XYZ_snap, [Indx.Al; Indx.Al], Indx.O, ABC);
     [VecOH, DistOH] = GetAtomCorrelation(XYZ_snap, Indx.O, Indx.H, ABC);
-%     [VecFH, DistFH] = GetAtomCorrelation(XYZ_snap, Indx.F, Indx.H, ABC);
+%     [VecAlH, DistAlH] = GetAtomCorrelation(XYZ_snap, Indx.Al, Indx.H, ABC);
 %     [VecFO, DistFO] = GetAtomCorrelation(XYZ_snap, Indx.F, Indx.O, ABC);
     
     RadFunOH{snap} = reshape(DistOH, [numel(DistOH), 1]);
-%     RadFunFH{snap} = reshape(DistFH, [numel(DistFH), 1]);
+%     RadFunAlH{snap} = reshape(DistAlH, [numel(DistAlH), 1]);
 %     RadFunFO{snap} = reshape(DistFO, [numel(DistFO), 1]);
     RadFunAlO{snap} = reshape(DistAlO{snap}, [numel(DistAlO{snap}), 1]);
 end
 
-MinimaOH = RadialDistribution(RadFunOH, ABC, ['O'; 'H'], 0);
-% MinimaFH = RadialDistribution(RadFunFH, ABC, ['F'; 'H'], 0);
+MinimaOH = RadialDistribution(RadFunOH, ABC, ['O'; 'H'], 1);
+% MinimaAlH = RadialDistribution(RadFunAlH, ABC, ['Al'; 'H'], 0);
 % MinimaFO = RadialDistribution(RadFunFO, ABC, ['F'; 'O'], 0);
 MinimaAlO = RadialDistribution(RadFunAlO, ABC, ['Al'; 'O '], 1);
+
+%%%%%%%%%%%%%%%%%%%%%% Up to this point you get the graph from the initial successful modification  %%%%%%%%%%%%%%%%%%%%%% 
 
 if strcmp(DoubleAnalType, 'MassDensity')
     
@@ -98,9 +100,6 @@ if strcmp(DoubleAnalType, 'MassDensity')
     % % get the O atom distribution and corresponding indices of DL atoms
     [Dens_O, ~, ~, ~, ~, z] = getDensityProfile(xyz, ABC);
     [FirstLayerIndx, SecondLayerIndx] = getWaterLayerIndices(Indx, XYZ, Dens_O, z);
-
-
-%%%%%%%%%%%%%%%%%%%%%% Up to this point you get the graph from the initial successful modification  %%%%%%%%%%%%%%%%%%%%%% 
 
 
     for i = startConfig:nConfigs
