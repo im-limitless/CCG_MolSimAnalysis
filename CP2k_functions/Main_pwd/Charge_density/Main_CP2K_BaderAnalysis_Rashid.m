@@ -12,16 +12,16 @@ close all;
 % system = 'Pt_12H10F';
 % Trajectory = 'Pt_12H10F_0to9500_500step.xyz';
 
-BaseFldr = 'G:\Imperial\MattProjects\Edges\PostEquilibration\Pit\HF\';
-system = 'CP_Pit_20F';
-Trajectory = 'Sample41000_52500.xyz';
+BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/EleventhTimeLucky_Plus/Al_AlO/';
+system = 'Al_water';
+Trajectory = 'Al_water_14300to18100_100step.xyz';
 
 % BaseFldr = 'G:\Imperial\MattProjects\Edges\PostEquilibration\Vacuum\';
 % system = 'Pt_Bulk';
 % Trajectory = 'Pt_Bulk.xyz';
 
 
-fldrname = [BaseFldr system '\Bader\'];
+fldrname = [BaseFldr system '/Bader_Analysis/'];
 ACFfiles = dir([fldrname 'ACF_*.dat']);
 
 % DoubleAnalType = 'MassDensity';
@@ -41,19 +41,19 @@ for n = 1:length(ACFfiles)
     [Q(:,n), Qnet(:,n), StepNum(n)] = extractBaderCharges(fldrname, ACFfiles(n).name, Atoms, AtomList);
 end
 
-% % Find indices of all "Pt*" atoms
+% % Find indices of all "Al*" atoms
 if size(AtomList,1) > 1
-    PtList = find(ismember(AtomList, 'Pt'));
-    PtList = PtList(PtList < length(AtomList)+1);
+    AlList = find(ismember(AtomList, 'Al'));
+    AlList = AlList(AlList < length(AtomList)+1);
     Indxfns = fieldnames(Indx);
-    Indx.PtAll = [];
-    for ii = 1:length(PtList)
-        Indx.PtAll = [Indx.PtAll; Indx.(Indxfns{PtList(ii)})];
+    Indx.Al_All = [];
+    for ii = 1:length(AlList)
+        Indx.Al_All = [Indx.Al_All; Indx.(Indxfns{AlList(ii)})];
     end
 else
     Indxfns = fieldnames(Indx);
-    PtList = 1;
-    Indx.PtAll = Indx.(Indxfns{1});
+    AlList = 1;
+    Indx.Al_All = Indx.(Indxfns{1});
 end
 
 % % parse coordinates of atoms along trajectory and wrap into cell
@@ -62,34 +62,34 @@ XYZ = wrapXYZ(XYZ, ABC);
 
 % % compute radial functions for OH, OF and HF
 RadFunOH = cell(nConfigs,1);
-RadFunFH = cell(nConfigs,1);
-RadFunFO = cell(nConfigs,1);
-RadFunPtO = cell(nConfigs,1);
+% RadFunFH = cell(nConfigs,1);
+% RadFunFO = cell(nConfigs,1);
+RadFunAlO = cell(nConfigs,1);
 
 DistOH = cell(1,nConfigs);
-DistFH = cell(1,nConfigs);
-DistFO = cell(1,nConfigs);
-DistPtO = cell(1,nConfigs);
+% DistFH = cell(1,nConfigs);
+% DistFO = cell(1,nConfigs);
+DistAlO = cell(1,nConfigs);
 
 for snap = startConfig:nConfigs
     XYZ_snap = zeros(size(XYZ,2), size(XYZ,3));
     XYZ_snap(:,:) = XYZ(snap,:,:);
     
-    [VecPtO, DistPtO{snap}] = GetAtomCorrelation(XYZ_snap, [Indx.Pts; Indx.PtE], Indx.O, ABC);
+    [VecAlO, DistAlO{snap}] = GetAtomCorrelation(XYZ_snap, [Indx.Als; Indx.AlE], Indx.O, ABC);
     [VecOH, DistOH] = GetAtomCorrelation(XYZ_snap, Indx.O, Indx.H, ABC);
-    [VecFH, DistFH] = GetAtomCorrelation(XYZ_snap, Indx.F, Indx.H, ABC);
-    [VecFO, DistFO] = GetAtomCorrelation(XYZ_snap, Indx.F, Indx.O, ABC);
+%     [VecFH, DistFH] = GetAtomCorrelation(XYZ_snap, Indx.F, Indx.H, ABC);
+%     [VecFO, DistFO] = GetAtomCorrelation(XYZ_snap, Indx.F, Indx.O, ABC);
     
     RadFunOH{snap} = reshape(DistOH, [numel(DistOH), 1]);
-    RadFunFH{snap} = reshape(DistFH, [numel(DistFH), 1]);
-    RadFunFO{snap} = reshape(DistFO, [numel(DistFO), 1]);
-    RadFunPtO{snap} = reshape(DistPtO{snap}, [numel(DistPtO{snap}), 1]);
+%     RadFunFH{snap} = reshape(DistFH, [numel(DistFH), 1]);
+%     RadFunFO{snap} = reshape(DistFO, [numel(DistFO), 1]);
+    RadFunAlO{snap} = reshape(DistAlO{snap}, [numel(DistAlO{snap}), 1]);
 end
 
 MinimaOH = RadialDistribution(RadFunOH, ABC, ['O'; 'H'], 0);
-MinimaFH = RadialDistribution(RadFunFH, ABC, ['F'; 'H'], 0);
-MinimaFO = RadialDistribution(RadFunFO, ABC, ['F'; 'O'], 0);
-MinimaPtO = RadialDistribution(RadFunPtO, ABC, ['Pt'; 'O '], 1);
+% MinimaFH = RadialDistribution(RadFunFH, ABC, ['F'; 'H'], 0);
+% MinimaFO = RadialDistribution(RadFunFO, ABC, ['F'; 'O'], 0);
+MinimaPtO = RadialDistribution(RadFunPtO, ABC, ['Al'; 'O '], 1);
 
 if strcmp(DoubleAnalType, 'MassDensity')
     
@@ -128,9 +128,9 @@ elseif strcmp(DoubleAnalType, 'Radial')
     disp('Determining water layering from radial distribution...');
     
     for i = startConfig:nConfigs
-        [r1st, ~] = find(DistPtO{i} <= MinimaPtO(1));
+        [r1st, ~] = find(DistAlO{i} <= MinimaAlO(1));
         DL1st{i} = Indx.O(unique(r1st));
-        [r2nd, ~] = find(DistPtO{i} <= MinimaPtO(2) & DistPtO{i} > MinimaPtO(1));
+        [r2nd, ~] = find(DistAlO{i} <= MinimaAlO(2) & DistAlO{i} > MinimaAlO(1));
         DL2nd{i} = Indx.O(unique(r2nd));
         nonDL{i} = setdiff(Indx.O, [DL1st{i}; DL2nd{i}]);
         
@@ -196,10 +196,10 @@ box on
 set(gca, 'colororder', [0 0 0]);
 xlabel('Time (ps)');
 yyaxis left
-if length(PtList) == 1
-    HalfElectro = SumCharge(PtList,:)/2;
-elseif length(PtList) > 1
-    HalfElectro = sum(SumCharge(PtList,:))/2;
+if length(AlList) == 1
+    HalfElectro = SumCharge(AlList,:)/2;
+elseif length(AlList) > 1
+    HalfElectro = sum(SumCharge(AlList,:))/2;
 end
 plot(StepNum/2000, HalfElectro, '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'b');
 Lyax = gca;
@@ -271,31 +271,31 @@ set(Ryax, 'YTick',Lyaxt, 'YTickLabel', LyaxDegC);
 ylabel('Charge Density (\muC\cdotcm^{-2})');
 legend('2nd Water Layer')
 
-% Total charge per Pt type
+% Total charge per Al type
 figure
 box on
 hold on
 xlabel('Time (ps)');
 ylabel('Total Charge (e)');
-% title(['Total Bader charge for Pt Atoms in ' system], 'interpreter', 'none')
+% title(['Total Bader charge for Al Atoms in ' system], 'interpreter', 'none')
 C = [218/255 165/255 32/255; 0 0.5 0; 0 0 1; 1 0 0];
-PtC = [];
-for i = 1:length(PtList)
-    if contains(AtomList(PtList(i), :), 'PtE')
-        PtC = C(1,:);
-    elseif contains(AtomList(PtList(i), :), 'Ptb')
-        PtC = C(2,:);
-    elseif contains(AtomList(PtList(i), :), 'Pts') & ~contains(AtomList(PtList(i), :), 'Ptss')
-        PtC = C(3,:);
-    elseif contains(AtomList(PtList(i), :), 'Ptss')
-        PtC = C(4,:);
+AlC = [];
+for i = 1:length(AlList)
+    if contains(AtomList(AlList(i), :), 'AlE')
+        AlC = C(1,:);
+    elseif contains(AtomList(AlList(i), :), 'Alb')
+        AlC = C(2,:);
+    elseif contains(AtomList(AlList(i), :), 'Als') & ~contains(AtomList(AlList(i), :), 'Alss')
+        AlC = C(3,:);
+    elseif contains(AtomList(AlList(i), :), 'Alss')
+        AlC = C(4,:);
     end
-    plot(StepNum/2000, SumCharge(PtList(i),:)/2, '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', PtC);
+    plot(StepNum/2000, SumCharge(AlList(i),:)/2, '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', AlC);
 end
-if length(PtList) == 2
-    legend(AtomList(PtList(1),:), AtomList(PtList(2),:), 'interpreter', 'tex')
-elseif length(PtList) == 3
-    legend(AtomList(PtList(1),:), AtomList(PtList(2),:), AtomList(PtList(3),:), 'interpreter', 'tex')
+if length(AlList) == 2
+    legend(AtomList(AlList(1),:), AtomList(AlList(2),:), 'interpreter', 'tex')
+elseif length(AlList) == 3
+    legend(AtomList(AlList(1),:), AtomList(AlList(2),:), AtomList(AlList(3),:), 'interpreter', 'tex')
 end
 hold off
 
@@ -306,23 +306,23 @@ hold on
 xlabel('Time (ps)');
 ylabel('Ave. Charge per Atom (e)');
 % title(['Total Bader charge for Pt Atoms in ' system], 'interpreter', 'none')
-PtC = [];
-for i = 1:length(PtList)
-    if contains(AtomList(PtList(i), :), 'PtE')
-        PtC = C(1,:);
-    elseif contains(AtomList(PtList(i), :), 'Ptb')
-        PtC = C(2,:);
-    elseif contains(AtomList(PtList(i), :), 'Pts') & ~contains(AtomList(PtList(i), :), 'Ptss')
-        PtC = C(3,:);
-    elseif contains(AtomList(PtList(i), :), 'Ptss')
-        PtC = C(4,:);
+AlC = [];
+for i = 1:length(AlList)
+    if contains(AtomList(AlList(i), :), 'AlE')
+        AlC = C(1,:);
+    elseif contains(AtomList(AlList(i), :), 'Alb')
+        AlC = C(2,:);
+    elseif contains(AtomList(AlList(i), :), 'Als') & ~contains(AtomList(AlList(i), :), 'Alss')
+        AlC = C(3,:);
+    elseif contains(AtomList(AlList(i), :), 'Alss')
+        AlC = C(4,:);
     end
-    errorbar(StepNum/2000, MeanCharge(PtList(i),:), StdCharge(PtList(i),:), '-o', 'color', PtC, 'markeredgecolor', 'k', 'markerfacecolor', PtC);
+    errorbar(StepNum/2000, MeanCharge(AlList(i),:), StdCharge(AlList(i),:), '-o', 'color', AlC, 'markeredgecolor', 'k', 'markerfacecolor', AlC);
 end
-if length(PtList) == 2
-    legend(AtomList(PtList(1),:), AtomList(PtList(2),:), 'interpreter', 'tex')
-elseif length(PtList) == 3
-    legend(AtomList(PtList(1),:), AtomList(PtList(2),:), AtomList(PtList(3),:), 'interpreter', 'tex')
+if length(AlList) == 2
+    legend(AtomList(AlList(1),:), AtomList(AlList(2),:), 'interpreter', 'tex')
+elseif length(AlList) == 3
+    legend(AtomList(AlList(1),:), AtomList(AlList(2),:), AtomList(AlList(3),:), 'interpreter', 'tex')
 end
 hold off
 
@@ -334,14 +334,14 @@ ylabel('Total Charge (e)');
 title(['Total Bader charge for all electrolyte species in ' system], 'interpreter', 'none')
 C = [1 0 0; 0 0.5 0; 0 0 1];
 IonList = 1:length(AtomList);
-IonList(PtList) = [];
+IonList(AlList) = [];
 IonSumCharge = sum(SumCharge(IonList,:));
 plot(StepNum/2000, IonSumCharge, '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'm');
 legend('Total Electrolyte', 'interpreter', 'tex')
 hold off
 
 for i = 1:length(AtomList)
-    if ~ismember(i, PtList)
+    if ~ismember(i, AlList)
         figure
         box on
         hold on
@@ -375,15 +375,15 @@ for i = 1:length(indx)
 end
 hold off
 
-PtNums = [];
-for i = 1:length(PtList)
-    PtNums = [PtNums; Indx.(Indxfns{PtList(i)})];
+AlNums = [];
+for i = 1:length(AlList)
+    AlNums = [AlNums; Indx.(Indxfns{AlList(i)})];
 end
 
 % XYZ_ave(:,:) = mean(XYZ, 1);
 
-MeanQnet = mean(Qnet(PtNums,1:end),2);
-Bader3DCharge(XYZ_snap(PtNums,:), ABC, MeanQnet);
+MeanQnet = mean(Qnet(AlNums,1:end),2);
+Bader3DCharge(XYZ_snap(AlNums,:), ABC, MeanQnet);
 % XYZ_snap = zeros(size(XYZ,2), size(XYZ,3));
 % XYZ_snap(:,:) = XYZ(1,:,:);
 % MeanQnet = mean(Qnet(PtNums,:),2);
