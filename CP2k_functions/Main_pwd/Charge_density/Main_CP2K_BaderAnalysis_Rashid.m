@@ -22,10 +22,10 @@ Trajectory = 'Al_water_14300to18100_100step.xyz';
 
 
 fldrname = [BaseFldr system '/Bader_Analysis/'];
-ACFfiles = dir([fldrname 'ACF.dat']);
+ACFfiles = dir([fldrname 'ACF_*.dat']);
 
-% DoubleAnalType = 'MassDensity';
-DoubleAnalType = 'Radial';
+DoubleAnalType = 'MassDensity';
+% DoubleAnalType = 'Radial';
 
 % % Call function to find ABC vectors from .inp file
 ABC = getABCvectors(BaseFldr, system);
@@ -70,12 +70,12 @@ DistOH = cell(1,nConfigs);
 % DistFH = cell(1,nConfigs);
 % DistFO = cell(1,nConfigs);
 DistAlO = cell(1,nConfigs);
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Everything up is working fine %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 for snap = startConfig:nConfigs
     XYZ_snap = zeros(size(XYZ,2), size(XYZ,3));
     XYZ_snap(:,:) = XYZ(snap,:,:);
     
-    [VecAlO, DistAlO{snap}] = GetAtomCorrelation(XYZ_snap, [Indx.Als; Indx.AlE], Indx.O, ABC);
+    [VecAlO, DistAlO{snap}] = GetAtomCorrelation(XYZ_snap, [Indx.Al1], Indx.O, ABC);
     [VecOH, DistOH] = GetAtomCorrelation(XYZ_snap, Indx.O, Indx.H, ABC);
 %     [VecFH, DistFH] = GetAtomCorrelation(XYZ_snap, Indx.F, Indx.H, ABC);
 %     [VecFO, DistFO] = GetAtomCorrelation(XYZ_snap, Indx.F, Indx.O, ABC);
@@ -89,14 +89,14 @@ end
 MinimaOH = RadialDistribution(RadFunOH, ABC, ['O'; 'H'], 0);
 % MinimaFH = RadialDistribution(RadFunFH, ABC, ['F'; 'H'], 0);
 % MinimaFO = RadialDistribution(RadFunFO, ABC, ['F'; 'O'], 0);
-MinimaPtO = RadialDistribution(RadFunPtO, ABC, ['Al'; 'O '], 1);
+MinimaAlO = RadialDistribution(RadFunAlO, ABC, ['Al'; 'O '], 1);
 
 if strcmp(DoubleAnalType, 'MassDensity')
     
     disp('Determining water layering from mass density profile...');
     
     % % get the O atom distribution and corresponding indices of DL atoms
-    [Dens_O, ~, ~, ~, ~, z] = getDensityProfile(xyz, ABC);
+    [Dens_O, ~, ~, ~, z] = getDensityProfile(xyz, ABC);
     [FirstLayerIndx, SecondLayerIndx] = getWaterLayerIndices(Indx, XYZ, Dens_O, z);
     
     for i = startConfig:nConfigs
@@ -170,7 +170,7 @@ for i = 1:length(StepNum)
         DL2nd_sum(i) = sum(Qnet(DL2nd{Inter},i));
         XYZ_snap = zeros(size(XYZ,2), size(XYZ,3));
         XYZ_snap(:,:) = XYZ(Inter,:,:);
-        writeSnaptoxyz(BaseFldr, system, StepNum(i), XYZ_snap, Atoms, [DL1st{Inter}; Indx.PtAll] , DoubleAnalType)
+        writeSnaptoxyz(BaseFldr, system, StepNum(i), XYZ_snap, Atoms, [DL1st{Inter}; Indx.Al_All] , DoubleAnalType)
     else % redundant?
         DL1st_sum(i) = 0;
         DL2nd_sum(i) = 0;
@@ -281,13 +281,13 @@ ylabel('Total Charge (e)');
 C = [218/255 165/255 32/255; 0 0.5 0; 0 0 1; 1 0 0];
 AlC = [];
 for i = 1:length(AlList)
-    if contains(AtomList(AlList(i), :), 'AlE')
+    if contains(AtomList(AlList(i), :), 'Al1')
         AlC = C(1,:);
     elseif contains(AtomList(AlList(i), :), 'Alb')
         AlC = C(2,:);
     elseif contains(AtomList(AlList(i), :), 'Als') & ~contains(AtomList(AlList(i), :), 'Alss')
         AlC = C(3,:);
-    elseif contains(AtomList(AlList(i), :), 'Alss')
+    elseif contains(AtomList(AlList(i), :), 'Al2')
         AlC = C(4,:);
     end
     plot(StepNum/2000, SumCharge(AlList(i),:)/2, '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', AlC);
@@ -308,11 +308,11 @@ ylabel('Ave. Charge per Atom (e)');
 % title(['Total Bader charge for Pt Atoms in ' system], 'interpreter', 'none')
 AlC = [];
 for i = 1:length(AlList)
-    if contains(AtomList(AlList(i), :), 'AlE')
+    if contains(AtomList(AlList(i), :), 'Al1')
         AlC = C(1,:);
     elseif contains(AtomList(AlList(i), :), 'Alb')
         AlC = C(2,:);
-    elseif contains(AtomList(AlList(i), :), 'Als') & ~contains(AtomList(AlList(i), :), 'Alss')
+    elseif contains(AtomList(AlList(i), :), 'Al2') & ~contains(AtomList(AlList(i), :), 'Alss')
         AlC = C(3,:);
     elseif contains(AtomList(AlList(i), :), 'Alss')
         AlC = C(4,:);
@@ -339,7 +339,7 @@ IonSumCharge = sum(SumCharge(IonList,:));
 plot(StepNum/2000, IonSumCharge, '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'm');
 legend('Total Electrolyte', 'interpreter', 'tex')
 hold off
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Everything up is working fine %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 for i = 1:length(AtomList)
     if ~ismember(i, AlList)
         figure

@@ -22,7 +22,7 @@ Trajectory = 'Al_water_14300to18100_100step.xyz';
 
 
 fldrname = [BaseFldr system '/Bader_Analysis/'];
-ACFfiles = dir([fldrname 'ACF_*.dat']);
+ACFfiles = dir([fldrname 'ACF.dat']);
 
 % DoubleAnalType = 'MassDensity';
 DoubleAnalType = 'Radial';
@@ -70,12 +70,12 @@ DistOH = cell(1,nConfigs);
 % DistFH = cell(1,nConfigs);
 % DistFO = cell(1,nConfigs);
 DistAlO = cell(1,nConfigs);
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Everything up is working fine %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 for snap = startConfig:nConfigs
     XYZ_snap = zeros(size(XYZ,2), size(XYZ,3));
     XYZ_snap(:,:) = XYZ(snap,:,:);
     
-    [VecAlO, DistAlO{snap}] = GetAtomCorrelation(XYZ_snap, [Indx.Als; Indx.AlE], Indx.O, ABC);
+    [VecAlO, DistAlO{snap}] = GetAtomCorrelation(XYZ_snap, [Indx.Al1; Indx.Al2], Indx.O, ABC);
     [VecOH, DistOH] = GetAtomCorrelation(XYZ_snap, Indx.O, Indx.H, ABC);
 %     [VecFH, DistFH] = GetAtomCorrelation(XYZ_snap, Indx.F, Indx.H, ABC);
 %     [VecFO, DistFO] = GetAtomCorrelation(XYZ_snap, Indx.F, Indx.O, ABC);
@@ -375,15 +375,15 @@ for i = 1:length(indx)
 end
 hold off
 
-PtNums = [];
-for i = 1:length(PtList)
-    PtNums = [PtNums; Indx.(Indxfns{PtList(i)})];
+AlNums = [];
+for i = 1:length(AlList)
+    AlNums = [AlNums; Indx.(Indxfns{AlList(i)})];
 end
 
 % XYZ_ave(:,:) = mean(XYZ, 1);
 
-MeanQnet = mean(Qnet(PtNums,1:end),2);
-Bader3DCharge(XYZ_snap(PtNums,:), ABC, MeanQnet);
+MeanQnet = mean(Qnet(AlNums,1:end),2);
+Bader3DCharge(XYZ_snap(AlNums,:), ABC, MeanQnet);
 % XYZ_snap = zeros(size(XYZ,2), size(XYZ,3));
 % XYZ_snap(:,:) = XYZ(1,:,:);
 % MeanQnet = mean(Qnet(PtNums,:),2);
