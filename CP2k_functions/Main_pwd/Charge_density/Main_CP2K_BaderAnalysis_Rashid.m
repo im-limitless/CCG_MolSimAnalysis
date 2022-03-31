@@ -22,7 +22,7 @@ Trajectory = 'Al_water_14300to18100_100step.xyz';
 
 
 fldrname = [BaseFldr system '/Bader_Analysis/'];
-ACFfiles = dir([fldrname 'ACF_*.dat']);
+ACFfiles = dir([fldrname 'ACF.dat']);
 
 % DoubleAnalType = 'MassDensity';
 DoubleAnalType = 'Radial';
@@ -70,7 +70,7 @@ DistOH = cell(1,nConfigs);
 % DistFH = cell(1,nConfigs);
 % DistFO = cell(1,nConfigs);
 DistAlO = cell(1,nConfigs);
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Everything up is working fine %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 for snap = startConfig:nConfigs
     XYZ_snap = zeros(size(XYZ,2), size(XYZ,3));
     XYZ_snap(:,:) = XYZ(snap,:,:);
