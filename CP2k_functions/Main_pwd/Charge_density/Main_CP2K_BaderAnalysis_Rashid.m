@@ -339,7 +339,7 @@ IonSumCharge = sum(SumCharge(IonList,:));
 plot(StepNum/2000, IonSumCharge, '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'm');
 legend('Total Electrolyte', 'interpreter', 'tex')
 hold off
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Everything up is working fine %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 for i = 1:length(AtomList)
     if ~ismember(i, AlList)
         figure
@@ -357,7 +357,7 @@ for i = 1:length(AtomList)
     end
 end
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Everything up is working fine %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 [StepNumPot, EffPotDrop] = CP2K_CalcEffectivePotentialDrop(BaseFldr, system);
 
 [tf, indx] = ismember(StepNumPot, StepNum);
@@ -381,6 +381,7 @@ for i = 1:length(AlList)
 end
 
 % XYZ_ave(:,:) = mean(XYZ, 1);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Everything Below is working fine %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 MeanQnet = mean(Qnet(AlNums,1:end),2);
 Bader3DCharge(XYZ_snap(AlNums,:), ABC, MeanQnet);
