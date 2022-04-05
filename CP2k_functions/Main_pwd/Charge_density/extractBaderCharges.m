@@ -33,8 +33,8 @@ fid = fopen([fldrname flname]);
     TotalCharge = zeros(length(Atoms),1);
     NetCharge = zeros(length(Atoms),1);
     StndElec = zeros(length(Atoms),1);
-    StockAtoms = {'F' 'H' 'O' 'Pt'};
-    Elecrons = [7; 1; 6; 18];
+    StockAtoms = {'Cl' 'H' 'O' 'Al'};
+    Elecrons = [1; 1; 6; 3];
     nAtoms=zeros(length(AtomList),1);
     for i = 1:size(AtomList,1)
         for j = 1:size(Atoms,1)
@@ -51,8 +51,8 @@ fid = fopen([fldrname flname]);
         end
     end
     
-    PtIndxs = find(ismember(AtomList, 'Pt'));
-    PtIndxs = PtIndxs(PtIndxs < length(AtomList)+1);
+    AlIndxs = find(ismember(AtomList, 'Al'));
+    AlIndxs = AlIndxs(AlIndxs < length(AtomList)+1);
     
     NetCharge = (NetCharge-TotalCharge).*Indx;
     Qnet = sum(NetCharge,2);

@@ -7,7 +7,7 @@ function [StepNum, EffectiveMicroPot] = CP2K_CalcEffectivePotentialDrop(BaseFldr
 % BaseFldr = 'G:\Imperial\MattProjects\Pt_Clean\';
 % System = 'CP_Like_1010_Fluorine';
 
-PotenFldr = [BaseFldr System '\EffectivePD\'];
+PotenFldr = [BaseFldr System '/EffectivePD/'];
 
 PotenSnaps = dir([PotenFldr System '-1*']);
 
@@ -23,17 +23,17 @@ for i = 1:length(PotenSnaps)
     StepIndx = find(PotenSnaps(i).name == '_');
         StepNum(i) = str2num(PotenSnaps(i).name(StepIndx(end)+1:end));
     
-    if exist([PotenFldr PotenSnaps(i).name '\' PotenSnaps(i).name '_Metal\Epot\aver_Z_0.dat']) & exist([PotenFldr PotenSnaps(i).name '\' PotenSnaps(i).name '_Electrolyte\Epot\aver_Z_0.dat']) & exist([PotenFldr 'aver_Z_' PotenSnaps(i).name(StepIndx(end)+1:end) '.dat'])
+    if exist([PotenFldr PotenSnaps(i).name '/' PotenSnaps(i).name '_Metal/Epot/aver_Z_0.dat']) & exist([PotenFldr PotenSnaps(i).name '/' PotenSnaps(i).name '_Electrolyte/Epot/aver_Z_0.dat']) & exist([PotenFldr 'aver_Z_' PotenSnaps(i).name(StepIndx(end)+1:end) '.dat'])
         
         disp(['Processing ' PotenSnaps(i).name '...']);
         
         
         
-        fid = fopen([PotenFldr PotenSnaps(i).name '\' PotenSnaps(i).name '_Metal\Epot\aver_Z_0.dat']);
+        fid = fopen([PotenFldr PotenSnaps(i).name '/' PotenSnaps(i).name '_Metal/Epot/aver_Z_0.dat']);
         MicroMetal{i} = fscanf(fid, '%f %f', [2 inf])';
         fclose(fid);
         
-        fid = fopen([PotenFldr PotenSnaps(i).name '\' PotenSnaps(i).name '_Electrolyte\Epot\aver_Z_0.dat']);
+        fid = fopen([PotenFldr PotenSnaps(i).name '/' PotenSnaps(i).name '_Electrolyte/Epot/aver_Z_0.dat']);
         MicroElectrolyte{i} = fscanf(fid, '%f %f', [2 inf])';
         fclose(fid);
         
@@ -70,11 +70,11 @@ for i = 1:length(PotenSnaps)
 %         plot(Micro{i}(:,1), (MicroEffective{i}(:,1)-mean([MicroEffective{i}(1:20); MicroEffective{i}(end-19:end)]))*27.211386245988, 'color', [0.7 0.7 0.7])
 %         hold off
          
-        fid = fopen([PotenFldr PotenSnaps(i).name '\' PotenSnaps(i).name '_Metal\Epot\avermacro_Z_0.dat']);
+        fid = fopen([PotenFldr PotenSnaps(i).name '/' PotenSnaps(i).name '_Metal/Epot/avermacro_Z_0.dat']);
         MacroMetal{i} = fscanf(fid, '%f %f', [3 inf])';
         fclose(fid);
         
-        fid = fopen([PotenFldr PotenSnaps(i).name '\' PotenSnaps(i).name '_Electrolyte\Epot\avermacro_Z_0.dat']);
+        fid = fopen([PotenFldr PotenSnaps(i).name '/' PotenSnaps(i).name '_Electrolyte/Epot/avermacro_Z_0.dat']);
         MacroElectrolyte{i} = fscanf(fid, '%f %f', [3 inf])';
         fclose(fid);
         

@@ -299,7 +299,7 @@ elseif length(AlList) == 3
 end
 hold off
 
-% mean charge per Pt type
+% mean charge per Al type
 figure
 box on
 hold on
@@ -332,7 +332,7 @@ hold on
 xlabel('Time (ps)');
 ylabel('Total Charge (e)');
 title(['Total Bader charge for all electrolyte species in ' system], 'interpreter', 'none')
-C = [1 0 0; 0 0.5 0; 0 0 1];
+C = [1 0 0; 0 0.5 0; 0 0 1; 218/255 165/255 32/255;219/255 166/255 34/255];
 IonList = 1:length(AtomList);
 IonList(AlList) = [];
 IonSumCharge = sum(SumCharge(IonList,:));
