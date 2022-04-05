@@ -86,7 +86,7 @@ for snap = startConfig:nConfigs
     RadFunAlO{snap} = reshape(DistAlO{snap}, [numel(DistAlO{snap}), 1]);
 end
 
-MinimaOH = RadialDistribution(RadFunOH, ABC, ['O'; 'H'], 0);
+MinimaOH = RadialDistribution(RadFunOH, ABC, ['O'; 'H'], 1);
 % MinimaFH = RadialDistribution(RadFunFH, ABC, ['F'; 'H'], 0);
 % MinimaFO = RadialDistribution(RadFunFO, ABC, ['F'; 'O'], 0);
 MinimaAlO = RadialDistribution(RadFunAlO, ABC, ['Al'; 'O '], 1);
