@@ -339,7 +339,7 @@ IonSumCharge = sum(SumCharge(IonList,:));
 plot(StepNum/2000, IonSumCharge, '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'm');
 legend('Total Electrolyte', 'interpreter', 'tex')
 hold off
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Everything up is working fine %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 for i = 1:length(AtomList)
     if ~ismember(i, AlList)
         figure
@@ -357,6 +357,12 @@ for i = 1:length(AtomList)
     end
 end
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Everything up is working fine %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%% The part below is for the potential drop which requires the
+%%%% v-Hartree.cube files for the whole system, water, and the metal
+%%%% surface. I currently have the files for the full system but not the
+%%%% other two!
 
 [StepNumPot, EffPotDrop] = CP2K_CalcEffectivePotentialDrop(BaseFldr, system);
 
@@ -374,6 +380,8 @@ for i = 1:length(indx)
     text(EffPotDrop(i), etoC*WLElectro(indx(i)), [num2str(StepNum(indx(i))/2000) ' s'], 'verticalalignment', 'top', 'horizontalalignment', 'right')
 end
 hold off
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Everything Below is working fine %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 AlNums = [];
 for i = 1:length(AlList)

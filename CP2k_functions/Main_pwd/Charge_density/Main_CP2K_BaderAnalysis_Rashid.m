@@ -358,22 +358,30 @@ for i = 1:length(AtomList)
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Everything up is working fine %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-[StepNumPot, EffPotDrop] = CP2K_CalcEffectivePotentialDrop(BaseFldr, system);
 
-[tf, indx] = ismember(StepNumPot, StepNum);
+%%%% The part below is for the potential drop which requires the
+%%%% v-Hartree.cube files for the whole system, water, and the metal
+%%%% surface. I currently have the files for the full system but not the
+%%%% other two!
 
-figure
-hold on
-ylabel('Total Charge (e)');
-xlabel('Electrostatic Potential (V)');
-% plot(EffPotDrop, HalfElectro(indx), 'o', 'color', 'k', 'markerfacecolor', 'r')
+% [StepNumPot, EffPotDrop] = CP2K_CalcEffectivePotentialDrop(BaseFldr, system);
+% 
+% [tf, indx] = ismember(StepNumPot, StepNum);
+% 
+% figure
+% hold on
+% ylabel('Total Charge (e)');
+% xlabel('Electrostatic Potential (V)');
+% % plot(EffPotDrop, HalfElectro(indx), 'o', 'color', 'k', 'markerfacecolor', 'r')
+% 
+% WLElectro = HalfElectro(DL1st_sum~=0)+(DL1st_sum(DL1st_sum~=0)/2)+(DL2nd_sum(DL1st_sum~=0)/2);
+% plot(EffPotDrop, etoC*WLElectro(indx), 'o', 'color', 'k', 'markerfacecolor', 'r')
+% for i = 1:length(indx)
+%     text(EffPotDrop(i), etoC*WLElectro(indx(i)), [num2str(StepNum(indx(i))/2000) ' s'], 'verticalalignment', 'top', 'horizontalalignment', 'right')
+% end
+% hold off
 
-WLElectro = HalfElectro(DL1st_sum~=0)+(DL1st_sum(DL1st_sum~=0)/2)+(DL2nd_sum(DL1st_sum~=0)/2);
-plot(EffPotDrop, etoC*WLElectro(indx), 'o', 'color', 'k', 'markerfacecolor', 'r')
-for i = 1:length(indx)
-    text(EffPotDrop(i), etoC*WLElectro(indx(i)), [num2str(StepNum(indx(i))/2000) ' s'], 'verticalalignment', 'top', 'horizontalalignment', 'right')
-end
-hold off
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Everything Below is working fine %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 AlNums = [];
 for i = 1:length(AlList)
@@ -381,7 +389,6 @@ for i = 1:length(AlList)
 end
 
 % XYZ_ave(:,:) = mean(XYZ, 1);
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Everything Below is working fine %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 MeanQnet = mean(Qnet(AlNums,1:end),2);
 Bader3DCharge(XYZ_snap(AlNums,:), ABC, MeanQnet);
