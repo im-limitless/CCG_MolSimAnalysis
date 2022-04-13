@@ -391,8 +391,8 @@ end
 % XYZ_ave(:,:) = mean(XYZ, 1);
 
 MeanQnet = mean(Qnet(AlNums,1:end),2);
-Bader3DCharge(XYZ_snap(AlNums,:), ABC, MeanQnet);
+% Bader3DCharge(XYZ_snap(AlNums,:), ABC, MeanQnet);
 % XYZ_snap = zeros(size(XYZ,2), size(XYZ,3));
 % XYZ_snap(:,:) = XYZ(1,:,:);
 % MeanQnet = mean(Qnet(PtNums,:),2);
-% Bader3DCharge(XYZ_snap(PtNums,:), ABC, Qnet(PtNums,1));
+Bader3DCharge(XYZ_snap(AlNums,:), ABC, Qnet(AlNums,8));
