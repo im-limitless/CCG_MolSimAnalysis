@@ -86,7 +86,7 @@ for snap = startConfig:nConfigs
     RadFunAlO{snap} = reshape(DistAlO{snap}, [numel(DistAlO{snap}), 1]);
 end
 
-MinimaOH = RadialDistribution(RadFunOH, ABC, ['O'; 'H'], 0);
+MinimaOH = RadialDistribution(RadFunOH, ABC, ['O'; 'H'], 1);
 % MinimaFH = RadialDistribution(RadFunFH, ABC, ['F'; 'H'], 0);
 % MinimaFO = RadialDistribution(RadFunFO, ABC, ['F'; 'O'], 0);
 MinimaAlO = RadialDistribution(RadFunAlO, ABC, ['Al'; 'O '], 1);
@@ -364,22 +364,22 @@ end
 %%%% surface. I currently have the files for the full system but not the
 %%%% other two!
 
-[StepNumPot, EffPotDrop] = CP2K_CalcEffectivePotentialDrop(BaseFldr, system);
-
-[tf, indx] = ismember(StepNumPot, StepNum);
-
-figure
-hold on
-ylabel('Total Charge (e)');
-xlabel('Electrostatic Potential (V)');
-% plot(EffPotDrop, HalfElectro(indx), 'o', 'color', 'k', 'markerfacecolor', 'r')
-
-WLElectro = HalfElectro(DL1st_sum~=0)+(DL1st_sum(DL1st_sum~=0)/2)+(DL2nd_sum(DL1st_sum~=0)/2);
-plot(EffPotDrop, etoC*WLElectro(indx), 'o', 'color', 'k', 'markerfacecolor', 'r')
-for i = 1:length(indx)
-    text(EffPotDrop(i), etoC*WLElectro(indx(i)), [num2str(StepNum(indx(i))/2000) ' s'], 'verticalalignment', 'top', 'horizontalalignment', 'right')
-end
-hold off
+% [StepNumPot, EffPotDrop] = CP2K_CalcEffectivePotentialDrop(BaseFldr, system);
+% 
+% [tf, indx] = ismember(StepNumPot, StepNum);
+% 
+% figure
+% hold on
+% ylabel('Total Charge (e)');
+% xlabel('Electrostatic Potential (V)');
+% % plot(EffPotDrop, HalfElectro(indx), 'o', 'color', 'k', 'markerfacecolor', 'r')
+% 
+% WLElectro = HalfElectro(DL1st_sum~=0)+(DL1st_sum(DL1st_sum~=0)/2)+(DL2nd_sum(DL1st_sum~=0)/2);
+% plot(EffPotDrop, etoC*WLElectro(indx), 'o', 'color', 'k', 'markerfacecolor', 'r')
+% for i = 1:length(indx)
+%     text(EffPotDrop(i), etoC*WLElectro(indx(i)), [num2str(StepNum(indx(i))/2000) ' s'], 'verticalalignment', 'top', 'horizontalalignment', 'right')
+% end
+% hold off
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Everything Below is working fine %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -388,6 +388,14 @@ for i = 1:length(AlList)
     AlNums = [AlNums; Indx.(Indxfns{AlList(i)})];
 end
 
+% Creating a double that includes all the Al atoms + 1st Layer of water;
+
+d_DL1st= DL1st(1,39);
+%%%% Note: The atoms of the water are added from a single snapshot instead
+%%%% o
+d_DL1st = cell2mat(d_DL1st);
+AlDL1st= cat(1,AlNums,d_DL1st);
+
 % XYZ_ave(:,:) = mean(XYZ, 1);
 
 MeanQnet = mean(Qnet(AlNums,1:end),2);
@@ -395,4 +403,11 @@ Bader3DCharge(XYZ_snap(AlNums,:), ABC, MeanQnet);
 % XYZ_snap = zeros(size(XYZ,2), size(XYZ,3));
 % XYZ_snap(:,:) = XYZ(1,:,:);
 % MeanQnet = mean(Qnet(PtNums,:),2);
-% Bader3DCharge(XYZ_snap(PtNums,:), ABC, Qnet(PtNums,1));
+Bader3DCharge(XYZ_snap(AlNums,:), ABC, Qnet(AlNums,8));
+Bader3DCharge(XYZ_snap(d_DL1st,:), ABC, Qnet(d_DL1st,8));
+Bader3DCharge(XYZ_snap(AlDL1st,:), ABC, Qnet(AlDL1st,8));
+% % for i = 1:length(ACFfiles);
+% % 
+% %     Bader3DCharge(XYZ_snap(AlNums,:), ABC, Qnet(AlNums,i));
+% %     light
+% % end

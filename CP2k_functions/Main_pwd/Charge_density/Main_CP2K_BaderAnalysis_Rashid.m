@@ -388,11 +388,26 @@ for i = 1:length(AlList)
     AlNums = [AlNums; Indx.(Indxfns{AlList(i)})];
 end
 
+% Creating a double that includes all the Al atoms + 1st Layer of water;
+
+d_DL1st= DL1st(1,39);
+%%%% Note: The atoms of the water are added from a single snapshot instead
+%%%% of an average (might need to add the average later) %%%%
+d_DL1st = cell2mat(d_DL1st);
+AlDL1st= cat(1,AlNums,d_DL1st);
+
 % XYZ_ave(:,:) = mean(XYZ, 1);
 
 MeanQnet = mean(Qnet(AlNums,1:end),2);
-% Bader3DCharge(XYZ_snap(AlNums,:), ABC, MeanQnet);
+Bader3DCharge(XYZ_snap(AlNums,:), ABC, MeanQnet);
 % XYZ_snap = zeros(size(XYZ,2), size(XYZ,3));
 % XYZ_snap(:,:) = XYZ(1,:,:);
 % MeanQnet = mean(Qnet(PtNums,:),2);
 Bader3DCharge(XYZ_snap(AlNums,:), ABC, Qnet(AlNums,8));
+Bader3DCharge(XYZ_snap(d_DL1st,:), ABC, Qnet(d_DL1st,8));
+Bader3DCharge(XYZ_snap(AlDL1st,:), ABC, Qnet(AlDL1st,8));
+% % for i = 1:length(ACFfiles);
+% % 
+% %     Bader3DCharge(XYZ_snap(AlNums,:), ABC, Qnet(AlNums,i));
+% %     light
+% % end
