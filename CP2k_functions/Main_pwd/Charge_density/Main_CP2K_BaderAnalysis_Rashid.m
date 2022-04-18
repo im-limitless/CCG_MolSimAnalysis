@@ -407,6 +407,7 @@ AlDL= cat(1,AlNums,d_DL1st,d_DL2nd);
 
 % XYZ_ave(:,:) = mean(XYZ, 1);
 
+%% Average over all ACF snapshots
 MeanQnet = mean(Qnet(AlNums,1:end),2);
 Bader3DCharge(XYZ_snap(AlNums,:), ABC, MeanQnet);
 light
