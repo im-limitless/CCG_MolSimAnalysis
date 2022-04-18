@@ -57,3 +57,14 @@ RadialDistribution(RadFunOO, ABC, ['O'; 'O'], 1);
 % RadialDistribution(RadFunPtO, ABC, ['Pt'; 'O '],1);
 
 % RadialDistribution(RadFunPtEO, ABC, ['PtE'; 'O  '],1)
+
+%%%%%%%%%%%%%%%%% Counting the number of O-H bonds per oxygen atom %%%%%%%%%%%%%%%%%
+
+% the value after DistOH<# is based on the graph of the raidal distribution
+% of OH where the value is the extent of the first peak (entered manually
+% for now)
+OH_bonds= DistOH<1.3;
+
+no_OH_bonds= sum(sum(OH_bonds)==1);
+no_H2O_bonds= sum(sum(OH_bonds)==2);
+no_H3O_bonds= sum(sum(OH_bonds)==3);
