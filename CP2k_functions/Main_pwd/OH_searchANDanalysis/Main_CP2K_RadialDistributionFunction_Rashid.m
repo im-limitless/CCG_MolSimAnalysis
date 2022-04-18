@@ -1,9 +1,9 @@
 clear all;
 close all;
 
-BaseFldr = 'G:\Imperial\MattProjects\Edges\PostEquilibration\Pit\HF\'; 
-system = 'CP_Pit_20F';
-Trajectory = 'CP_Pit_20F_43000to73000_500step.xyz';
+BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/EleventhTimeLucky_Plus/Al_AlO/'; 
+system = 'Al_water';
+Trajectory = 'Al_water_14300to18100_100step.xyz';
 
 ABC = getABCvectors(BaseFldr, system);
 [xyz, XYZ, Indx, ~, ~, nAtoms, startConfig, nConfigs, StepNum] = ReadAndParsexyz(BaseFldr, system, Trajectory, ABC);
