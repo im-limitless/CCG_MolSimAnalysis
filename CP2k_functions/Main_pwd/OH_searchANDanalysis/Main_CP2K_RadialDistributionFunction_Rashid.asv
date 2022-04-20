@@ -2,8 +2,8 @@ clear all;
 close all;
 
 BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/EleventhTimeLucky_Plus/Al_AlO_OH/'; 
-system = 'OH_0.5ML';
-Trajectory = 'OH_0.5ML_12800to15200_100step.xyz';
+system = 'AlO_0.16ML_OH';
+Trajectory = 'AlO_0.16ML_OH_11000to16200_100step.xyz';
 
 ABC = getABCvectors(BaseFldr, system);
 [xyz, XYZ, Indx, ~, ~, nAtoms, startConfig, nConfigs, StepNum] = ReadAndParsexyz(BaseFldr, system, Trajectory, ABC);
@@ -80,12 +80,17 @@ num_O_noHbonds= sum(sum(OH_bonds)==0);
 
 % the value after DistAlO<# is based on the graph of the raidal distribution
 % of AlO where the value is the extent of the first peak (entered manually
-% for now)
-d_DistAlH= DistAlH(1,25);
+% for now). Also, don't forget to change the snapshot value to be the last
+% one in the d_DistAlX=DistAlX(1,#).
+%%%%%%%%%%%%%%%% Al-H bonds%%%%%%
+d_DistAlH= DistAlH(1,53);
 d_DistAlH= cell2mat(d_DistAlH);
-
-d_DistAlO= DistAlO(1,25);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+d_DistAlO= DistAlO(1,53);
 d_DistAlO= cell2mat(d_DistAlO);
 
-AlO_bonds= d_DistAlO<1.87 & d_DistAlH<2;
-num_AlO_bonds= sum(sum(AlO_bonds));
+AlO_bonds= d_DistAlO<2.2;
+num_AlO_bonds= sum(sum(AlO_bonds)==3);
+num_AlO2_bonds= sum(sum(AlO_bonds)==2);
+num_AlO1_bonds= sum(sum(AlO_bonds)==1);
+num_AlO0_bonds= sum(sum(AlO_bonds)==0);

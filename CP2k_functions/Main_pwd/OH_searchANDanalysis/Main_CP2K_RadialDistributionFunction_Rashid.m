@@ -80,7 +80,8 @@ num_O_noHbonds= sum(sum(OH_bonds)==0);
 
 % the value after DistAlO<# is based on the graph of the raidal distribution
 % of AlO where the value is the extent of the first peak (entered manually
-% for now)
+% for now). Also, don't forget to change the snapshot value to be the last
+% one in the d_DistAlX=DistAlX(1,#).
 %%%%%%%%%%%%%%%% Al-H bonds%%%%%%
 d_DistAlH= DistAlH(1,25);
 d_DistAlH= cell2mat(d_DistAlH);
@@ -90,3 +91,6 @@ d_DistAlO= cell2mat(d_DistAlO);
 
 AlO_bonds= d_DistAlO<2.2;
 num_AlO_bonds= sum(sum(AlO_bonds)==3);
+num_AlO2_bonds= sum(sum(AlO_bonds)==2);
+num_AlO1_bonds= sum(sum(AlO_bonds)==1);
+num_AlO0_bonds= sum(sum(AlO_bonds)==0);
