@@ -407,26 +407,32 @@ AlDL= cat(1,AlNums,d_DL1st,d_DL2nd);
 
 % XYZ_ave(:,:) = mean(XYZ, 1);
 
+%% Average over all ACF snapshots
 MeanQnet = mean(Qnet(AlNums,1:end),2);
 Bader3DCharge(XYZ_snap(AlNums,:), ABC, MeanQnet);
 light
 % XYZ_snap = zeros(size(XYZ,2), size(XYZ,3));
 % XYZ_snap(:,:) = XYZ(1,:,:);
 % MeanQnet = mean(Qnet(PtNums,:),2);
+
+%% Last snapshot (change it base on the system at hand)
 Bader3DCharge(XYZ_snap(AlNums,:), ABC, Qnet(AlNums,8));
 light
+
+%% Last snapshot (Al+DL_1st) (change it base on the system at hand)
 Bader3DCharge(XYZ_snap(d_DL1st,:), ABC, Qnet(d_DL1st,8));
 light
 Bader3DCharge(XYZ_snap(AlDL1st,:), ABC, Qnet(AlDL1st,8));
 light
 
-Bader3DCharge(XYZ_snap(d_DL2nd,:), ABC, Qnet(d_DL2nd,8));
+%% Last snapshot (Al+DL_2nd) (change it base on the system at hand)
+Bader3DCharge(XYZ_snap(d_DL2nd,:), ABC, Qnet(d_DL2nd,7));
 light
-Bader3DCharge(XYZ_snap(AlDL2nd,:), ABC, Qnet(AlDL2nd,8));
+Bader3DCharge(XYZ_snap(AlDL2nd,:), ABC, Qnet(AlDL2nd,7));
 light
 
-%% Al + DL
-Bader3DCharge(XYZ_snap(AlDL,:), ABC, Qnet(AlDL,8));
+%% Last snapshot (Al+DL) (change it base on the system at hand)
+Bader3DCharge(XYZ_snap(AlDL,:), ABC, Qnet(AlDL,7));
 light
 
 % % for i = 1:length(ACFfiles);

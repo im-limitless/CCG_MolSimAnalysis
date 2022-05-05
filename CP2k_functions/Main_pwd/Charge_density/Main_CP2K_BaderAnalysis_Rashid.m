@@ -13,8 +13,8 @@ close all;
 % Trajectory = 'Pt_12H10F_0to9500_500step.xyz';
 
 BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/EleventhTimeLucky_Plus/Al_AlO/';
-system = 'Al_water';
-Trajectory = 'Al_water_14300to18100_100step.xyz';
+system = 'AlO_water_1ML';
+Trajectory = 'AlO_water_1ML_14100to19000_100step.xyz';
 
 % BaseFldr = 'G:\Imperial\MattProjects\Edges\PostEquilibration\Vacuum\';
 % system = 'Pt_Bulk';
@@ -415,23 +415,23 @@ light
 % XYZ_snap(:,:) = XYZ(1,:,:);
 % MeanQnet = mean(Qnet(PtNums,:),2);
 
-%% Last snapshot
+%% Last snapshot (change it base on the system at hand)
 Bader3DCharge(XYZ_snap(AlNums,:), ABC, Qnet(AlNums,8));
 light
 
-%% Last snapshot (Al+DL_1st)
+%% Last snapshot (Al+DL_1st) (change it base on the system at hand)
 Bader3DCharge(XYZ_snap(d_DL1st,:), ABC, Qnet(d_DL1st,8));
 light
 Bader3DCharge(XYZ_snap(AlDL1st,:), ABC, Qnet(AlDL1st,8));
 light
 
-%% Last snapshot (Al+DL_2nd)
+%% Last snapshot (Al+DL_2nd) (change it base on the system at hand)
 Bader3DCharge(XYZ_snap(d_DL2nd,:), ABC, Qnet(d_DL2nd,8));
 light
 Bader3DCharge(XYZ_snap(AlDL2nd,:), ABC, Qnet(AlDL2nd,8));
 light
 
-%% Last snapshot (Al+DL)
+%% Last snapshot (Al+DL) (change it base on the system at hand)
 Bader3DCharge(XYZ_snap(AlDL,:), ABC, Qnet(AlDL,8));
 light
 
