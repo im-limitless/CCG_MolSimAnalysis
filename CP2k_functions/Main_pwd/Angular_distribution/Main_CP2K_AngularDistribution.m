@@ -1,9 +1,9 @@
 clear all;
 close all;
 
-Basefldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/EleventhTimeLucky_Plus/Al_AlO_OH/'; % Base directory containing calculation directory ("\" included at end)
-system = 'AlO_0.5ML_OH'; % Name of calculation directory (no "\")
-Trajectory = 'AlO_0.5ML_OH_13400to17400_100step.xyz';
+Basefldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/EleventhTimeLucky_Plus/Al_AlO/'; % Base directory containing calculation directory ("\" included at end)
+system = 'Al_water'; % Name of calculation directory (no "\")
+Trajectory = 'Al_water_14300to18100_100step.xyz';
 
 ABC = getABCvectors(Basefldr, system);
 [xyz, XYZ, Indx, Atoms, AtomList, nAtoms, startConfig, nConfigs, StepNum] = ReadAndParsexyz(Basefldr, system, Trajectory, ABC);
@@ -107,8 +107,8 @@ for snap = startConfig:nConfigs
     % snapshot - simple bug that number of atoms in DL changes so arrays
     % are non-consistent for concatenation when trying to do all snaps together - could modify using cell array)
     if snap == nConfigs
-        writeSnaptoxyz(Basefldr, system, snap, XYZ_snap, Atoms, [DL_Indx; DL_Indx_H; AtomIndx.Pts; AtomIndx.Ptb; AtomIndx.Ptss] , 'DL_Density');
-        CP2kOptimPathParse(Basefldr,system, ['DL_Density_' num2str(snap) '.xyz'])
+        writeSnaptoxyz(Basefldr, system, snap, XYZ_snap, Atoms, [DL_Indx; DL_Indx_H; AtomIndx.Al1; AtomIndx.Alb; AtomIndx.Al2] , 'DL_Density');
+%        CP2kOptimPathParse(Basefldr,system, ['DL_Density_' num2str(snap) '.xyz'])
     end
     
     DL_Indx = FirstLayerIndx{snap};
