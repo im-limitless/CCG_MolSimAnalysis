@@ -13,8 +13,8 @@ close all;
 % Trajectory = 'Pt_12H10F_0to9500_500step.xyz';
 
 BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/EleventhTimeLucky_Plus/Al_AlO/';
-system = 'AlO_water_1ML';
-Trajectory = 'AlO_water_1ML_14100to19000_100step.xyz';
+system = 'Al_water';
+Trajectory = 'Al_water_14300to18100_100step.xyz';
 
 % BaseFldr = 'G:\Imperial\MattProjects\Edges\PostEquilibration\Vacuum\';
 % system = 'Pt_Bulk';
