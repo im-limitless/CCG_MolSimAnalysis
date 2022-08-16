@@ -1,4 +1,4 @@
-function [Dens_O, Dens_H, Dens_F, TotDen, AveDen, z] = getDensityProfile(xyz, ABC)
+function [Dens_O, Dens_H, TotDen, AveDen, z] = getDensityProfile(xyz, ABC)
 % function [Dens_O, Dens_H, Dens_Na, Dens_Cl, TotDen, AveDen, z] = getDensityProfile(xyz, ABC)
 % function [Dens_O, Dens_H, TotDen, AveDen, z] = getDensityProfile(xyz, ABC)
 

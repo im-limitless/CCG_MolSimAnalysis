@@ -11,12 +11,7 @@ for j = 1:length(Indx1)
     
     % check for neighbours separated by PBC in x and y only
     [Vec12, Dist12(:,j)] = searchAcrossPBC(Vec12, Dist12(:,j), XYZ, Indx1(j), Indx2, ABC); % searchAcrossPBC(PBC_mat, non PBC Vector, non PBC distance, XYZ, looping atom IndxAtom(j), other atom IndxAtom, ABC)
-     %Rashd   %an inner loop to store the indicies of the atoms that are 1st near
-        %neighbors (1NN)
-        if Dist12 <= 3.6 %testing on 1NN for Al-Al case
-            NN_1st=[Indx2,Indx1(j)];
-        end
-    %Rashid%
+        
 end
 
 return
