@@ -1,7 +1,7 @@
 clear all;
 close all;
 
-BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/EleventhTimeLucky_Plus/Al_AlO/'; 
+BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/EleventhTimeLucky_Plus/Al_AlO/Al_water/Testing/'; 
 system = 'Al_water';
 Trajectory = 'Al_water_14300to18100_100step.xyz';
 
@@ -34,6 +34,7 @@ for snap = startConfig:nConfigs
 %     [VecOH, DistOH] = GetAtomCorrelation(XYZ_snap, [AtomIndx.O; AtomIndx.OtU; AtomIndx.OtL], AtomIndx.H, ABC);
 %     [VecFH, DistFH] = GetAtomCorrelation(XYZ_snap, Indx.F, Indx.H, ABC);
 %     [VecFO, DistFO] = GetAtomCorrelation(XYZ_snap, Indx.F, Indx.O, ABC);
+    [VecAlAl, DistAlAl] = GetAtomCorrelation(XYZ_snap, Indx.Al, Indx.Al, ABC);
 %     [VecHH, DistHH] = GetAtomCorrelation(XYZ_snap, Indx.H, Indx.H, ABC);
     [VecOO, DistOO] = GetAtomCorrelation(XYZ_snap, AtomIndx.O, AtomIndx.O, ABC);
 %     [VecPtO, DistPtO{snap}] = GetAtomCorrelation(XYZ_snap, Indx.Pt, Indx.O, ABC);
@@ -41,6 +42,7 @@ for snap = startConfig:nConfigs
     RadFunOH{snap} = reshape(DistOH, [numel(DistOH), 1]);
 %     RadFunFH{snap} = reshape(DistFH, [numel(DistFH), 1]);
 %     RadFunFO{snap} = reshape(DistFO, [numel(DistFO), 1]);
+    RadFunAlAl{snap} = reshape(DistAlAl, [numel(DistAlAl), 1]);
 %     RadFunHH{snap} = reshape(DistHH, [numel(DistHH), 1]);
     RadFunOO{snap} = reshape(DistOO, [numel(DistOO), 1]);
 %     RadFunPtO{snap} = reshape(DistPtO{snap}, [numel(DistPtO{snap}), 1]);
@@ -52,6 +54,7 @@ end
 RadialDistribution(RadFunOH, ABC, ['O'; 'H'], 1);
 % RadialDistribution(RadFunFH, ABC, ['H'; 'F'], 1);
 % RadialDistribution(RadFunFO, ABC, ['O'; 'F'], 1);
+RadialDistribution(RadFunAlAl, ABC, ['Al'; 'Al'], 1);
 % RadialDistribution(RadFunHH, ABC, ['H'; 'H'], 1);
 RadialDistribution(RadFunOO, ABC, ['O'; 'O'], 1);
 % RadialDistribution(RadFunPtO, ABC, ['Pt'; 'O '],1);
