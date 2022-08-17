@@ -1,4 +1,4 @@
-function [Atoms, AtomList, AtomIndx] = getAtomNamesFromInputXYZ(BaseFldr, system)
+function [Atoms, AtomList, AtomIndx, AtomIndxfns] = getAtomNamesFromInputXYZ(BaseFldr, system)
 
 fid  = fopen([BaseFldr system '\' system '.xyz']);
 lines = textscan(fid,'%s','delimiter','\n', 'whitespace', '');
@@ -20,5 +20,6 @@ for i = 1:size(AtomList,1)
     AtomIndx.(strtrim(AtomList(i,:))) = find(sum(Atoms == AtomList(i,:),2) == length(AtomList(i,:)));
 end
 
+AtomIndxfns = fieldnames(AtomIndx);
 
 return

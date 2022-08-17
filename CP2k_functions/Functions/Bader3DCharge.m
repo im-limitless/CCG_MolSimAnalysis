@@ -1,5 +1,7 @@
 function Bader3DCharge(XYZ, ABC, Qmc) 
 
+disp('Creating 3D charge distribution map...');
+
 [xs,ys,zs] = sphere(10,100);
 Radius = 1;
 
@@ -17,6 +19,36 @@ for i = 1:size(XYZ, [1])
     xAt = xs*Radius + XYZ(i,1);
     yAt = ys*Radius + XYZ(i,2);
     zAt = zs*Radius + XYZ(i,3);
+    
+    cIndx = find(QmIndx == i);
+ 
+    hsurf = surf(xAt,yAt,zAt,'FaceColor', Colors(cIndx,:),'EdgeColor','None');
+    set(hsurf,'AmbientStrength',0.1,...
+    'LineStyle','none',...
+    'FaceLighting','phong',...
+    'FaceAlpha',1.0,...
+    'AmbientStrength',0.2,...
+    'DiffuseStrength',0.9,...
+    'SpecularStrength',0.7);
+
+
+xAt = xs*Radius + XYZ(i,1) + ABC(1);
+
+    
+    cIndx = find(QmIndx == i);
+ 
+    hsurf = surf(xAt,yAt,zAt,'FaceColor', Colors(cIndx,:),'EdgeColor','None');
+    set(hsurf,'AmbientStrength',0.1,...
+    'LineStyle','none',...
+    'FaceLighting','phong',...
+    'FaceAlpha',1.0,...
+    'AmbientStrength',0.2,...
+    'DiffuseStrength',0.9,...
+    'SpecularStrength',0.7);
+
+
+xAt = xs*Radius + XYZ(i,1) - ABC(1);
+
     
     cIndx = find(QmIndx == i);
  
@@ -60,7 +92,7 @@ plot3(Vec(3,1)+Vec(1,1)+[0 Vec(2,1)],Vec(3,2)+Vec(1,2)+[0 Vec(2,2)],Vec(3,3)+Vec
 plot3(Vec(3,1)+Vec(2,1)+[0 Vec(1,1)],Vec(3,2)+Vec(2,2)+[0 Vec(1,2)],Vec(3,3)+Vec(2,3)+[0 Vec(1,3)],'-k','LineWidth',LwD)
 % light
 
-view(0,0)
+view(11.2545,8.5505)
 % set(gca,'CameraUpVector',[2 1 1],'CameraViewAngle',[4.]);
 % set(gca,'CameraUpVector',[0 0 1],'CameraViewAngle',[6.5],'CameraPosition',[-5.3 -77.0 81.0]);
 set(gcf,'Position',[599   393   803   600]);
