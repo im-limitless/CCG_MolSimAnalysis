@@ -5,7 +5,7 @@ function [xyz, XYZ, Indx, Atoms, AtomList, nAtoms, startConfig, nConfigs, Step] 
 % Traj = 'CP_Pit_20F_43000to73000_500step.xyz';
 % ABC = getABCvectors(Base, Fldr);
 
-fid  = fopen([Base Fldr '/' Traj]);
+fid  = fopen([Base Fldr '\' Traj]);
 disp('Reading xyz data...');
 lines = textscan(fid,'%s','delimiter','\n', 'whitespace', '');
 fclose(fid);
