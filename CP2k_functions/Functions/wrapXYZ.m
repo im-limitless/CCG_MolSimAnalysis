@@ -5,15 +5,19 @@ XYZ_wrap = XYZ_input;
 for i = 1:size(XYZ_wrap,1)
     for j = 1:size(XYZ_wrap,2)
         if XYZ_wrap(i,j,1) < 0
-            XYZ_wrap(i,j,1) = XYZ_wrap(i,j,1) + Vec(1);
+            w = floor(XYZ_wrap(i,j,1)/Vec(1));
+            XYZ_wrap(i,j,1) = XYZ_wrap(i,j,1) - w*Vec(1);
         elseif XYZ_wrap(i,j,1) > Vec(1)
-            XYZ_wrap(i,j,1) = XYZ_wrap(i,j,1) - Vec(1);
+            w = floor(XYZ_wrap(i,j,1)/Vec(1));
+            XYZ_wrap(i,j,1) = XYZ_wrap(i,j,1) - w*Vec(1);
         end
         
         if XYZ_wrap(i,j,2) < 0
-            XYZ_wrap(i,j,2) = XYZ_wrap(i,j,2) + Vec(2);
+             w = floor(XYZ_wrap(i,j,2)/Vec(2));
+            XYZ_wrap(i,j,2) = XYZ_wrap(i,j,2) - w*Vec(2);
         elseif XYZ_wrap(i,j,2) > Vec(2)
-            XYZ_wrap(i,j,2) = XYZ_wrap(i,j,2) - Vec(2);
+            w = floor(XYZ_wrap(i,j,2)/Vec(2));
+            XYZ_wrap(i,j,2) = XYZ_wrap(i,j,2) - w*Vec(2);
         end
     end
 end

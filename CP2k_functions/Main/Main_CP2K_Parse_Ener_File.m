@@ -3,34 +3,38 @@ clear all;
 close all;
 
 % Set the location of the calculation output
-Basefldr = 'G:\Imperial\MattProjects\Edges\PostEquilibration\Pit\HF\'; % Base directory containing calculation directory ("\" included at end)
-system = 'CP_Pit_18H22F'; % Name of calculation directory (no "\")
+BaseFldr = 'G:\Imperial\MattProjects\Edges\PostEquilibration\Pit\HF\'; % Base directory containing calculation directory ("\" included at end)
+system = 'CP_Pit_Water'; % Name of calculation directory (no "\")
 
 % Set the number of steps before the end that are used to compute averages
-SampleRange = 30000;
+SampleRange = 6000;
+% SampleRange = 10000;
 
-Allfldrs = dir([Basefldr '*' system]);
-flname = dir([Basefldr Allfldrs.name '\*.ener']);
-EnerFile = [Basefldr Allfldrs.name '\' flname.name];
+% Choose whether to plot an inset
+% Inset = 'Yes';
+Inset = 'No';
+
+Allfldrs = dir([BaseFldr '*' system]);
+flname = dir([BaseFldr Allfldrs.name '\*.ener']);
+EnerFile = [BaseFldr Allfldrs.name '\' flname.name];
 
 if ~isempty(flname)
     disp(['Parsing energy file for ' system '...']);
     
     fid = fopen(EnerFile);
-    eofstat = false;
-    
-    % First line is the number of atoms and is the same for all new sections
-    HeadLine = fgetl(fid); eofstat = feof(fid);
-    i = 0;
-    data = [];
-    
-    while ~eofstat
-        i=i+1;
-        textLine = fgetl(fid); eofstat = feof(fid);
-        data = [data; str2num(textLine)];
-    end
-    
-    fclose(fid);
+%     eofstat = false;
+%     
+%     % First line is the number of atoms and is the same for all new sections
+%     HeadLine = fgetl(fid); eofstat = feof(fid);
+%     i = 0;
+%     data = [];
+%     
+%     while ~eofstat
+%         i=i+1;
+%         textLine = fgetl(fid); eofstat = feof(fid);
+%         data = [data; str2num(textLine)];
+%     end
+data = readmatrix(EnerFile, 'NumHeaderLines',1, 'FileType', 'Text');
 else
     warning('Energy file does not exist, exiting...')
     return
@@ -44,8 +48,8 @@ title(['Ave. PE for last ' num2str(SampleRange/2000) ' ps = ' num2str(mean(27.21
 ylabel(ax1, 'Potential Energy (eV)')
 xlabel(ax1, 'Time (ps)')
 set(ax1, 'fontsize', 12)
-if size(data,1) > SampleRange
-    ax2 = axes('Position',[0.64 0.68 0.25 0.2]);
+if size(data,1) > SampleRange && strcmp(Inset, 'Yes')
+    ax2 = axes('Position',[0.64 0.6 0.25 0.2]);
     h2 = plot(ax2, data(end-SampleRange:end,2)/1000, 27.211399*data(end-SampleRange:end,5), '-', 'linewidth',0.5, 'color', 'r');
     ylabel(ax2, 'P. E. (eV)')
     xlabel(ax2, 'Time (ps)')
@@ -61,8 +65,8 @@ title(['Ave. KE for last ' num2str(SampleRange/2000) ' ps = ' num2str(mean(27.21
 ylabel(ax1, 'Kinetic Energy (eV)')
 xlabel(ax1, 'Time (ps)')
 set(ax1, 'fontsize', 12)
-if size(data,1) > SampleRange
-    ax2 = axes('Position',[0.64 0.68 0.25 0.2]);
+if size(data,1) > SampleRange && strcmp(Inset, 'Yes')
+    ax2 = axes('Position',[0.64 0.6 0.25 0.2]);
     h2 = plot(ax2, data(end-SampleRange:end,2)/1000, 27.211399*data(end-SampleRange:end,3), '-', 'linewidth',0.5, 'color', [0 0.5 0]);
     ylabel(ax2, 'K. E. (eV)')
     xlabel(ax2, 'Time (ps)')
@@ -73,12 +77,13 @@ fig3 = figure;
 set(gcf, 'color', 'w', 'position', [388   417   592   420])
 ax1 = axes;
 h1 = plot(ax1, data(1:end,2)/1000, 27.211399*data(1:end,6), '-', 'linewidth', 1, 'color', 'b');
+% h2 = plot(ax1, data(1:end,2)/1000, 27.211399*(data(1:end,3)+data(1:end,5)), '-', 'linewidth', 1, 'color', 'm');
 title(['Ave. CQ for last ' num2str(SampleRange/2000) ' ps = ' num2str(mean(27.211399*data(end-SampleRange:end,6)),'%.2f') ' \pm ' num2str(std(27.211399*data(end-SampleRange:end,6)),'%.2f') ' eV']);
 ylabel(ax1, 'Conserved Quantity (eV)')
 xlabel(ax1, 'Time (ps)')
 set(ax1, 'fontsize', 12)
-if size(data,1) > SampleRange
-    ax2 = axes('Position',[0.64 0.68 0.25 0.2]);
+if size(data,1) > SampleRange && strcmp(Inset, 'Yes')
+    ax2 = axes('Position',[0.64 0.6 0.25 0.2]);
     h2 = plot(ax2, data(end-SampleRange:end,2)/1000, 27.211399*data(end-SampleRange:end,6), '-', 'linewidth',0.5, 'color', 'b');
     ylabel(ax2, 'C. Q. (eV)')
     xlabel(ax2, 'Time (ps)')
@@ -95,8 +100,8 @@ title(['Ave. Temp. for last ' num2str(SampleRange/2000) ' ps = ' num2str(mean(da
 ylabel(ax1, 'Temperature (K)')
 xlabel(ax1, 'Time (ps)')
 set(ax1, 'fontsize', 12)
-if size(data,1) > SampleRange
-    ax2 = axes('Position',[0.64 0.68 0.25 0.2]);
+if size(data,1) > SampleRange && strcmp(Inset, 'Yes')
+    ax2 = axes('Position',[0.64 0.6 0.25 0.2]);
     h2 = plot(ax2, data(end-SampleRange:end,2)/1000, data(end-SampleRange:end,4), '-', 'linewidth',0.5, 'color', 'k');
     ylabel(ax2, 'Temp. (K)')
     xlabel(ax2, 'Time (ps)')
@@ -121,10 +126,10 @@ dTDriftdt = mean(diff(TDrift))*2000;
 % end
 
 
-exportgraphics(fig1,[Basefldr Allfldrs.name '\' system '_PE.jpg'],'Resolution',300)
-exportgraphics(fig2,[Basefldr Allfldrs.name '\' system '_KE.jpg'],'Resolution',300)
-exportgraphics(fig3,[Basefldr Allfldrs.name '\' system '_CQ.jpg'],'Resolution',300)
-exportgraphics(fig4,[Basefldr Allfldrs.name '\' system '_Temp.jpg'],'Resolution',300)
+exportgraphics(fig1,[BaseFldr Allfldrs.name '\' system '_PE.jpg'],'Resolution',300)
+exportgraphics(fig2,[BaseFldr Allfldrs.name '\' system '_KE.jpg'],'Resolution',300)
+exportgraphics(fig3,[BaseFldr Allfldrs.name '\' system '_CQ.jpg'],'Resolution',300)
+exportgraphics(fig4,[BaseFldr Allfldrs.name '\' system '_Temp.jpg'],'Resolution',300)
 
 disp(['Ave. Total Energy for last ' num2str(SampleRange/2000) ' ps = ' num2str(mean(27.211399*data(end-SampleRange:end,3))+mean(27.211399*data(end-SampleRange:end,5))) ' eV']);
 disp(['Std. Dev. = ' num2str(std(27.211399*data(end-SampleRange:end,6))) ' eV']);
