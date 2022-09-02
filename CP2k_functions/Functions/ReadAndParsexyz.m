@@ -1,8 +1,9 @@
-function [xyz, XYZ, Indx, Atoms, AtomList, nAtoms, startConfig, nConfigs, Step] = ReadAndParsexyz(Base, Fldr, Traj, ABC)
+function [xyz, XYZ, Indx, Atoms, AtomList, nAtoms, startConfig, nConfigs, Step] = ReadAndParsexyz(Base, Fldr, Traj, ABC, Rot)
 
-% Base = 'G:\Imperial\MattProjects\MD_files\Pit_NVT\CP_Pit1822\';
-% Fldr = 'SS1';
-% Traj = 'SS1.xyz';
+% Base = 'G:\Imperial\MattProjects\Edges\PostEquilibration\Pit\HF\';
+% Fldr = 'CP_Pit_20F';
+% Traj = 'CP_Pit_20F_43000to73000_500step.xyz';
+% ABC = getABCvectors(Base, Fldr);
 
 fid  = fopen([Base Fldr '\' Traj]);
 disp('Reading xyz data...');
@@ -39,6 +40,7 @@ for j = startConfig:nConfigs
     end
     
     XYZ = wrapXYZ(XYZ, ABC);
+    XYZ = RotateCoordinateAxes(XYZ, ABC, Rot(1), Rot(2), Rot(3));
     
     for k = 1:size(AtomList,1)
         xyz.(strtrim(AtomList(k,:)))(j,:, 1:3) = XYZ(j, Indx.(strtrim(AtomList(k,:))),1:3);
