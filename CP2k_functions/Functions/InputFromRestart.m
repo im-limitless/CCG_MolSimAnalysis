@@ -8,7 +8,7 @@ fprintf(fidout,[' &GLOBAL' newline]);
 fprintf(fidout,['   PRINT_LEVEL  LOW' newline]);
 fprintf(fidout,['   PROJECT_NAME ' OutFldr newline]);
 fprintf(fidout,['   RUN_TYPE  ENERGY_FORCE' newline]);
-fprintf(fidout,['   WALLTIME 1600' newline]);
+fprintf(fidout,['   WALLTIME 3500' newline]);
 fprintf(fidout,[' &END GLOBAL' newline]);
 fprintf(fidout,[' &FORCE_EVAL' newline]);
 fprintf(fidout,['   METHOD  QS' newline]);

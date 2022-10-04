@@ -1,11 +1,13 @@
 function [Vectors] = getABCvectors(ParentDir, WorkFldr)
 
-if exist([ParentDir WorkFldr '\' WorkFldr '-1.restart'], 'file')
-    fid  = fopen([ParentDir WorkFldr '\' WorkFldr '-1.restart']);
-elseif exist([ParentDir WorkFldr '\' WorkFldr '.inp'], 'file')
-    fid  = fopen([ParentDir WorkFldr '\' WorkFldr '.inp']);
-elseif exist([ParentDir WorkFldr '\' WorkFldr '.pdb'], 'file')
-    fid  = fopen([ParentDir WorkFldr '\' WorkFldr '.pdb']);
+PathSep = setOSpathSep;
+
+if exist([ParentDir WorkFldr PathSep WorkFldr '-1.restart'], 'file')
+    fid  = fopen([ParentDir WorkFldr PathSep WorkFldr '-1.restart']);
+elseif exist([ParentDir WorkFldr PathSep WorkFldr '.inp'], 'file')
+    fid  = fopen([ParentDir WorkFldr PathSep WorkFldr '.inp']);
+elseif exist([ParentDir WorkFldr PathSep WorkFldr '.pdb'], 'file')
+    fid  = fopen([ParentDir WorkFldr PathSep WorkFldr '.pdb']);
     lines = textscan(fid,'%s','delimiter','\n', 'whitespace', '');
     fclose(fid);
     lines = lines{1};

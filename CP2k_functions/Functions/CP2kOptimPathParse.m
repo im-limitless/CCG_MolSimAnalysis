@@ -88,7 +88,23 @@ if contains(flname, '.xyz')
 end
 
 XTDFileName = [basefldr directory '\' flname '.xtd'];
+XSDFileName = [basefldr directory '\' flname '.xsd'];
 % XTDFileName = [basefldr directory '\Sample' num2str(startConf) '_' num2str(endConf) '.xtd'];
 XTDFileWriteCP2k(XTDFileName,n,AtomCur,AtomPosImages,Vec,5, Snapshots)
+
+% B = unique(AtomCur);
+% % nIndx =[];
+% nIndiv = [];
+% for ii = 1:length(B)
+%     nIndiv = [nIndiv sum(strcmp(B{ii},AtomCur))];
+% % nIndx(ii,:) = strcmp(B{ii},AtomCur);
+% end
+
+A = AtomPosImages(:,:,end);
+A = A./[norm(Vec(1,:)) norm(Vec(2,:)) norm(Vec(3,:))];
+A = reshape(A, [1,size(A,1), size(A,2)]);
+
+
+XSDFileWriteCP2K(XSDFileName,n,AtomCur,A,Vec);
 
 

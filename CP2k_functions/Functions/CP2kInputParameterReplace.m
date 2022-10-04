@@ -1,8 +1,8 @@
 function CP2kInputParameterReplace(Infldr, Outfldr, jobID, param, paramVal)
 
-flname = dir([Infldr '*.inp']);
+flname = dir([Infldr jobID '\*-1.restart']);
 
-fid = fopen([Infldr flname.name]);
+fid = fopen([Infldr jobID '\' flname.name]);
 lines = textscan(fid,'%s','delimiter','\n', 'whitespace', '');
 fclose(fid);
 lines = lines{1};
@@ -16,7 +16,7 @@ for i = 1:length(relevant)
     lines{relevant(i)} = pad(lines{relevant(i)}, length(lines{relevant(i)})+pIndx-1, 'left');
 end
 
-fid = fopen([Outfldr jobID '.inp'],'w');
+fid = fopen([Outfldr jobID '\' jobID '-1.restart'],'w');
 for i = 1:length(lines)
     fprintf(fid,'%s\n',lines{i});
 end

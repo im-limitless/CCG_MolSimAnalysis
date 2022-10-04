@@ -1,6 +1,8 @@
 function [Atoms, AtomList, AtomIndx, AtomIndxfns, Kinds, Elements, PP] = getAtomInfoFromInput(BaseFldr, system)
 
-fid  = fopen([BaseFldr system '\' system '.xyz']);
+PathSep = setOSpathSep;
+
+fid  = fopen([BaseFldr system PathSep system '.xyz']);
 lines = textscan(fid,'%s','delimiter','\n', 'whitespace', '');
 fclose(fid);
 
@@ -25,10 +27,10 @@ AtomIndxfns = fieldnames(AtomIndx);
 % now read the input or restart file to find the elements
 
 
-if exist([BaseFldr system '\' system '-1.restart'], 'file')
-    fid  = fopen([BaseFldr system '\' system '-1.restart']);
-elseif exist([BaseFldr system '\' system '.inp'], 'file')
-    fid  = fopen([BaseFldr system '\' system '.inp']);
+if exist([BaseFldr system PathSep system '-1.restart'], 'file')
+    fid  = fopen([BaseFldr system PathSep system '-1.restart']);
+elseif exist([BaseFldr system PathSep system '.inp'], 'file')
+    fid  = fopen([BaseFldr system PathSep system '.inp']);
 else
     warning('No ".inp" or "-1.restart" file detected, terminating...');
     return
