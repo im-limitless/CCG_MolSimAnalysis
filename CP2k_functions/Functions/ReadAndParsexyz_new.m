@@ -11,8 +11,9 @@ function [xyz, XYZ, Indx, Atoms, AtomList, nAtoms, startConfig, nConfigs, Step] 
 % Indx is a data structure containing the atom numbers (as ordered in the .xyz file) of each atom type, e.g. "Indx.Pt" retunrs the position of all Pt atoms in the xyz file.
 % Indx.Pt can be used to access elements of XYZ corresponding to Pt only, i.e. XYZ(1, Indx.Pt, :) will return the x, y and z (3) coordinates for configuration 1 of all Pt atoms.
 
+PathSep = setOSpathSep;
 
-fid  = fopen([Base Fldr '\' Traj]);
+fid  = fopen([Base Fldr PathSep Traj]);
 disp('Reading xyz data...');
 nAtoms = str2num(fgetl(fid));
 InitialI = fgetl(fid);
@@ -29,7 +30,7 @@ NextI = fgetl(fid);
 
 fclose(fid);
 
-A = readmatrix([Base Fldr '\' Traj], 'headerlines', 0, 'FileType', 'Text', 'CommentStyle', 'i =');
+A = readmatrix([Base Fldr PathSep Traj], 'headerlines', 0, 'FileType', 'Text', 'CommentStyle', 'i =');
 nConfigs = size(A,1)/(nAtoms+1);
 removeNAtoms = (0:nConfigs-1)*(nAtoms+1)+1;
 A(removeNAtoms,:) = [];
@@ -55,6 +56,7 @@ if nConfigs > 1
     %     posI = [EqI(1) ComI(1)];
     %     Step1 = str2num(InitialI(posI(1)+1:posI(2)-1));
     Step1str = strsplit(InitialI);
+    Step1str = Step1str(~cellfun(@isempty, Step1str));
     Step1 = str2num(Step1str{3});
     %     EqI = strfind(NextI, '=');
     %     ComI = strfind(NextI, ',');
@@ -62,6 +64,7 @@ if nConfigs > 1
     %     Step2 = str2num(NextI(posI(1)+1:posI(2)-1));
 
     Step2str = strsplit(NextI);
+    Step2str = Step2str(~cellfun(@isempty, Step2str));
     Step2 = str2num(Step2str{3});
 
     Step = Step1:(Step2-Step1):(Step1+(Step2-Step1)*(nConfigs-1));

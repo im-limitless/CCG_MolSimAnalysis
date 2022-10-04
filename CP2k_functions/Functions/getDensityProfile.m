@@ -2,25 +2,13 @@
 % function [Dens_O, Dens_H, Dens_Na, Dens_Cl, TotDen, AveDen, z] = getDensityProfile(xyz, ABC)
 function [Dens_O, Dens_H, TotDen, AveDen, z] = getDensityProfile(xyz, ABC)
 
-% theta = -pi*(90-110/2)/180;
-% zmax = -ABC(1)*sin(theta)+ABC(3)*cos(theta);
-% bins = 200;
-% zRange = linspace(0, zmax, bins);
-% 
-% for i = 1:length(zRange)-1
-%     countO(i,:) = sum(xyz.O(:,:,3) < zRange(i+1) & xyz.O(:,:,3) > zRange(i) & xyz.O(:,:,1) < 8.24*cos(theta)+5.64*sin(theta) & xyz.O(:,:,1) > 4.70*cos(theta)+7.93*sin(theta),2); 
-%     countH(i,:) = sum(xyz.H(:,:,3) < zRange(i+1) & xyz.H(:,:,3) > zRange(i) ,2); 
-% %     countF(i,:) = sum(xyz.F(:,:,3) < zRange(i+1) & xyz.F(:,:,3) > zRange(i) ,2); 
-% %     countNa(i,:) = sum(xyz.Na(:,:,3) < zRange(i+1) & xyz.Na(:,:,3) > zRange(i) ,2); 
-% %     countCl(i,:) = sum(xyz.Cl(:,:,3) < zRange(i+1) & xyz.Cl(:,:,3) > zRange(i) ,2); 
-%     z(i) = (zRange(i+1)+zRange(i))/2;
-% end
-
 zmax = ABC(3);
 bins = 200;
 zRange = linspace(0, zmax, bins);
 for i = 1:length(zRange)-1
-     countO(i,:) = sum(xyz.O(:,:,3) < zRange(i+1) & xyz.O(:,:,3) > zRange(i) ,2); 
+%     countO(i,:) = sum(xyz.O(:,:,3) < zRange(i+1) & xyz.O(:,:,3) > zRange(i) ,2); 
+%     countH(i,:) = sum(xyz.H(:,:,3) < zRange(i+1) & xyz.H(:,:,3) > zRange(i) ,2); 
+     countO(i,:) = sum(xyz.O(:,:,3) < zRange(i+1) & xyz.O(:,:,3) > zRange(i) & (xyz.O(:,:,1) < 6 | xyz.O(:,:,1) > 20) ,2); 
     countH(i,:) = sum(xyz.H(:,:,3) < zRange(i+1) & xyz.H(:,:,3) > zRange(i) ,2); 
 %     countF(i,:) = sum(xyz.F(:,:,3) < zRange(i+1) & xyz.F(:,:,3) > zRange(i) ,2); 
 %     countNa(i,:) = sum(xyz.Na(:,:,3) < zRange(i+1) & xyz.Na(:,:,3) > zRange(i) ,2); 

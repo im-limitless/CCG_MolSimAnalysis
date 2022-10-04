@@ -45,8 +45,8 @@ if plotTF == 1
     set(gcf, 'position', [600 600 459   288]);
     hold on
     box on
-    % plot(r(2:end), g, 'color', C, 'linewidth', 1.5);
-    plot(r(2:end),smooth(g), 'color', C, 'linewidth', 2);
+    plot(r(2:end), g, 'color', C, 'linewidth', 2);
+%     plot(r(2:end),smooth(g), 'color', C, 'linewidth', 2);
     set(gca, 'xlim',[0 7], 'ylim', yScale, 'ytick', [0 0.5 1 1.5 2 2.5 3 3.5 4], 'yticklabel', {'0.0' '0.5' '1.0' '1.5' '2.0' '2.5' '3.0' '3.5' '4.0'},'fontsize', 14)
     legend(['g_{' ElemNames(1,:) '}_{' ElemNames(2,:) '}(r)'])
     xlabel('r (Ang)');

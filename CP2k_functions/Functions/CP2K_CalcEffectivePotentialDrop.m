@@ -1,7 +1,7 @@
 function [StepNum, EffectiveMicroPot] = CP2K_CalcEffectivePotentialDrop(BaseFldr, System)
 % BaseFldr = 'G:\Imperial\MattProjects\Edges\PostEquilibration\Pit\HF\';
 % % System = 'CP_Pit_18H22F';
-% % System = 'CP_Pit_20F';
+% % % System = 'CP_Pit_20F';
 % System = 'CP_Pit_20H22F';
 
 % BaseFldr = 'G:\Imperial\MattProjects\Pt_Clean\';
@@ -148,7 +148,7 @@ set(gcf, 'position', [680   300  640 480]);
 xlabel('Time (ps)');
 ylabel('Effective Potential Drop (\DeltaV, eV)');
 plot(StepNum/2000, EffectiveMicroPot, '-o', 'color', 'r', 'markerfacecolor', 'r', 'markeredgecolor', 'k', 'linewidth', 1)
-plot([min(StepNum)/2000 max(StepNum)/2000], [mean(EffectiveMicroPot) mean(EffectiveMicroPot)], '--', 'color', [0.7 0.7 0.7])
-title(['\DeltaV_{Ave.} = ' num2str(mean(EffectiveMicroPot), '%.2f') ' \pm ' num2str(std(EffectiveMicroPot),'%.2f') ' eV']);
+plot([min(StepNum)/2000 max(StepNum)/2000], [mean(EffectiveMicroPot(end-1:end)) mean(EffectiveMicroPot(end-1:end))], '--', 'color', [0.7 0.7 0.7])
+title(['\DeltaV_{Ave.} = ' num2str(mean(EffectiveMicroPot(end-1:end)), '%.2f') ' \pm ' num2str(std(EffectiveMicroPot(end-1:end)),'%.2f') ' eV']);
 legend(System, 'Average', 'interpreter', 'none')
 hold off

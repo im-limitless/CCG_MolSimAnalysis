@@ -7,6 +7,7 @@ function [XYZR] = RotateCoordinateAxes(XYZ, ABC, theta, Axes, TF)
 if TF
     switch Axes
         case 1
+            disp(['Rotating coordinates about x-axis by ' num2str(theta) ' rad']);
             Rx = [1 0 0; 0 cos(theta) -sin(theta); 0 sin(theta) cos(theta)];
             XYZR = reshape(XYZ, [size(XYZ ,1)*size(XYZ,2) size(XYZ,3)])*Rx;
             XYZR = reshape(XYZR, [size(XYZ,1) size(XYZ,2) size(XYZ,3)]);
