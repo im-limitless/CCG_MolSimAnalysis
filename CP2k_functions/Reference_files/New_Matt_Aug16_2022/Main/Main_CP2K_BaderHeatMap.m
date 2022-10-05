@@ -16,11 +16,11 @@ ABC = getABCvectors(BaseFldr, system);
 [Atoms, AtomList, Indx, Indxfns] = getAtomNamesFromInputXYZ(BaseFldr, system);
 
 % % find the indices of atoms containing name in first arguement
-myAtoms = {'Pt' 'O'};
+myAtoms = {'Al'};
 [Indx, myAtomList, myAtomNums] = detectAtomsOfType(myAtoms, AtomList, Indx, Indxfns);
 
 % % parse coordinates of atoms along trajectory and wrap into cell
-[xyz, XYZ, ~, ~, ~, nAtoms, startConfig, nConfigs, StepNum_Traj] = ReadAndParsexyz(BaseFldr, system, Trajectory, ABC, [0 0 0]);
+[xyz, XYZ, ~, ~, ~, nAtoms, startConfig, nConfigs, StepNum_Traj] = ReadAndParsexyz_new(BaseFldr, system, Trajectory, ABC, [0 0 0]);
 
 % [xyz1, XYZ1, ~, ~, ~, nAtoms1, startConfig1, nConfigs1, StepNum_Traj1] = ReadAndParsexyz(BaseFldr, system, Trajectory, ABC, [0 0 0]);
 % [xyz2, XYZ2, ~, ~, ~, nAtoms2, startConfig2, nConfigs2, StepNum_Traj2] = ReadAndParsexyz_new(BaseFldr, system, Trajectory, ABC, [0 0 0]);

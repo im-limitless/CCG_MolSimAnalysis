@@ -2,9 +2,9 @@ clear all;
 close all; clc;
 
 %% Set the location of the calculation output
-BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge/MD_pre_runs/';
-system = 'Al_water';
-Trajectory = 'Al_water-pos-1.xyz';
+BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge/5lyr_systems/Al_AlO/'; 
+system = 'AlO_water_1ML';
+Trajectory = 'AlO_water_1ML_22000to36000_1000step.xyz';
 
 % BaseFldr = 'G:\Imperial\MattProjects\Pt_Clean\CP_Like\';
 % system = 'CP_Like_1012_Fluoride';

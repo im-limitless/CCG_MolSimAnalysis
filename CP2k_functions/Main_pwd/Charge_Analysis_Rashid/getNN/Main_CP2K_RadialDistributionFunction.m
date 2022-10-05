@@ -1,9 +1,9 @@
 clear all;
 close all;
 
-BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/EleventhTimeLucky_Plus/Al_AlO/Al_water/Testing/'; 
+BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/EleventhTimeLucky_Plus2/Al_AlO/'; 
 system = 'Al_water';
-Trajectory = 'Al_water_14300to18100_100step.xyz';
+Trajectory = 'Al_water_20900to38500_100step.xyz';
 
 ABC = getABCvectors(BaseFldr, system);
 [xyz, XYZ, Indx, ~, ~, nAtoms, startConfig, nConfigs, StepNum] = ReadAndParsexyz(BaseFldr, system, Trajectory, ABC);
@@ -34,7 +34,7 @@ for snap = startConfig:nConfigs
 %     [VecOH, DistOH] = GetAtomCorrelation(XYZ_snap, [AtomIndx.O; AtomIndx.OtU; AtomIndx.OtL], AtomIndx.H, ABC);
 %     [VecFH, DistFH] = GetAtomCorrelation(XYZ_snap, Indx.F, Indx.H, ABC);
 %     [VecFO, DistFO] = GetAtomCorrelation(XYZ_snap, Indx.F, Indx.O, ABC);
-    [VecAlAl, DistAlAl] = GetAtomCorrelation(XYZ_snap, Indx.Al, Indx.Al, ABC);
+    [VecAlAl, DistAlAl] = GetAtomCorrelation(XYZ_snap, AtomIndx.Al1, AtomIndx.Al1, ABC);
 %     [VecHH, DistHH] = GetAtomCorrelation(XYZ_snap, Indx.H, Indx.H, ABC);
     [VecOO, DistOO] = GetAtomCorrelation(XYZ_snap, AtomIndx.O, AtomIndx.O, ABC);
 %     [VecPtO, DistPtO{snap}] = GetAtomCorrelation(XYZ_snap, Indx.Pt, Indx.O, ABC);

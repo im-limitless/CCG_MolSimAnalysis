@@ -3,8 +3,8 @@ clear all;
 close all;
 
 % Set the location of the calculation output
-BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge/MD_pre_runs/'; % Base directory containing calculation directory ("\" included at end)
-system = 'Al_water'; % Name of calculation directory (no "\")
+BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge/5lyr_systems/Al_AlO/'; % Base directory containing calculation directory ("\" included at end)
+system = 'AlO_water_1ML'; % Name of calculation directory (no "\")
 
 % Set the number of steps before the end that are used to compute averages
 SampleRange = 6000;

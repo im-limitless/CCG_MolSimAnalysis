@@ -1,9 +1,9 @@
 clear all;
 close all;
 
-BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/EleventhTimeLucky_Plus/Al_AlO/Al_water/Testing/'; 
+BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/EleventhTimeLucky_Plus2/Al_AlO/'; 
 system = 'Al_water';
-Trajectory = 'Al_water_14300to18100_100step.xyz';
+Trajectory = 'Al_water_20900to40500_100step.xyz';
 
 ABC = getABCvectors(BaseFldr, system);
 [xyz, XYZ, Indx, ~, ~, nAtoms, startConfig, nConfigs, StepNum] = ReadAndParsexyz(BaseFldr, system, Trajectory, ABC);
@@ -47,6 +47,15 @@ for n = 1:length(ACFfiles)
 end
 
 %%%%%%%%%%%%%%%%%%% 1st NN Bader Charge %%%%%%%%%%%%%%%%%%%
+for snap = 177
+    
+    XYZ_snap = zeros(size(XYZ,2), size(XYZ,3));
+    XYZ_snap(:,:) = XYZ(snap,:,:);
+   
+    [VecAlAl, DistAlAl] = GetAtomCorrelation(XYZ_snap, AtomIndx.Al1, AtomIndx.Al1, ABC); 
+
+end
+
 Atom=[]
 
 Atom_1Q=[]
@@ -59,18 +68,18 @@ NN_1Q=[]
 % Qnet_NN_1=[]
 
 for i= 1:length(AtomIndx.Al1)
-    DoubleCount= 1:length(AtomIndx.Al1);
-    DoubleCount(i)=[];
+    %DoubleCount= 1:length(AtomIndx.Al1);
+    %DoubleCount(i)=[];
     i;
-    R_ind_Atom=AtomIndx.Al1(i);
+    R_ind_Atom=AtomIndx.Al1(i)
 %     Atom=[Atom;R_ind_Atom R_Q_Atom]
-    R_Q_Atom=Qnet(AtomIndx.Al1(i),1);
+    R_Q_Atom=Qnet(AtomIndx.Al1(i),1)
 %     Qnet_Atom=[Qnet_Atom;R_Q_Atom]
     Atom=[Atom;R_ind_Atom R_Q_Atom];
     Atom_1Q=[Atom_1Q; R_Q_Atom];
 
 
-    AlNN_indx= find(DistAlAl(DoubleCount,i)<3.6);
+    AlNN_indx= find(DistAlAl(:,i)<3.6 & DistAlAl(:,i)>0);
     R_ind_NN=AtomIndx.Al1(AlNN_indx)
     R_Q_NN=Qnet(AtomIndx.Al1(AlNN_indx),1)
 %     Qnet(AtomIndx.Al1(AlNN_indx),1)
@@ -82,36 +91,36 @@ for i= 1:length(AtomIndx.Al1)
 end
 
 %%%%%%%%%%%%%%%%%%% 2nd NN Bader Charge %%%%%%%%%%%%%%%%%%%
-for snap = 39
-    
-    XYZ_snap = zeros(size(XYZ,2), size(XYZ,3));
-    XYZ_snap(:,:) = XYZ(snap,:,:);
-   
-    [VecAlAl2, DistAlAl2] = GetAtomCorrelation(XYZ_snap, AtomIndx.Al1, AtomIndx.Al2, ABC); 
-
-end
-
-NN_2=[]
-
-NN_2A=[]
-NN_2Q=[]
-% Qnet_NN_2=[]
-
-for i= 1:length(AtomIndx.Al2)
-    DoubleCount= 1:length(AtomIndx.Al2);
-    DoubleCount(i)=[];
-    i
-
-
-    AlNN_indx2= find(DistAlAl2(DoubleCount,i)>3.6 & DistAlAl2(DoubleCount,i)<=4.52);
-    AlNN_indx2
-
-    R_ind_NN=AtomIndx.Al2(AlNN_indx2)
-    R_Q_NN=Qnet(AtomIndx.Al2(AlNN_indx2),1)
-%     Qnet(AtomIndx.Al1(AlNN_indx),1)
-
-    NN_2=[NN_2;R_ind_NN R_Q_NN];
-    NN_2A=[NN_2A;i;i;i ;R_ind_NN];
-    NN_2Q=[NN_2Q; R_Q_NN];
-
-end
+% for snap = 1
+%     
+%     XYZ_snap = zeros(size(XYZ,2), size(XYZ,3));
+%     XYZ_snap(:,:) = XYZ(snap,:,:);
+%    
+%     [VecAlAl2, DistAlAl2] = GetAtomCorrelation(XYZ_snap, AtomIndx.Al1, AtomIndx.Al2, ABC); 
+% 
+% end
+% 
+% NN_2=[]
+% 
+% NN_2A=[]
+% NN_2Q=[]
+% % Qnet_NN_2=[]
+% 
+% for i= 1:length(AtomIndx.Al1)
+%     DoubleCount= 1:length(AtomIndx.Al1);
+%     DoubleCount(i)=[];
+%     i;
+%     AtomIndx.Al1(i)
+% 
+%     AlNN_indx2= find(DistAlAl2(DoubleCount,i)>3.6 & DistAlAl2(DoubleCount,i)<=4.52);
+%     AlNN_indx2
+% 
+%     R_ind_NN=AtomIndx.Al2(AlNN_indx2)
+%     R_Q_NN=Qnet(AtomIndx.Al2(AlNN_indx2),1)
+% %     Qnet(AtomIndx.Al1(AlNN_indx),1)
+% 
+%     NN_2=[NN_2;R_ind_NN R_Q_NN];
+%     NN_2A=[NN_2A;nan; nan; nan;R_ind_NN];
+%     NN_2Q=[NN_2Q; nan; nan; nan; R_Q_NN];
+% 
+% end
