@@ -1,11 +1,12 @@
 clear all;  clc;
 close all;
 
-BaseFldr = 'G:\Imperial\MattProjects\Edges\PostEquilibration\Pit\HF\';
-system = 'CP_Pit_20F';
+
+BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/EleventhTimeLucky_Plus2/Al_AlO/';
+system = 'Al_water';
 Trajectory = 'CP_Pit_20F_43000to73000_500step.xyz';
 
-fldrname = [BaseFldr system '\Bader\'];
+fldrname = [BaseFldr system '/Bader/'];
 ACFfiles = dir([fldrname 'ACF_*.dat']);
 
 

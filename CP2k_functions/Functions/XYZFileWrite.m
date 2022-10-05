@@ -1,5 +1,7 @@
 function XYZFileWrite(basefldr,n,AtomCur,AtomPos,Vec,name)
 
+pathSec =setOSpathSep;
+
 % Michail Stamatakis 16-Nov-2011. University of Delaware.
 % Function that writes a VASP configuration to basefldr
 % Version 3.0

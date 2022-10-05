@@ -1,5 +1,7 @@
 function writeSnaptoxyz(BaseFldr, fldrname, StepNum, XYZ_snap, Atoms, DL, DoubleAnalType)
 
+pathSec =setOSpathSep;
+
 % if ~exist([BaseFldr fldrname '\1stWL_Trajectories'])
 %     mkdir([BaseFldr fldrname '\1stWL_Trajectories']);
 % end

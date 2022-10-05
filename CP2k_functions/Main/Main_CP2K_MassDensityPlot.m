@@ -2,9 +2,9 @@ clear all;
 close all; clc;
 
 %% Set the location of the calculation output
-BaseFldr = 'G:\Imperial\MattProjects\Edges\PostEquilibration\Pit\HF\';
-system = 'CP_Pit_Water';
-Trajectory = 'CP_Pit_Water_41000to63000_500step.xyz';
+BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/EleventhTimeLucky_Plus2/Al_AlO/';
+system = 'Al_water';
+Trajectory = 'Al_water_20900to44800_100step.xyz';
 
 % BaseFldr = 'G:\Imperial\MattProjects\Pt_Clean\CP_Like\';
 % system = 'CP_Like_1012_Fluoride';
@@ -16,20 +16,20 @@ Trajectory = 'CP_Pit_Water_41000to63000_500step.xyz';
 
 ABC = getABCvectors(BaseFldr, system);
 % [xyz, XYZ, Indx, ~, ~, nAtoms, startConfig, nConfigs, StepNum] = ReadAndParsexyz(BaseFldr, system, Trajectory, ABC, [pi/2; 1; 1]);
-% [xyz, XYZ, Indx, Atoms, AtomList, nAtoms, startConfig, nConfigs, StepNum] = ReadAndParsexyz_new(BaseFldr, system, Trajectory, ABC, [0; 0; 0]);
-[xyz, XYZ, Indx, Atoms, AtomList, nAtoms, startConfig, nConfigs, StepNum] = ReadAndParsexyz_new(BaseFldr, system, Trajectory, ABC, [pi/2; 1; 1]);
+[xyz, XYZ, Indx, Atoms, AtomList, nAtoms, startConfig, nConfigs, StepNum] = ReadAndParsexyz_new(BaseFldr, system, Trajectory, ABC, [0; 0; 0]);
+% [xyz, XYZ, Indx, Atoms, AtomList, nAtoms, startConfig, nConfigs, StepNum] = ReadAndParsexyz_new(BaseFldr, system, Trajectory, ABC, [pi/2; 1; 1]);
 
 
 %% Modify which O atoms go into mass density accoring to explicit naming in
 % input xyz. AtomIndx is the Index of atoms by name from input.xyz. Modify
 % % get the names of atoms from original xyz input file
 % [~, OIndxxyz] = ismember([AtomIndx.O; AtomIndx.OtL; AtomIndx.OtU; AtomIndx.OtS] , Indx.O);
-[~, OIndxxyz] = ismember([AtomIndx.O] , Indx.O);
-xyz.O = xyz.O(:,OIndxxyz,:);
+% [~, OIndxxyz] = ismember([AtomIndx.O] , Indx.O);
+% xyz.O = xyz.O(:,OIndxxyz,:);
 %%
 
-% [Dens_O, Dens_H, TotDen, AveDen, z] = getDensityProfile(xyz, ABC);
-[Dens_O, Dens_H, TotDen, AveDen, z] = getCylindricalDensity(xyz, ABC);
+[Dens_O, Dens_H, TotDen, AveDen, z] = getDensityProfile(xyz, ABC);
+% [Dens_O, Dens_H, TotDen, AveDen, z] = getCylindricalDensity(xyz, ABC);
 % [Dens_O, Dens_H, Dens_F, TotDen, AveDen, z] = getDensityProfile(xyz, ABC);
 % [Dens_O, Dens_H, Dens_Na, Dens_Cl, TotDen, AveDen, z] = getDensityProfile(xyz, ABC);
 

@@ -1,5 +1,7 @@
 function XSDFileWriteCP2K(XSDFileName,n,AtomCur,AtomPos,Vec)
 
+pathSec =setOSpathSep;
+
 % Michail Stamatakis 16-Nov-2011. University of Delaware.
 % Function that writes a Materials Studio xsd file
 % Version 3.0

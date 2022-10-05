@@ -1,5 +1,6 @@
 function gR = radialDistribution(switchVal,gR,coords,L)
-    
+    pathSec =setOSpathSep;
+
         % Set three operation cases for this function
         initialize=0;
         sample=1;

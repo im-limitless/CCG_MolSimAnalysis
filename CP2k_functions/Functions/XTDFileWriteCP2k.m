@@ -1,5 +1,7 @@
 function XTDFileWriteCP2k(XTDFileName,n,AtomCur,AtomPosImages,Vec,MovieSpeed, Snapshots)
 
+pathSec =setOSpathSep;
+
 % Michail Stamatakis 16-Dec-2011. University of Delaware.
 % Function that writes a Materials Studio xtd (animation) file
 % Version 3.0

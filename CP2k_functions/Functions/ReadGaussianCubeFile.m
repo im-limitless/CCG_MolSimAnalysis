@@ -1,5 +1,8 @@
 function [GridDens, RawDens, xGrid, yGrid, zGrid] = ReadGaussianCubeFile(BaseFldr, Cube)
 
+pathSec =setOSpathSep;
+
+
 fid = fopen([BaseFldr Cube]);
 disp(['Reading cube file ' Cube '...']);
 fgetl(fid);

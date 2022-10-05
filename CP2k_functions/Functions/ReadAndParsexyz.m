@@ -1,5 +1,7 @@
 function [xyz, XYZ, Indx, Atoms, AtomList, nAtoms, startConfig, nConfigs, Step] = ReadAndParsexyz(Base, Fldr, Traj, ABC, Rot)
 
+pathSec =setOSpathSep;
+
 % Base = 'G:\Imperial\MattProjects\Edges\PostEquilibration\Pit\HF\';
 % Fldr = 'CP_Pit_20F';
 % Traj = 'CP_Pit_20F_43000to73000_500step.xyz';

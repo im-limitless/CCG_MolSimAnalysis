@@ -1,5 +1,8 @@
 function [Vec, Dist] = searchAcrossPBC(Vec, Dist, XYZ, IndxA, IndxB, ABC)
 
+pathSec =setOSpathSep;
+
+
 PBC_mat = [1 0 0; -1 0 0; 0 1 0; 0 -1 0; 1 1 0; -1 1 0; 1 -1 0; -1 -1 0; 1 0 1; -1 0 1; 0 1 1; 0 -1 1; 1 1 1; -1 1 1; 1 -1 1; -1 -1 1; 1 0 -1; -1 0 -1; 0 1 -1; 0 -1 -1; 1 1 -1; -1 1 -1; 1 -1 -1; -1 -1 -1; 0 0 1; 0 0 -1;];
 
 

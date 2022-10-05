@@ -2,6 +2,9 @@ function [XYZR] = RotateCoordinateAxes(XYZ, ABC, theta, Axes, TF)
 % theta is angle of rotation. Axes is the cartesian axis to rotate about x = 1, y =
 % 2, z = 3. TF is true/fale, 1 for rotate 0 for do nothing.
 
+pathSec =setOSpathSep;
+
+
 % XYZR = zeros(size(XYZ));
 
 if TF

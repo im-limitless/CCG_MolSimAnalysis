@@ -1,5 +1,7 @@
 function [XYZ_wrap] = wrapXYZ(XYZ_input, Vec)
 
+pathSec =setOSpathSep;
+
 XYZ_wrap = XYZ_input;
 
 for i = 1:size(XYZ_wrap,1)

@@ -2,9 +2,11 @@
 clear all;
 close all;
 
+pathSec =setOSpathSep;
+
 % Set the location of the calculation output
-BaseFldr = 'G:\Imperial\MattProjects\Edges\PostEquilibration\Pit\HF\'; % Base directory containing calculation directory ("\" included at end)
-system = 'CP_Pit_Water'; % Name of calculation directory (no "\")
+BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/EleventhTimeLucky_Plus2/Al_AlO/'; % Base directory containing calculation directory ("\" included at end)
+system = 'Al_water'; % Name of calculation directory (no "\")
 
 % Set the number of steps before the end that are used to compute averages
 SampleRange = 6000;
@@ -15,8 +17,8 @@ SampleRange = 6000;
 Inset = 'No';
 
 Allfldrs = dir([BaseFldr '*' system]);
-flname = dir([BaseFldr Allfldrs.name '\*.ener']);
-EnerFile = [BaseFldr Allfldrs.name '\' flname.name];
+flname = dir([BaseFldr Allfldrs.name '/*.ener']);
+EnerFile = [BaseFldr Allfldrs.name pathSec flname.name];
 
 if ~isempty(flname)
     disp(['Parsing energy file for ' system '...']);
@@ -126,10 +128,10 @@ dTDriftdt = mean(diff(TDrift))*2000;
 % end
 
 
-exportgraphics(fig1,[BaseFldr Allfldrs.name '\' system '_PE.jpg'],'Resolution',300)
-exportgraphics(fig2,[BaseFldr Allfldrs.name '\' system '_KE.jpg'],'Resolution',300)
-exportgraphics(fig3,[BaseFldr Allfldrs.name '\' system '_CQ.jpg'],'Resolution',300)
-exportgraphics(fig4,[BaseFldr Allfldrs.name '\' system '_Temp.jpg'],'Resolution',300)
+exportgraphics(fig1,[BaseFldr Allfldrs.name pathSec system '_PE.jpg'],'Resolution',300)
+exportgraphics(fig2,[BaseFldr Allfldrs.name pathSec system '_KE.jpg'],'Resolution',300)
+exportgraphics(fig3,[BaseFldr Allfldrs.name pathSec system '_CQ.jpg'],'Resolution',300)
+exportgraphics(fig4,[BaseFldr Allfldrs.name pathSec system '_Temp.jpg'],'Resolution',300)
 
 disp(['Ave. Total Energy for last ' num2str(SampleRange/2000) ' ps = ' num2str(mean(27.211399*data(end-SampleRange:end,3))+mean(27.211399*data(end-SampleRange:end,5))) ' eV']);
 disp(['Std. Dev. = ' num2str(std(27.211399*data(end-SampleRange:end,6))) ' eV']);

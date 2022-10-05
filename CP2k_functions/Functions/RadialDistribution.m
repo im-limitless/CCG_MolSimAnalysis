@@ -1,5 +1,7 @@
 function [RadialMinima] = RadialDistribution(RadFunSnaps, ABC, ElemNames, plotTF)
 
+pathSec =setOSpathSep;
+
 disp(['Computing radial distribution function for ' ElemNames(1,:) ' and ' ElemNames(2,:)])
 
 % concatenate all bond distances for all scanned atoms from all snapshots

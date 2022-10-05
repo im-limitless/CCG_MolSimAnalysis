@@ -2,6 +2,8 @@
 clear all;
 close all;
 
+pathSec =setOSpathSep;
+
 mWater = 18/6.02e23/1000;
 mF = 19/6.02e23/1000;
 

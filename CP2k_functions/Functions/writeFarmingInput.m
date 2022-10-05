@@ -1,5 +1,7 @@
 function writeFarmingInput(BaseFldr, Allfldrs, cores, ppn, time)
 
+pathSec =setOSpathSep;
+
 % if exist([BaseFldr 'Farm'],'dir')
 %     warning('Directory already exists! Farming folder not created.');
 %     return
