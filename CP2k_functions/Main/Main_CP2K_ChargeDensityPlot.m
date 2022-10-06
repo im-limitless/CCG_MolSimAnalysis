@@ -5,7 +5,7 @@ close all; clc;
 BaseFldr = 'G:\Imperial\MattProjects\Edges\PostEquilibration\Pit\HF\';
 system = 'CP_Pit_Water';
 
-AllFiles = dir([BaseFldr '*' system '\Cubes\*ELEC*.cube']);
+AllFiles = dir([BaseFldr '*' system '\Cubes\*TOT*.cube']);
 Cube = {AllFiles.name};
 
 SumGrid = [];
@@ -28,10 +28,10 @@ set(gcf, 'position', [-1390         270        1105         420])
 for j = 1:length(Cube)-1
     SumGrid = SumGrid + GridDens.(['C' num2str(j+1)]);
 
-plot(linspace(0, ABC(3), 480), smooth(reshape(mean(GridDens.(['C' num2str(j)]), [1 ,2]),480,1)), 'Color', 'r', 'LineWidth', 1.5);
+plot(linspace(0, ABC(3), 480), smooth(reshape(mean(GridDens.(['C' num2str(j)]), [1 ,2]),480,1), floor((2/ABC(3))*480)), 'Color', 'r', 'LineWidth', 1.5);
 end
 
 
 AveGridDens = SumGrid/length(Cube);
-plot(linspace(0, ABC(3), 480), smooth(reshape(mean(AveGridDens, [1 ,2]),480,1)), 'Color', 'k', 'LineWidth', 1.5);
+plot(linspace(0, ABC(3), 480), smooth(reshape(mean(AveGridDens, [1 ,2]),480,1), floor((2/ABC(3))*480)), 'Color', 'k', 'LineWidth', 1.5);
 

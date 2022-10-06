@@ -2,8 +2,11 @@ clear all;  clc;
 close all;
 
 BaseFldr = 'G:\Imperial\MattProjects\Edges\PostEquilibration\Pit\HF\';
-system = 'CP_Pit_20F';
-Trajectory = 'CP_Pit_20F_43000to73000_500step.xyz';
+system = 'CP_Pit_Water';
+Trajectory = 'CP_Pit_Water_41000to63000_500step.xyz';
+% BaseFldr = 'G:\Imperial\MRes\Jad\';
+% system = 'Au_Junc';
+% Trajectory = 'Au_Junc.xyz';
 
 fldrname = [BaseFldr system '\Bader\'];
 ACFfiles = dir([fldrname 'ACF_*.dat']);
@@ -13,24 +16,24 @@ ACFfiles = dir([fldrname 'ACF_*.dat']);
 ABC = getABCvectors(BaseFldr, system);
 
 % % get the names of atoms from original xyz input file
-[Atoms, AtomList, Indx, Indxfns] = getAtomNamesFromInputXYZ(BaseFldr, system);
+[Atoms, AtomList, Indx, Indxfns, Kinds, Elements, PP] = getAtomInfoFromInput(BaseFldr, system);
 
-% % find the indices of atoms containing name in first arguement
-myAtoms = {'Pt' 'O'};
-[Indx, myAtomList, myAtomNums] = detectAtomsOfType(myAtoms, AtomList, Indx, Indxfns);
+% % find the indices of atoms containing myAtoms
+myAtoms = {'Pt'};
+% myAtoms = {'all'};
+[Indx, myAtomList, myAtomNums, myAtomCore] = detectAtomsOfType(myAtoms, AtomList, Indx, Indxfns, Kinds, Elements, PP);
 
 % % parse coordinates of atoms along trajectory and wrap into cell
-[xyz, XYZ, ~, ~, ~, nAtoms, startConfig, nConfigs, StepNum_Traj] = ReadAndParsexyz(BaseFldr, system, Trajectory, ABC, [0 0 0]);
-
-% [xyz1, XYZ1, ~, ~, ~, nAtoms1, startConfig1, nConfigs1, StepNum_Traj1] = ReadAndParsexyz(BaseFldr, system, Trajectory, ABC, [0 0 0]);
-% [xyz2, XYZ2, ~, ~, ~, nAtoms2, startConfig2, nConfigs2, StepNum_Traj2] = ReadAndParsexyz_new(BaseFldr, system, Trajectory, ABC, [0 0 0]);
+% [xyz, XYZ, ~, ~, ~, nAtoms, startConfig, nConfigs, StepNum_Traj] = ReadAndParsexyz(BaseFldr, system, Trajectory, ABC, [0 0 0]);
+[xyz, XYZ, ~, ~, ~, nAtoms, startConfig, nConfigs, StepNum_Traj] = ReadAndParsexyz_new(BaseFldr, system, Trajectory, ABC, [0 0 0]);
 
 % % Read the Bader charge "ACF" files and extract the raw charge Q/net charge Qnet
 Q = zeros(length(Atoms),length(ACFfiles));
 Qnet = zeros(length(Atoms),length(ACFfiles));
 
 for n = 1:length(ACFfiles)
-    [Q(:,n), Qnet(:,n), StepNum(n)] = extractBaderCharges(fldrname, ACFfiles(n).name, Atoms, AtomList);
+    disp(['Extracting charge from ' ACFfiles(n).name]);
+    [Q(:,n), Qnet(:,n), StepNum(n)] = extractBaderCharges(fldrname, ACFfiles(n).name, Atoms, AtomList, Kinds, PP);
 end
 
 MeanCharge = zeros(length(AtomList),length(StepNum));
@@ -52,5 +55,5 @@ StdCharge = StdCharge(:,sortIdx);
 
 XYZ_snap = reshape(XYZ(1,:,:), [size(XYZ,2) size(XYZ,3)]);
 
-MeanQnet = mean(Qnet(myAtomNums,end-20:end),2);
+MeanQnet = mean(Qnet(myAtomNums,:),2);
 Bader3DCharge(XYZ_snap(myAtomNums,:), ABC, MeanQnet);

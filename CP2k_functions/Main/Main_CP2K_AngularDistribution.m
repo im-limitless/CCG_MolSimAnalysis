@@ -1,31 +1,37 @@
 clear all;
-close all;
+% close all;
 
-Basefldr = 'G:\Imperial\MattProjects\Pt_Clean\CP_Like\'; % Base directory containing calculation directory ("\" included at end)
-system = 'CP_Like_1010_Fluorine'; % Name of calculation directory (no "\")
-Trajectory = 'Sample36000_58000.xyz';
+% BaseFldr = 'G:\Imperial\PhD\Rashid\Pictures\';
+%     system = 'Al_water';
+%     Trajectory = 'Al_water_14300to18100_100step.xyz';
 
-ABC = getABCvectors(Basefldr, system);
-[xyz, XYZ, Indx, Atoms, AtomList, nAtoms, startConfig, nConfigs, StepNum] = ReadAndParsexyz(Basefldr, system, Trajectory, ABC);
+
+BaseFldr = 'G:\Imperial\MattProjects\Pt_Clean\CP_Like\';
+    system = 'CP_Like_1010_Fluorine';
+    Trajectory = 'CP_Like_1010_Fluorine_46000to58000_500step.xyz';
+
+ABC = getABCvectors(BaseFldr, system);
+[xyz, XYZ, Indx, Atoms, AtomList, nAtoms, startConfig, nConfigs, StepNum] = ReadAndParsexyz_new(BaseFldr, system, Trajectory, ABC, [0; 0; 0]);
 
 %% Modify which O atoms go into mass density accoring to explicit naming in
 % input xyz. AtomIndx is the Index of atoms by name from input.xyz. Modify
 % ismember argument to choose which atoms are used.
-[~, ~, AtomIndx] = getAtomNamesFromInputXYZ(Basefldr, system);
+[~, ~, AtomIndx, ~, ~, ~, ~] = getAtomInfoFromInput(BaseFldr, system);
+% [~, ~, AtomIndx] = getAtomNamesFromInputXYZ(BaseFldr, system);
 % [~, OIndxxyz] = ismember([AtomIndx.O; AtomIndx.OtL; AtomIndx.OtU; AtomIndx.OtS] , Indx.O);
-[~, OIndxxyz] = ismember(AtomIndx.O , Indx.O);
-xyz.O = xyz.O(:,OIndxxyz,:);
+% [~, OIndxxyz] = ismember(AtomIndx.O , Indx.O);
+% xyz.O = xyz.O(:,OIndxxyz,:);
 
 %%
 
-% [Dens_O, Dens_H, TotDen, AveDen, z] = getDensityProfile(xyz, ABC);
-[Dens_O, Dens_H, Dens_F, TotDen, AveDen, z] = getDensityProfile(xyz, ABC);
+[Dens_O, Dens_H, TotDen, AveDen, z] = getDensityProfile(xyz, ABC);
+% [Dens_O, Dens_H, Dens_F, TotDen, AveDen, z] = getDensityProfile(xyz, ABC);
 % [Dens_O, Dens_H, Dens_Na, Dens_Cl, TotDen, AveDen, z] = getDensityProfile(xyz, ABC);
 
-[FirstLayerIndx, SecondLayerIndx] = getWaterLayerIndices(AtomIndx, XYZ, Dens_O, z);
+[FirstLayerIndx, SecondLayerIndx, ThirdLayerIndx, FourthLayerIndx, Minima] = getWaterLayerIndices(AtomIndx, XYZ, Dens_O, z);
 
 for snap = startConfig:nConfigs
-    disp(['Processing snapshot ' num2str(StepNum(snap)) ' - ' num2str(100*(snap/nConfigs)) ' % complete']);
+%     disp(['Processing snapshot ' num2str(StepNum(snap)) ' - ' num2str(100*(snap/nConfigs)) ' % complete']);
     
     XYZ_snap = zeros(size(XYZ,2), size(XYZ,3));
     XYZ_snap(:,:) = XYZ(snap,:,:);
@@ -33,12 +39,12 @@ for snap = startConfig:nConfigs
     [VecOH, DistOH] = GetAtomCorrelation(XYZ_snap, AtomIndx.O, AtomIndx.H, ABC);
     
     for j = 1:length(AtomIndx.O)
-        BondOH = find(DistOH(:,j) < 1.33);
+        BondOH = find(DistOH(:,j) <= 1.28);
         % find the O atoms with ONLY two O-H bonds within 1.3 Ang, i.e. water
         if length(BondOH) == 2
             
             % calculate net vector bisecting H-O-H
-            VecH2O = VecOH(BondOH(1),:)+VecOH(BondOH(2),:);
+            VecH2O = VecOH(BondOH(1),:,j)+VecOH(BondOH(2),:,j);
             
             % % %             % if we want to assume only one direction for both halves if the cell
             % % %                     zVec = [0 0 1];
@@ -50,13 +56,13 @@ for snap = startConfig:nConfigs
             if XYZ_snap(AtomIndx.O(j),3) < ABC(3)/2
                 zVec = [0 0 1];
                 Theta = acosd(dot(VecH2O,zVec)/(norm(VecH2O)*norm(zVec)));
-                Phi1 = acosd(dot(VecOH(BondOH(1),:),zVec)/(norm(VecOH(BondOH(1),:))*norm(zVec)));
-                Phi2 = acosd(dot(VecOH(BondOH(2),:),zVec)/(norm(VecOH(BondOH(2),:))*norm(zVec)));
+                Phi1 = acosd(dot(VecOH(BondOH(1),:,j),zVec)/(norm(VecOH(BondOH(1),:,j))*norm(zVec)));
+                Phi2 = acosd(dot(VecOH(BondOH(2),:,j),zVec)/(norm(VecOH(BondOH(2),:,j))*norm(zVec)));
             elseif XYZ_snap(AtomIndx.O(j),3) >= ABC(3)/2
                 zVec = [0 0 -1];
                 Theta = acosd(dot(VecH2O,zVec)/(norm(VecH2O)*norm(zVec)));
-                Phi1 = acosd(dot(VecOH(BondOH(1),:),zVec)/(norm(VecOH(BondOH(1),:))*norm(zVec)));
-                Phi2 = acosd(dot(VecOH(BondOH(2),:),zVec)/(norm(VecOH(BondOH(2),:))*norm(zVec)));
+                Phi1 = acosd(dot(VecOH(BondOH(1),:,j),zVec)/(norm(VecOH(BondOH(1),:,j))*norm(zVec)));
+                Phi2 = acosd(dot(VecOH(BondOH(2),:,j),zVec)/(norm(VecOH(BondOH(2),:,j))*norm(zVec)));
             end
         end
         
@@ -70,12 +76,12 @@ for snap = startConfig:nConfigs
     %     DL_Indx = FirstLayerIndx{snap};
     
     for j = 1:length(DL_Indx)
-        BondOH = find(DistOH(:,find(AtomIndx.O == DL_Indx(j))) < 1.33);
+        BondOH = find(DistOH(:,find(AtomIndx.O == DL_Indx(j))) <= 1.28);
         % find the O atoms with ONLY two O-H bonds within 1.3 Ang, i.e. water
         if length(BondOH) == 2
             
             % calculate net vector bisecting H-O-H
-            VecH2O = VecOH(BondOH(1),:)+VecOH(BondOH(2),:);
+            VecH2O = VecOH(BondOH(1),:,j)+VecOH(BondOH(2),:,j);
             
             % % %             % if we want to assume only one direction for both halves if the cell
             % % %                     zVec = [0 0 1];
@@ -87,13 +93,13 @@ for snap = startConfig:nConfigs
             if XYZ_snap(DL_Indx(j),3) < ABC(3)/2
                 zVec = [0 0 1];
                 ThetaDL = acosd(dot(VecH2O,zVec)/(norm(VecH2O)*norm(zVec)));
-                Phi1DL = acosd(dot(VecOH(BondOH(1),:),zVec)/(norm(VecOH(BondOH(1),:))*norm(zVec)));
-                Phi2DL = acosd(dot(VecOH(BondOH(2),:),zVec)/(norm(VecOH(BondOH(2),:))*norm(zVec)));
+                Phi1DL = acosd(dot(VecOH(BondOH(1),:,j),zVec)/(norm(VecOH(BondOH(1),:,j))*norm(zVec)));
+                Phi2DL = acosd(dot(VecOH(BondOH(2),:,j),zVec)/(norm(VecOH(BondOH(2),:,j))*norm(zVec)));
             elseif XYZ_snap(DL_Indx(j),3) >= ABC(3)/2
                 zVec = [0 0 -1];
                 ThetaDL = acosd(dot(VecH2O,zVec)/(norm(VecH2O)*norm(zVec)));
-                Phi1DL = acosd(dot(VecOH(BondOH(1),:),zVec)/(norm(VecOH(BondOH(1),:))*norm(zVec)));
-                Phi2DL = acosd(dot(VecOH(BondOH(2),:),zVec)/(norm(VecOH(BondOH(2),:))*norm(zVec)));
+                Phi1DL = acosd(dot(VecOH(BondOH(1),:,j),zVec)/(norm(VecOH(BondOH(1),:,j))*norm(zVec)));
+                Phi2DL = acosd(dot(VecOH(BondOH(2),:,j),zVec)/(norm(VecOH(BondOH(2),:,j))*norm(zVec)));
             end
         end
         
@@ -106,19 +112,19 @@ for snap = startConfig:nConfigs
     % write a sample snapshot to .xyz and convert to MS file (only for last
     % snapshot - simple bug that number of atoms in DL changes so arrays
     % are non-consistent for concatenation when trying to do all snaps together - could modify using cell array)
-    if snap == nConfigs
-        writeSnaptoxyz(Basefldr, system, snap, XYZ_snap, Atoms, [DL_Indx; DL_Indx_H; AtomIndx.Pts; AtomIndx.Ptb; AtomIndx.Ptss] , 'DL_Density');
-        CP2kOptimPathParse(Basefldr,system, ['DL_Density_' num2str(snap) '.xyz'])
-    end
+%     if snap == nConfigs
+%         writeSnaptoxyz(BaseFldr, system, snap, XYZ_snap, Atoms, [DL_Indx; DL_Indx_H; AtomIndx.Pts; AtomIndx.Ptb; AtomIndx.Ptss] , 'DL_Density');
+%         CP2kOptimPathParse(BaseFldr,system, ['DL_Density_' num2str(snap) '.xyz'])
+%     end
     
     DL_Indx = FirstLayerIndx{snap};
     for j = 1:length(DL_Indx)
-        BondOH = find(DistOH(:,find(AtomIndx.O == DL_Indx(j))) < 1.33);
+        BondOH = find(DistOH(:,find(AtomIndx.O == DL_Indx(j))) <= 1.28);
         % find the O atoms with ONLY two O-H bonds within 1.3 Ang, i.e. water
         if length(BondOH) == 2
             
             % calculate net vector bisecting H-O-H
-            VecH2O = VecOH(BondOH(1),:)+VecOH(BondOH(2),:);
+            VecH2O = VecOH(BondOH(1),:,j)+VecOH(BondOH(2),:,j);
             
             % % %             % if we want to assume only one direction for both halves if the cell
             % % %                     zVec = [0 0 1];
@@ -130,13 +136,13 @@ for snap = startConfig:nConfigs
             if XYZ_snap(DL_Indx(j),3) < ABC(3)/2
                 zVec = [0 0 1];
                 ThetaDL = acosd(dot(VecH2O,zVec)/(norm(VecH2O)*norm(zVec)));
-                Phi1DL = acosd(dot(VecOH(BondOH(1),:),zVec)/(norm(VecOH(BondOH(1),:))*norm(zVec)));
-                Phi2DL = acosd(dot(VecOH(BondOH(2),:),zVec)/(norm(VecOH(BondOH(2),:))*norm(zVec)));
+                Phi1DL = acosd(dot(VecOH(BondOH(1),:,j),zVec)/(norm(VecOH(BondOH(1),:,j))*norm(zVec)));
+                Phi2DL = acosd(dot(VecOH(BondOH(2),:,j),zVec)/(norm(VecOH(BondOH(2),:,j))*norm(zVec)));
             elseif XYZ_snap(DL_Indx(j),3) >= ABC(3)/2
                 zVec = [0 0 -1];
                 ThetaDL = acosd(dot(VecH2O,zVec)/(norm(VecH2O)*norm(zVec)));
-                Phi1DL = acosd(dot(VecOH(BondOH(1),:),zVec)/(norm(VecOH(BondOH(1),:))*norm(zVec)));
-                Phi2DL = acosd(dot(VecOH(BondOH(2),:),zVec)/(norm(VecOH(BondOH(2),:))*norm(zVec)));
+                Phi1DL = acosd(dot(VecOH(BondOH(1),:,j),zVec)/(norm(VecOH(BondOH(1),:,j))*norm(zVec)));
+                Phi2DL = acosd(dot(VecOH(BondOH(2),:,j),zVec)/(norm(VecOH(BondOH(2),:,j))*norm(zVec)));
             end
         end
         

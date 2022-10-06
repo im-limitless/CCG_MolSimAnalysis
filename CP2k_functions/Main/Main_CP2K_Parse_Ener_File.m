@@ -3,12 +3,12 @@ clear all;
 close all;
 
 % Set the location of the calculation output
-BaseFldr = 'G:\Imperial\MattProjects\Edges\PostEquilibration\Pit\HF\'; % Base directory containing calculation directory ("\" included at end)
+BaseFldr = 'D:\'; % Base directory containing calculation directory ("\" included at end)
 system = 'CP_Pit_Water'; % Name of calculation directory (no "\")
 
 % Set the number of steps before the end that are used to compute averages
-SampleRange = 6000;
-% SampleRange = 10000;
+% SampleRange = 6000;
+SampleRange = 10000;
 
 % Choose whether to plot an inset
 % Inset = 'Yes';

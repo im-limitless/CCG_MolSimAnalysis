@@ -14,18 +14,25 @@ close all;
 
 BaseFldr = 'G:\Imperial\MattProjects\Edges\PostEquilibration\Pit\HF\';
 system = 'CP_Pit_20F';
-Trajectory = 'Sample41000_52500.xyz';
+Trajectory = 'CP_Pit_20F_43000to73000_500step.xyz';
 
-% BaseFldr = 'G:\Imperial\MattProjects\Edges\PostEquilibration\Vacuum\';
-% system = 'Pt_Bulk';
-% Trajectory = 'Pt_Bulk.xyz';
+% BaseFldr = 'G:\Imperial\MattProjects\Edges\PostEquilibration\Pit\HF\';
+% system = 'CP_Pit_18H22F';
+% Trajectory = 'CP_Pit_18H22F_20000to50000_500step.xyz';
 
+% BaseFldr = 'G:\Imperial\MattProjects\Edges\PostEquilibration\Pit\HF\';
+% system = 'CP_Pit_20H22F';
+% Trajectory = 'CP_Pit_20H22F_30000to60000_500step.xyz';
+
+% BaseFldr = 'G:\Imperial\MattProjects\Edges\PostEquilibration\Pit\HF\';
+% system = 'CP_Pit_Water';
+% Trajectory = 'CP_Pit_Water_0to16000_500step.xyz';
 
 fldrname = [BaseFldr system '\Bader\'];
 ACFfiles = dir([fldrname 'ACF_*.dat']);
 
-% DoubleAnalType = 'MassDensity';
-DoubleAnalType = 'Radial';
+DoubleAnalType = 'MassDensity';
+% DoubleAnalType = 'Radial';
 
 % % Call function to find ABC vectors from .inp file
 ABC = getABCvectors(BaseFldr, system);
@@ -75,20 +82,23 @@ for snap = startConfig:nConfigs
     XYZ_snap = zeros(size(XYZ,2), size(XYZ,3));
     XYZ_snap(:,:) = XYZ(snap,:,:);
     
-    [VecPtO, DistPtO{snap}] = GetAtomCorrelation(XYZ_snap, [Indx.Pts; Indx.PtE], Indx.O, ABC);
+%     [VecPtO, DistPtO{snap}] = GetAtomCorrelation(XYZ_snap, [Indx.PtE], Indx.O, ABC);
+    [VecPtO, DistPtO{snap}] = GetAtomCorrelation(XYZ_snap, [Indx.Pts], Indx.O, ABC);
+%     [VecPtO, DistPtO{snap}] = GetAtomCorrelation(XYZ_snap, [Indx.Pts; Indx.PtE], Indx.O, ABC);
     [VecOH, DistOH] = GetAtomCorrelation(XYZ_snap, Indx.O, Indx.H, ABC);
-    [VecFH, DistFH] = GetAtomCorrelation(XYZ_snap, Indx.F, Indx.H, ABC);
-    [VecFO, DistFO] = GetAtomCorrelation(XYZ_snap, Indx.F, Indx.O, ABC);
+%     [VecFH, DistFH] = GetAtomCorrelation(XYZ_snap, Indx.F, Indx.H, ABC);
+%     [VecFO, DistFO] = GetAtomCorrelation(XYZ_snap, Indx.F, Indx.O, ABC);
     
     RadFunOH{snap} = reshape(DistOH, [numel(DistOH), 1]);
-    RadFunFH{snap} = reshape(DistFH, [numel(DistFH), 1]);
-    RadFunFO{snap} = reshape(DistFO, [numel(DistFO), 1]);
+%     RadFunFH{snap} = reshape(DistFH, [numel(DistFH), 1]);
+%     RadFunFO{snap} = reshape(DistFO, [numel(DistFO), 1]);
     RadFunPtO{snap} = reshape(DistPtO{snap}, [numel(DistPtO{snap}), 1]);
 end
 
-MinimaOH = RadialDistribution(RadFunOH, ABC, ['O'; 'H'], 0);
-MinimaFH = RadialDistribution(RadFunFH, ABC, ['F'; 'H'], 0);
-MinimaFO = RadialDistribution(RadFunFO, ABC, ['F'; 'O'], 0);
+% MinimaOH = RadialDistribution(RadFunOH, ABC, ['O'; 'H'], 0);
+MinimaOH = 1.33;
+% MinimaFH = RadialDistribution(RadFunFH, ABC, ['F'; 'H'], 0);
+% MinimaFO = RadialDistribution(RadFunFO, ABC, ['F'; 'O'], 0);
 MinimaPtO = RadialDistribution(RadFunPtO, ABC, ['Pt'; 'O '], 1);
 
 if strcmp(DoubleAnalType, 'MassDensity')
@@ -96,18 +106,24 @@ if strcmp(DoubleAnalType, 'MassDensity')
     disp('Determining water layering from mass density profile...');
     
     % % get the O atom distribution and corresponding indices of DL atoms
-    [Dens_O, ~, ~, ~, ~, z] = getDensityProfile(xyz, ABC);
-    [FirstLayerIndx, SecondLayerIndx] = getWaterLayerIndices(Indx, XYZ, Dens_O, z);
+%     [Dens_O, ~, ~, ~, ~, z] = getDensityProfile(xyz, ABC);
+[Dens_O, ~, ~, ~, z] = getDensityProfile(xyz, ABC);
+    [FirstLayerIndx, SecondLayerIndx, ThirdLayerIndx, FourthLayerIndx] = getWaterLayerIndices(Indx, XYZ, Dens_O, z);
     
     for i = startConfig:nConfigs
         DL1st{i} = [FirstLayerIndx{i}];
         DL2nd{i} = [SecondLayerIndx{i}];
-        nonDL{i} = setdiff(Indx.O, [DL1st{i}; DL2nd{i}]);
+        DL3rd{i} = [ThirdLayerIndx{i}];
+        DL4th{i} = [FourthLayerIndx{i}];
+%         nonDL{i} = setdiff(Indx.O, [DL1st{i}; DL2nd{i}]);
+        nonDL{i} = setdiff(Indx.O, [DL1st{i}; DL2nd{i}; DL3rd{i}; DL4th{i}]);
         
         XYZ_snap = zeros(size(XYZ,2), size(XYZ,3));
         XYZ_snap(:,:) = XYZ(i,:,:);
         [~, DistOH1stWL] = GetAtomCorrelation(XYZ_snap, DL1st{i}, Indx.H, ABC);
         [~, DistOH2ndWL] = GetAtomCorrelation(XYZ_snap, DL2nd{i}, Indx.H, ABC);
+        [~, DistOH3rdWL] = GetAtomCorrelation(XYZ_snap, DL3rd{i}, Indx.H, ABC);
+        [~, DistOH4thWL] = GetAtomCorrelation(XYZ_snap, DL4th{i}, Indx.H, ABC);
         [~, DistOHnonDL] = GetAtomCorrelation(XYZ_snap, nonDL{i}, Indx.H, ABC);
         
         for j = 1:length(DL1st{i})
@@ -116,6 +132,14 @@ if strcmp(DoubleAnalType, 'MassDensity')
         
         for j = 1:length(DL2nd{i})
             DL2nd{i} = [DL2nd{i}; Indx.H(find(DistOH2ndWL(:,j)<MinimaOH(1)))];
+        end
+        
+        for j = 1:length(DL3rd{i})
+            DL3rd{i} = [DL3rd{i}; Indx.H(find(DistOH3rdWL(:,j)<MinimaOH(1)))];
+        end
+        
+        for j = 1:length(DL4th{i})
+            DL4th{i} = [DL4th{i}; Indx.H(find(DistOH4thWL(:,j)<MinimaOH(1)))];
         end
         
         for j = 1:length(nonDL{i})
@@ -128,8 +152,8 @@ elseif strcmp(DoubleAnalType, 'Radial')
     disp('Determining water layering from radial distribution...');
     
     for i = startConfig:nConfigs
-        [r1st, ~] = find(DistPtO{i} <= MinimaPtO(1));
-        DL1st{i} = Indx.O(unique(r1st));
+        [r1st{i}, ~] = find(DistPtO{i} <= MinimaPtO(1));
+        DL1st{i} = Indx.O(unique(r1st{i}));
         [r2nd, ~] = find(DistPtO{i} <= MinimaPtO(2) & DistPtO{i} > MinimaPtO(1));
         DL2nd{i} = Indx.O(unique(r2nd));
         nonDL{i} = setdiff(Indx.O, [DL1st{i}; DL2nd{i}]);
@@ -168,12 +192,16 @@ for i = 1:length(StepNum)
         Inter = find(StepNum(i) == StepNum_Traj);
         DL1st_sum(i) = sum(Qnet(DL1st{Inter},i));
         DL2nd_sum(i) = sum(Qnet(DL2nd{Inter},i));
+%         DL3rd_sum(i) = sum(Qnet(DL3rd{Inter},i));
+%         DL4th_sum(i) = sum(Qnet(DL4th{Inter},i));
         XYZ_snap = zeros(size(XYZ,2), size(XYZ,3));
         XYZ_snap(:,:) = XYZ(Inter,:,:);
         writeSnaptoxyz(BaseFldr, system, StepNum(i), XYZ_snap, Atoms, [DL1st{Inter}; Indx.PtAll] , DoubleAnalType)
     else % redundant?
         DL1st_sum(i) = 0;
         DL2nd_sum(i) = 0;
+%         DL3rd_sum(i) = 0;
+%         DL4th_sum(i) = 0;
     end
     
     for j = 1:length(AtomList)
@@ -189,6 +217,8 @@ MeanCharge = MeanCharge(:,sortIdx);
 StdCharge = StdCharge(:,sortIdx);
 DL1st_sum = DL1st_sum(sortIdx);
 DL2nd_sum = DL2nd_sum(sortIdx);
+% DL3rd_sum = DL3rd_sum(sortIdx);
+% DL4th_sum = DL4th_sum(sortIdx);
 
 % Bader charge and charge density on half-electrode w/out DL
 figure
@@ -221,6 +251,7 @@ set(gca, 'colororder', [0 0 0]);
 xlabel('Time (ps)');
 yyaxis left
 plot(StepNum(DL1st_sum~=0)/2000, HalfElectro(DL1st_sum~=0)+(DL1st_sum(DL1st_sum~=0)/2)+(DL2nd_sum(DL1st_sum~=0)/2), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'r');
+% plot(StepNum(DL1st_sum~=0)/2000, HalfElectro(DL1st_sum~=0)+(DL1st_sum(DL1st_sum~=0)/2)+(DL2nd_sum(DL1st_sum~=0)/2)+(DL3rd_sum(DL1st_sum~=0)/2)+(DL4th_sum(DL1st_sum~=0)/2), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'r');
 Lyax = gca;
 etoC = ((1.60218e-19)*(1e6))/(2*ABC(1)*ABC(2)*(1e-8)*(1e-8));
 Lyaxt = get(Lyax, 'YTick');
@@ -228,6 +259,7 @@ LyaxDegC = round(10*Lyaxt*etoC)/10;
 ylabel('Total Charge (e)');
 yyaxis right
 plot(StepNum(DL1st_sum~=0)/2000, HalfElectro(DL1st_sum~=0)+(DL1st_sum(DL1st_sum~=0)/2)+(DL2nd_sum(DL1st_sum~=0)/2), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'r');
+% plot(StepNum(DL1st_sum~=0)/2000, HalfElectro(DL1st_sum~=0)+(DL1st_sum(DL1st_sum~=0)/2)+(DL2nd_sum(DL1st_sum~=0)/2)+(DL3rd_sum(DL1st_sum~=0)/2)+(DL4th_sum(DL1st_sum~=0)/2), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'r');
 Ryax = gca;
 set(Ryax, 'YTick',Lyaxt, 'YTickLabel', LyaxDegC);
 ylabel('Charge Density (\muC\cdotcm^{-2})');
@@ -382,7 +414,7 @@ end
 
 % XYZ_ave(:,:) = mean(XYZ, 1);
 
-MeanQnet = mean(Qnet(PtNums,1:end),2);
+MeanQnet = mean(Qnet(PtNums,end-6:end),2);
 Bader3DCharge(XYZ_snap(PtNums,:), ABC, MeanQnet);
 % XYZ_snap = zeros(size(XYZ,2), size(XYZ,3));
 % XYZ_snap(:,:) = XYZ(1,:,:);
