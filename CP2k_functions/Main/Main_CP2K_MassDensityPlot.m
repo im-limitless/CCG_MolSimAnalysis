@@ -4,7 +4,11 @@ close all; clc;
 %% Set the location of the calculation output
 BaseFldr = 'G:\Imperial\MattProjects\Edges\PostEquilibration\Pit\HF\';
 system = 'CP_Pit_Water';
-Trajectory = 'CP_Pit_Water_41000to63000_500step.xyz';
+Trajectory = 'CP_Pit_Water_57500to63000_500step.xyz';
+
+% BaseFldr = '/Users/mtdarby/Dropbox/Mac/Documents/MattProjects/TempAnalysis/';
+% system = 'CP_Pit_20F';
+% Trajectory = 'CP_Pit_20F_43000to73000_500step.xyz';
 
 % BaseFldr = 'G:\Imperial\MattProjects\Pt_Clean\CP_Like\';
 % system = 'CP_Like_1012_Fluoride';
@@ -16,20 +20,20 @@ Trajectory = 'CP_Pit_Water_41000to63000_500step.xyz';
 
 ABC = getABCvectors(BaseFldr, system);
 % [xyz, XYZ, Indx, ~, ~, nAtoms, startConfig, nConfigs, StepNum] = ReadAndParsexyz(BaseFldr, system, Trajectory, ABC, [pi/2; 1; 1]);
-% [xyz, XYZ, Indx, Atoms, AtomList, nAtoms, startConfig, nConfigs, StepNum] = ReadAndParsexyz_new(BaseFldr, system, Trajectory, ABC, [0; 0; 0]);
-[xyz, XYZ, Indx, Atoms, AtomList, nAtoms, startConfig, nConfigs, StepNum] = ReadAndParsexyz_new(BaseFldr, system, Trajectory, ABC, [pi/2; 1; 1]);
+[xyz, XYZ, Indx, Atoms, AtomList, nAtoms, startConfig, nConfigs, StepNum] = ReadAndParsexyz_new(BaseFldr, system, Trajectory, ABC, [0; 0; 0]);
+% [xyz, XYZ, Indx, Atoms, AtomList, nAtoms, startConfig, nConfigs, StepNum] = ReadAndParsexyz_new(BaseFldr, system, Trajectory, ABC, [pi/2; 1; 1]);
 
 
-%% Modify which O atoms go into mass density accoring to explicit naming in
-% input xyz. AtomIndx is the Index of atoms by name from input.xyz. Modify
-% % get the names of atoms from original xyz input file
-% [~, OIndxxyz] = ismember([AtomIndx.O; AtomIndx.OtL; AtomIndx.OtU; AtomIndx.OtS] , Indx.O);
-[~, OIndxxyz] = ismember([AtomIndx.O] , Indx.O);
-xyz.O = xyz.O(:,OIndxxyz,:);
+% % % % % %% Modify which O atoms go into mass density accoring to explicit naming in
+% % % % % % input xyz. AtomIndx is the Index of atoms by name from input.xyz. Modify
+% % % % % % % get the names of atoms from original xyz input file
+% % % % % % [~, OIndxxyz] = ismember([AtomIndx.O; AtomIndx.OtL; AtomIndx.OtU; AtomIndx.OtS] , Indx.O);
+% % % % % [~, OIndxxyz] = ismember([AtomIndx.O] , Indx.O);
+% % % % % xyz.O = xyz.O(:,OIndxxyz,:);
 %%
 
-% [Dens_O, Dens_H, TotDen, AveDen, z] = getDensityProfile(xyz, ABC);
-[Dens_O, Dens_H, TotDen, AveDen, z] = getCylindricalDensity(xyz, ABC);
+[Dens_O, Dens_H, TotDen, AveDen, z] = getDensityProfile(xyz, ABC);
+% [Dens_O, Dens_H, TotDen, AveDen, z] = getCylindricalDensity(xyz, ABC);
 % [Dens_O, Dens_H, Dens_F, TotDen, AveDen, z] = getDensityProfile(xyz, ABC);
 % [Dens_O, Dens_H, Dens_Na, Dens_Cl, TotDen, AveDen, z] = getDensityProfile(xyz, ABC);
 
@@ -61,9 +65,9 @@ set(gcf, 'position', [377         423        1123         420]);
 xlabel('z (Ang)');
 ylabel('Density (kgm^{-3})');
 set(gca, 'xlim', [0 ABC(3)], 'ylim', [0 2500]);
-plot(z, sum(TotDen,2)/(nConfigs-startConfig+1), 'linewidth', 1.5, 'color', 'k')
-plot(z, sum(Dens_H,2)/(nConfigs-startConfig+1), 'linewidth', 1.5, 'color', 'b')
-plot(z, sum(Dens_O,2)/(nConfigs-startConfig+1), 'linewidth', 1.5, 'color', 'r')
+plot(z, smooth(sum(TotDen,2)/(nConfigs-startConfig+1),3), 'linewidth', 1.5, 'color', 'k')
+plot(z, smooth(sum(Dens_H,2)/(nConfigs-startConfig+1),3), 'linewidth', 1.5, 'color', 'b')
+plot(z, smooth(sum(Dens_O,2)/(nConfigs-startConfig+1),3), 'linewidth', 1.5, 'color', 'r')
 % plot(z, sum(Dens_F,2)/(nConfigs-startConfig+1), 'linewidth', 1.5, 'color', [34 177 76]/255)
 % plot(z, smooth(sum(Dens_Na,2)/(nConfigs-startConfig+1)), 'linewidth', 1.5, 'color', [128 0 128]/255)
 % plot(z, smooth(sum(Dens_Cl,2)/(nConfigs-startConfig+1)), 'linewidth', 1.5, 'color', [34 177 76]/255)
@@ -87,5 +91,5 @@ hold off
 %     mkdir([BaseFldr 'MassDensityProfiles']);
 % end
 % 
-% saveas(gcf, [BaseFldr 'MassDensityProfiles\' system '.jpg']);
+% saveas(gcf, [BaseFldr 'MassDensityProfiles' PathSep system '.jpg']);
 

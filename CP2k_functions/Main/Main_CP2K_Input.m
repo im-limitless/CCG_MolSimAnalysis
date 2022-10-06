@@ -4,10 +4,10 @@ newlinechar = char(10);
 
 % % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Read Materials Studio file
-BaseInFldr = 'E:\Materials Studio Projects\TempProject Files\Documents\Flat\Adjusted\'; % Add the path to the folder where xsd files are (end in "\")
-BaseOutFldr = 'G:\Imperial\ScriptTestingSuite\'; % Add the path where the output folders will be written
+BaseInFldr = 'E:\Materials Studio Projects\TempProject Files\Documents\'; % Add the path to the folder where xsd files are (end in "\")
+BaseOutFldr = 'G:\Imperial\NaIon\hard_carbon\pore\pristine\sodium\'; % Add the path where the output folders will be written
 
-FileList = dir([BaseInFldr '*_*.xsd']); % set the name of the xsd files using "*" wildcard; "*_*.xsd" reads any file within BaseInFldr with and underscore and .xsd file type. Any number of files can be read in one go.
+FileList = dir([BaseInFldr '*.xsd']); % set the name of the xsd files using "*" wildcard; "*_*.xsd" reads any file within BaseInFldr with and underscore and .xsd file type. Any number of files can be read in one go.
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%% Choose a Machine %%%%%

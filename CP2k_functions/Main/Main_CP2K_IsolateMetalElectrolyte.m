@@ -3,7 +3,7 @@ clear all; close all; clc;
 % script to find coordinates from restart file and make metal only +
 % eletrolyte only inputs for Electrostatic Potentials
 
-BaseFldr = 'G:\Imperial\MattProjects\Edges\PostEquilibration\Pit\HF\CP_Pit_18H22F\';
+BaseFldr = 'G:\Imperial\MattProjects\Edges\PostEquilibration\Pit\HF\CP_Pit_Water\';
 % BaseFldr = 'G:\Imperial\MattProjects\Pt_Clean\CorrectVolume\Pt_12H10F\';
 
 Restarts = dir([BaseFldr '*-1_*.restart']);
@@ -46,7 +46,7 @@ for i = 1:length(Restarts)
         
         mkdir([OutFldr MetalOut]);
         InputFromRestart(OutFldr, MetalOut, IndxPt, IndxCell, lines);
-        CreateSubmissionFile('LRZ', OutFldr, MetalOut, 1800, 768, 24, 'No');
+        CreateSubmissionFile('ARCHER', OutFldr, MetalOut, 1, 128, 128, 'No');
         copyfile('G:\Imperial\CP2k_files\GTH_POTENTIALS', [OutFldr MetalOut '\GTH_POTENTIALS']);
         copyfile('G:\Imperial\CP2k_files\GTH_BASIS_SETS', [OutFldr MetalOut '\GTH_BASIS_SETS']);
         copyfile('G:\Imperial\CP2k_files\dftd3.dat', [OutFldr MetalOut '\dftd3.dat']);
@@ -58,7 +58,7 @@ for i = 1:length(Restarts)
     else
         mkdir([OutFldr ElectrolyteOut]);
         InputFromRestart(OutFldr, ElectrolyteOut, IndxElectrolyte, IndxCell, lines);
-        CreateSubmissionFile('LRZ', OutFldr, ElectrolyteOut, 1800, 768, 24, 'No');
+        CreateSubmissionFile('ARCHER', OutFldr, ElectrolyteOut, 1, 128, 128, 'No');
         copyfile('G:\Imperial\CP2k_files\GTH_POTENTIALS', [OutFldr ElectrolyteOut '\GTH_POTENTIALS']);
         copyfile('G:\Imperial\CP2k_files\GTH_BASIS_SETS', [OutFldr ElectrolyteOut '\GTH_BASIS_SETS']);
         copyfile('G:\Imperial\CP2k_files\dftd3.dat', [OutFldr ElectrolyteOut '\dftd3.dat']);
