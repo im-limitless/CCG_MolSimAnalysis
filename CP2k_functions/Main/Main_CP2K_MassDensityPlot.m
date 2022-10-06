@@ -1,10 +1,12 @@
 clear all; 
 close all; clc;
 
+PathSep =  setOSpathSep;
+
 %% Set the location of the calculation output
-BaseFldr = 'G:\Imperial\MattProjects\Edges\PostEquilibration\Pit\HF\';
-system = 'CP_Pit_Water';
-Trajectory = 'CP_Pit_Water_57500to63000_500step.xyz';
+BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge/5lyr_systems/Al_AlO_OH/AlO_OH/';
+system = 'AlO_1ML_OH';
+Trajectory = 'AlO_1ML_OH_0to14000_1000step.xyz';
 
 % BaseFldr = '/Users/mtdarby/Dropbox/Mac/Documents/MattProjects/TempAnalysis/';
 % system = 'CP_Pit_20F';
@@ -85,11 +87,11 @@ legend('Water', 'H', 'O', 'Ave. Bulk Density', 'location', 'northeast');
 hold off
 
 %% uncomment to save a jpg of the mass density
-% if exist([BaseFldr 'MassDensityProfiles'],'dir')
-%     warning('Directory already exists!');
-% else
-%     mkdir([BaseFldr 'MassDensityProfiles']);
-% end
-% 
-% saveas(gcf, [BaseFldr 'MassDensityProfiles' PathSep system '.jpg']);
+if exist([BaseFldr 'MassDensityProfiles'],'dir')
+    warning('Directory already exists!');
+else
+    mkdir([BaseFldr 'MassDensityProfiles']);
+end
+
+saveas(gcf, [BaseFldr 'MassDensityProfiles' PathSep system '.jpg']);
 

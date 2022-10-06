@@ -1,14 +1,14 @@
 clear all;  clc;
 close all;
 
-BaseFldr = 'G:\Imperial\MattProjects\Edges\PostEquilibration\Pit\HF\';
-system = 'CP_Pit_Water';
-Trajectory = 'CP_Pit_Water_41000to63000_500step.xyz';
+BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/EleventhTimeLucky_Plus2/Al_AlO/';
+system = 'Al_water';
+Trajectory = 'Al_water_20900to44800_100step.xyz';
 % BaseFldr = 'G:\Imperial\MRes\Jad\';
 % system = 'Au_Junc';
 % Trajectory = 'Au_Junc.xyz';
 
-fldrname = [BaseFldr system '\Bader\'];
+fldrname = [BaseFldr system '/Bader_Analysis/'];
 ACFfiles = dir([fldrname 'ACF_*.dat']);
 
 
@@ -19,7 +19,7 @@ ABC = getABCvectors(BaseFldr, system);
 [Atoms, AtomList, Indx, Indxfns, Kinds, Elements, PP] = getAtomInfoFromInput(BaseFldr, system);
 
 % % find the indices of atoms containing myAtoms
-myAtoms = {'Pt'};
+myAtoms = {'Al'};
 % myAtoms = {'all'};
 [Indx, myAtomList, myAtomNums, myAtomCore] = detectAtomsOfType(myAtoms, AtomList, Indx, Indxfns, Kinds, Elements, PP);
 

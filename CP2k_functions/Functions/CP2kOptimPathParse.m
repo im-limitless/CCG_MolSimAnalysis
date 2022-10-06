@@ -1,5 +1,7 @@
 function CP2kOptimPathParse(basefldr,directory, flname)
 
+PathSep =  setOSpathSep;
+
 % Matt Darby. 21-12-2020. Imperial College London.
 % Function that parses a CP2K .xyz file output from basefldr
 % Version 3.0
@@ -20,12 +22,12 @@ ABC = getABCvectors(basefldr, directory);
 Vec = diag(ABC);
 
 if ~isempty(length(basefldr))
-    if ~strcmp(basefldr(end),'\')
-        basefldr = [basefldr '\'];
+    if ~strcmp(basefldr(end),PathSep)
+        basefldr = [basefldr PathSep];
     end
 end
 
-fidxdatcar = fopen([basefldr directory '\' flname]);
+fidxdatcar = fopen([basefldr directory PathSep flname]);
 
 eofstat = false;
 
@@ -87,8 +89,8 @@ if contains(flname, '.xyz')
     flname = erase(flname, '.xyz');
 end
 
-XTDFileName = [basefldr directory '\' flname '.xtd'];
-XSDFileName = [basefldr directory '\' flname '.xsd'];
+XTDFileName = [basefldr directory PathSep flname '.xtd'];
+XSDFileName = [basefldr directory PathSep flname '.xsd'];
 % XTDFileName = [basefldr directory '\Sample' num2str(startConf) '_' num2str(endConf) '.xtd'];
 XTDFileWriteCP2k(XTDFileName,n,AtomCur,AtomPosImages,Vec,5, Snapshots)
 
