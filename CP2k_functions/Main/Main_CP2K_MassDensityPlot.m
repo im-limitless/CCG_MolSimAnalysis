@@ -4,9 +4,9 @@ close all; clc;
 PathSep =  setOSpathSep;
 
 %% Set the location of the calculation output
-BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge/5lyr_systems/Al_AlO_OH/AlO_OH/';
-system = 'AlO_1ML_OH';
-Trajectory = 'AlO_1ML_OH_0to14000_1000step.xyz';
+BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge/5lyr_systems/Al_AlO/';
+system = 'AlO_water_1ML';
+Trajectory = 'AlO_water_1ML_22000to44000_1000step.xyz';
 
 % BaseFldr = '/Users/mtdarby/Dropbox/Mac/Documents/MattProjects/TempAnalysis/';
 % system = 'CP_Pit_20F';

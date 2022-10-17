@@ -70,14 +70,13 @@ DistOH = cell(1,nConfigs);
 % DistFH = cell(1,nConfigs);
 % DistFO = cell(1,nConfigs);
 DistAlO = cell(1,nConfigs);
-% DistAlO11 = cell(1,nConfigs);
-% DistAlO12 = cell(1,nConfigs);
+
 
 for snap = startConfig:nConfigs
     XYZ_snap = zeros(size(XYZ,2), size(XYZ,3));
     XYZ_snap(:,:) = XYZ(snap,:,:);
     
-    [VecAlO, DistAlO{snap}] = GetAtomCorrelation(XYZ_snap, [Indx.Al11], Indx.O, ABC);
+    [VecAlO, DistAlO{snap}] = GetAtomCorrelation(XYZ_snap, [Indx.Al1], Indx.O, ABC);
 %     [VecAlO11, DistAlO11{snap}] = GetAtomCorrelation(XYZ_snap, [Indx.Al11], Indx.O, ABC);
 %     [VecAlO12, DistAlO12{snap}] = GetAtomCorrelation(XYZ_snap, [Indx.Al12], Indx.O, ABC);
     [VecOH, DistOH] = GetAtomCorrelation(XYZ_snap, Indx.O, Indx.H, ABC);
@@ -88,16 +87,14 @@ for snap = startConfig:nConfigs
 % %     RadFunFH{snap} = reshape(DistFH, [numel(DistFH), 1]);
 % %     RadFunFO{snap} = reshape(DistFO, [numel(DistFO), 1]);
     RadFunAlO{snap} = reshape(DistAlO{snap}, [numel(DistAlO{snap}), 1]);
-%     RadFunAlO11{snap} = reshape(DistAlO11{snap}, [numel(DistAlO11{snap}), 1]);
-%     RadFunAlO12{snap} = reshape(DistAlO11{snap}, [numel(DistAlO12{snap}), 1]);
+
 end
 
 MinimaOH = RadialDistribution(RadFunOH, ABC, ['O'; 'H'], 1);
 % % MinimaFH = RadialDistribution(RadFunFH, ABC, ['F'; 'H'], 0);
 % % MinimaFO = RadialDistribution(RadFunFO, ABC, ['F'; 'O'], 0);
-MinimaAlO = RadialDistribution(RadFunAlO, ABC, ['Al1'; 'O '], 1);
-% MinimaAlO11 = RadialDistribution(RadFunAlO11, ABC, ['Al11'; 'O '], 1);
-% MinimaAlO12 = RadialDistribution(RadFunAlO11, ABC, ['Al12'; 'O '], 1);
+MinimaAlO = RadialDistribution(RadFunAlO, ABC, ['Al'; 'O '], 1);
+
 
 if strcmp(DoubleAnalType, 'MassDensity')
     
@@ -383,115 +380,7 @@ for i = 1:length(AtomList)
         hold off
     end
 end
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Total charge per Al type
-figure
-box on
-hold on
-xlabel('Time (ps)');
-ylabel('Total Charge (e)');
-% title(['Total Bader charge for Al Atoms in ' system], 'interpreter', 'none')
-C = [218/255 165/255 32/255; 218/255 165/255 32/255; 0 0.5 0; 0 0 1; 1 0 0; 1 0 0];
-AlC = [];
-for i = 1:length(AlList)
-    if contains(AtomList(AlList(i), :), 'Al11') 
-        AlC = C(1,:);
-    elseif contains(AtomList(AlList(i), :), 'Al12') 
-        AlC = C(2,:);
-    elseif contains(AtomList(AlList(i), :), 'Alb')
-        AlC = C(3,:);
-    elseif contains(AtomList(AlList(i), :), 'Als') & ~contains(AtomList(AlList(i), :), 'Alss')
-        AlC = C(4,:);
-    elseif contains(AtomList(AlList(i), :), 'Al21') 
-        AlC = C(5,:);
-    elseif contains(AtomList(AlList(i), :), 'Al22') 
-        AlC = C(6,:);
-    end
-    plot(StepNum/2000, SumCharge(AlList(i),:)/2, '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', AlC);
-end
-if length(AlList) == 2
-    legend(AtomList(AlList(1),:), AtomList(AlList(2),:), 'interpreter', 'tex')
-elseif length(AlList) == 3
-    legend(AtomList(AlList(1),:), AtomList(AlList(2),:), AtomList(AlList(3),:), 'interpreter', 'tex')
-end
 
-for i = 1:length(AlList)
-    if contains(AtomList(AlList(i), :), 'Al1')
-        AlC = C(1,:);
-    elseif contains(AtomList(AlList(i), :), 'Alb')
-        AlC = C(2,:);
-    elseif contains(AtomList(AlList(i), :), 'Als') & ~contains(AtomList(AlList(i), :), 'Alss')
-        AlC = C(3,:);
-    elseif contains(AtomList(AlList(i), :), 'Al2')
-        AlC = C(4,:);
-    end
-    plot(StepNum/2000, mean(SumCharge(AlList(i),:)/2), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', AlC);
-end
-if length(AlList) == 2
-    legend(AtomList(AlList(1),:), AtomList(AlList(2),:), 'interpreter', 'tex')
-elseif length(AlList) == 3
-    legend(AtomList(AlList(1),:), AtomList(AlList(2),:), AtomList(AlList(3),:), 'interpreter', 'tex')
-end
-hold off
-
-% mean charge per Al type
-figure
-box on
-hold on
-xlabel('Time (ps)');
-ylabel('Ave. Charge per Atom (e)');
-% title(['Total Bader charge for Pt Atoms in ' system], 'interpreter', 'none')
-AlC = [];
-for i = 1:length(AlList)
-    if contains(AtomList(AlList(i), :), 'Al1')
-        AlC = C(1,:);
-    elseif contains(AtomList(AlList(i), :), 'Alb')
-        AlC = C(2,:);
-    elseif contains(AtomList(AlList(i), :), 'Al2') & ~contains(AtomList(AlList(i), :), 'Alss')
-        AlC = C(3,:);
-    elseif contains(AtomList(AlList(i), :), 'Alss')
-        AlC = C(4,:);
-    end
-    errorbar(StepNum/2000, MeanCharge(AlList(i),:), StdCharge(AlList(i),:), '-o', 'color', AlC, 'markeredgecolor', 'k', 'markerfacecolor', AlC);
-end
-if length(AlList) == 2
-    legend(AtomList(AlList(1),:), AtomList(AlList(2),:), 'interpreter', 'tex')
-elseif length(AlList) == 3
-    legend(AtomList(AlList(1),:), AtomList(AlList(2),:), AtomList(AlList(3),:), 'interpreter', 'tex')
-end
-hold off
-
-figure
-box on
-hold on
-xlabel('Time (ps)');
-ylabel('Total Charge (e)');
-title(['Total Bader charge for all electrolyte species in ' system], 'interpreter', 'none')
-C = [1 0 0; 0 0.5 0; 0 0 1; 218/255 165/255 32/255;219/255 166/255 34/255];
-IonList = 1:length(AtomList);
-IonList(AlList) = [];
-IonSumCharge = sum(SumCharge(IonList,:));
-plot(StepNum/2000, IonSumCharge, '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'm');
-legend('Total Electrolyte', 'interpreter', 'tex')
-hold off
-
-for i = 1:length(AtomList)
-    if ~ismember(i, AlList)
-        figure
-        box on
-        hold on
-        h1 = plot(StepNum/2000, SumCharge(i,:), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', C(i,:));
-        h2 = plot([StepNum(1)/2000 StepNum(end)/2000], [mean(SumCharge(i,2:end)) mean(SumCharge(i,2:end))], '--', 'color', [0.7 0.7 0.7]);
-        AveStr = ['Traj. Ave. = ' num2str(mean(SumCharge(i,2:end)), '%.2f') '\pm'  num2str(std(SumCharge(i,2:end)), '%.2f')];
-        legend(AtomList(i,:), AveStr, 'interpreter', 'tex')
-        xlabel('Time (ps)');
-        ylabel('Total Charge (e)');
-        title(['Total Bader charge for ' AtomList(i,:) ' in ' system], 'interpreter', 'none')
-        uistack(h1, 'top');
-        hold off
-    end
-end
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Everything up is working fine %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%% The part below is for the potential drop which requires the

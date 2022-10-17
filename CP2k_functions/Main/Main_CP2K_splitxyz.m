@@ -7,9 +7,9 @@ PathSep =  setOSpathSep;
 % format for materials studio
 
 % Set the location of the calculation output
-BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge/5lyr_systems/Al_AlO_OH/AlO_OH/'; % Base directory containing calculation directory ("\" included at end)
-system = 'AlO_1ML_OH'; % Name of calculation directory (no "\")
-Trajectory = 'AlO_1ML_OH-pos-1.xyz';
+BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge/5lyr_systems/Al_AlO/'; % Base directory containing calculation directory ("\" included at end)
+system = 'AlO_water_1ML'; % Name of calculation directory (no "\")
+Trajectory = 'AlO_water_1ML-pos-1.xyz';
 
 nSampleSteps = 1000; % sampling in units of number of steps
 InitalStepOverride = []; % Use to set initial step manually. Set to [] to use entire trajectory
