@@ -26,11 +26,11 @@ AtomIndxfns = fieldnames(AtomIndx);
 
 % now read the input or restart file to find the elements
 
-
-if exist([BaseFldr system PathSep system '-1.restart'], 'file')
-    fid  = fopen([BaseFldr system PathSep system '-1.restart']);
-elseif exist([BaseFldr system PathSep system '.inp'], 'file')
+%swap -1.restart and .inp
+if exist([BaseFldr system PathSep system '.inp'], 'file')
     fid  = fopen([BaseFldr system PathSep system '.inp']);
+elseif exist([BaseFldr system PathSep system '-1.restart'], 'file')
+    fid  = fopen([BaseFldr system PathSep system '-1.restart']);
 else
     warning('No ".inp" or "-1.restart" file detected, terminating...');
     return

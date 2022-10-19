@@ -3,7 +3,7 @@
 function [Dens_O, Dens_H, TotDen, AveDen, z] = getDensityProfile(xyz, ABC)
 
 zmax = ABC(3);
-bins = 110;
+bins = 200;
 zRange = linspace(0, zmax, bins);
 for i = 1:length(zRange)-1
     countO(i,:) = sum(xyz.O(:,:,3) < zRange(i+1) & xyz.O(:,:,3) > zRange(i) ,2); 

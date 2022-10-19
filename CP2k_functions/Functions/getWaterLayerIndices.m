@@ -1,7 +1,7 @@
 function [FirstLayerIndx, SecondLayerIndx, ThirdLayerIndx, FourthLayerIndx, MinimaZ] = getWaterLayerIndices(Indx, XYZ, Dens_O, z)
 
 Minima = LocateStationaryPoints(mean(Dens_O,2));
-Minima = {[35 46 153 164]} ;disp('Using hard-coded WL override');
+% Minima = {[35 46 153 164]} ;disp('Using hard-coded WL override');
 
 MinimaZ = z(Minima{:});
 
