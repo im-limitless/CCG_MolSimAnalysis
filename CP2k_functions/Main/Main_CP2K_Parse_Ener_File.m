@@ -5,11 +5,12 @@ close all;
 PathSep =  setOSpathSep;
 
 % Set the location of the calculation output
-BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge/5lyr_systems/Al_AlO/'; % Base directory containing calculation directory ("\" included at end)
-system = 'AlO_water_1ML'; % Name of calculation directory (no "\")
+BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge/5lyr_systems/Al_AlO/Al_water/Fix_volume/BOMD/Temperature_fix/'; % Base directory containing calculation directory ("\" included at end)
+system = 'Al_water'; % Name of calculation directory (no "\")
 
 % Set the number of steps before the end that are used to compute averages
-SampleRange = 6000;
+SampleRange = 1000;
+% SampleRange = 6000;
 % SampleRange = 10000;
 
 % Choose whether to plot an inset

@@ -3,9 +3,9 @@ close all;
 
 %%%%%%%%%%%%%% Data collections %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/EleventhTimeLucky_Plus2/Al_AlO/';
+BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge/5lyr_systems/Al_AlO/';
 system = 'Al_water';
-Trajectory = 'Al_water_20900to44800_100step.xyz';
+Trajectory = 'Al_water_21000to80000_1000step.xyz';
 
 
 fldrname = [BaseFldr system '/Bader_Analysis/'];
@@ -407,13 +407,12 @@ set(gca, 'colororder', [0 0 0]);
 xlabel('Time (ps)');
 plot(StepNum(DL1st_sum~=0)/2000, (DL1st_sum(DL1st_sum~=0)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'r');
 plot([StepNum(1)/2000 StepNum(end)/2000], [mean(DL1st_sum) mean(DL1st_sum)], '--', 'color', 'r');
-% ylabel('Total Charge (e)');
-% legend('1st Water Layer')
-plot(StepNum/2000, totalAlsCharge, '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'b');
-plot([StepNum(1)/2000 StepNum(end)/2000], [mean(DL2nd_sum) mean(DL2nd_sum)], '--', 'color', 'b');
+
+plot(StepNum/2000, totalAlsCharge, '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'c');
+plot([StepNum(1)/2000 StepNum(end)/2000], [mean(totalAlsCharge) mean(totalAlsCharge)], '--', 'color', 'c');
 ylabel('Total Charge (e)');
-% legend('2nd Water Layer')
-legend('1st Water Layer', '<1st Water Layer>', '2nd Water Layer', '<2nd Water Layer>', 'interpreter', 'tex')
+
+legend('1st Water Layer', '<1st Water Layer>', 'Al Layers', '<Al Layers>', 'interpreter', 'tex')
 hold off
 
 
@@ -433,11 +432,11 @@ plot([StepNum(1)/2000 StepNum(end)/2000], [mean(DL1st_sum) mean(DL1st_sum)], '--
 plot(StepNum(DL2nd_sum~=0)/2000, (DL2nd_sum(DL2nd_sum~=0)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'b');
 plot([StepNum(1)/2000 StepNum(end)/2000], [mean(DL2nd_sum) mean(DL2nd_sum)], '--', 'color', 'b');
 
-plot(StepNum(nonDL_sum~=0)/2000, (nonDL_sum(nonDL_sum~=0)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'g');
-plot([StepNum(1)/2000 StepNum(end)/2000], [mean(nonDL_sum) mean(nonDL_sum)], '--', 'color', 'g');
+plot(StepNum/2000, totalAlsCharge, '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'c');
+plot([StepNum(1)/2000 StepNum(end)/2000], [mean(totalAlsCharge) mean(totalAlsCharge)], '--', 'color', 'c');
 ylabel('Total Charge (e)');
 
-legend('1st Water Layer', '<1st Water Layer>', '2nd Water Layer', '<2nd Water Layer>', 'Bulk Water', '<Bulk Water>', 'interpreter', 'tex')
+legend('1st Water Layer', '<1st Water Layer>', '2nd Water Layer', '<2nd Water Layer>', 'Al Layers', '<Al Layers>', 'interpreter', 'tex')
 hold off
 
 
@@ -505,3 +504,16 @@ end
 % end
 
 hold off
+
+%%%%%%%%%%%%%% Heat map(s) %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%Precondition(s)
+% <XY coords/all snapshots> --> xyz(nStep, atom, coord) , Bader charge for atoms
+% of interest--> <Qnet (atom, nSnap)>
+
+%Output: Heat map for atoms of interest per all snapshots
+
+Al11_xy_tbl= randi(Indx.Al11,n);
+
+

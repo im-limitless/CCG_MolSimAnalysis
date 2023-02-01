@@ -1,9 +1,9 @@
 clear all;
 close all;
 
-BaseFldr = 'D:\';
-system = 'CP_Pit_20F';
-Trajectory = 'CP_Pit_20F_43000to73000_500step.xyz';
+BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge/5lyr_systems/Al_AlO/';
+system = 'AlO_water_1ML';
+Trajectory = 'AlO_water_1ML_14100to19000_100step.xyz';
 
 % % get the names of atoms from original xyz input file
 [~, ~, AtomIndx, ~, ~, ~, ~] = getAtomInfoFromInput(BaseFldr, system);
@@ -40,20 +40,20 @@ for snap = startConfig:nConfigs
     
 %     [VecOH, DistOH] = GetAtomCorrelation(XYZ_snap, AtomIndx.O, AtomIndx.H, ABC);
 %     [VecOH, DistOH] = GetAtomCorrelation(XYZ_snap, [AtomIndx.O; AtomIndx.OtU; AtomIndx.OtL], AtomIndx.H, ABC);
-    [VecFH, DistFH] = GetAtomCorrelation(XYZ_snap, Indx.F, Indx.H, ABC);
+%     [VecFH, DistFH] = GetAtomCorrelation(XYZ_snap, Indx.F, Indx.H, ABC);
 %     [VecFO, DistFO] = GetAtomCorrelation(XYZ_snap, Indx.F, Indx.O, ABC);
 %     [VecHH, DistHH] = GetAtomCorrelation(XYZ_snap, Indx.H, Indx.H, ABC);
-%     [VecOO, DistOO] = GetAtomCorrelation(XYZ_snap, AtomIndx.O, AtomIndx.O, ABC);
+    [VecOO, DistOO] = GetAtomCorrelation(XYZ_snap, AtomIndx.Al1, AtomIndx.Al1, ABC);
 %     [VecPtO, DistPtO] = GetAtomCorrelation(XYZ_snap, AtomIndx.Pts, Indx.O, ABC);
 
 % [VecPt, DistPt] = GetAtomCorrelation(XYZ_snap, AtomIndx.Pts, [AtomIndx.Pts; AtomIndx.Ptss], ABC);
 %     RadFunOH{snap} = reshape(DistPt, [numel(DistPt), 1]);
 %     
 %     RadFunOH{snap} = reshape(DistOH, [numel(DistOH), 1]);
-    RadFunFH{snap} = reshape(DistFH, [numel(DistFH), 1]);
+%     RadFunFH{snap} = reshape(DistFH, [numel(DistFH), 1]);
 %     RadFunFO{snap} = reshape(DistFO, [numel(DistFO), 1]);
 %     RadFunHH{snap} = reshape(DistHH, [numel(DistHH), 1]);
-%     RadFunOO{snap} = reshape(DistOO, [numel(DistOO), 1]);
+    RadFunOO{snap} = reshape(DistOO, [numel(DistOO), 1]);
 %     RadFunPtO{snap} = reshape(DistPtO{snap}, [numel(DistPtO{snap}), 1]);
     
 % [VecPtSO, DistPtSO] = GetAtomCorrelation(XYZ_snap, AtomIndx.Pts, Indx.O, ABC);
@@ -65,10 +65,10 @@ for snap = startConfig:nConfigs
 end
 
 % RadialDistribution(RadFunOH, ABC, ['O'; 'H'], 1);
-RadialDistribution(RadFunFH, ABC, ['H'; 'F'], 1);
+% RadialDistribution(RadFunFH, ABC, ['H'; 'F'], 1);
 % RadialDistribution(RadFunFO, ABC, ['O'; 'F'], 1);
 % RadialDistribution(RadFunHH, ABC, ['H'; 'H'], 1);
-% RadialDistribution(RadFunOO, ABC, ['O'; 'O'], 1);
+RadialDistribution(RadFunOO, ABC, ['O'; 'O'], 1);
 % MinimaPtSO = RadialDistribution(RadFunPtSO, ABC, ['Pts'; 'O  '],1);
 % [r1stflat, ~] = find(DistPtSO <= MinimaPtSO(1));
 % 

@@ -3,9 +3,9 @@ close all;
 
 %%%%%%%%%%%%%% Data collections %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/EleventhTimeLucky_Plus2/Al_AlO/';
+BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge/5lyr_systems/Al_AlO/';
 system = 'Al_water';
-Trajectory = 'Al_water_20900to44800_100step.xyz';
+Trajectory = 'final.xyz';
 
 
 fldrname = [BaseFldr system '/Bader_Analysis/'];
@@ -62,8 +62,9 @@ DistAlO = cell(1,nConfigs);
 for snap = startConfig:nConfigs
     XYZ_snap = zeros(size(XYZ,2), size(XYZ,3));
     XYZ_snap(:,:) = XYZ(snap,:,:);
-    
-    [VecAlO, DistAlO{snap}] = GetAtomCorrelation(XYZ_snap, [Indx.Al11], Indx.O, ABC);
+
+    [VecAlO, DistAlO{snap}] = GetAtomCorrelation(XYZ_snap, [Indx.Al1], Indx.O, ABC);
+%     [VecAlO, DistAlO{snap}] = GetAtomCorrelation(XYZ_snap, [Indx.Al11], Indx.O, ABC);
 %     [VecAlO11, DistAlO11{snap}] = GetAtomCorrelation(XYZ_snap, [Indx.Al11], Indx.O, ABC);
 %     [VecAlO12, DistAlO12{snap}] = GetAtomCorrelation(XYZ_snap, [Indx.Al12], Indx.O, ABC);
     [VecOH, DistOH] = GetAtomCorrelation(XYZ_snap, Indx.O, Indx.H, ABC);
@@ -504,3 +505,16 @@ end
 % end
 
 hold off
+
+%%%%%%%%%%%%%% Heat map(s) %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%Precondition(s)
+% <XY coords/all snapshots> --> xyz(nStep, atom, coord) , Bader charge for atoms
+% of interest--> <Qnet (atom, nSnap)>
+
+%Output: Heat map for atoms of interest per all snapshots
+
+Al11_xy_tbl= randi(Indx.Al11,n);
+
+

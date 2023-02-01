@@ -4,9 +4,9 @@ close all; clc;
 PathSep =  setOSpathSep;
 
 %% Set the location of the calculation output
-BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/EleventhTimeLucky_Plus2/Al_AlO/';
+BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge/5lyr_systems/Al_AlO/Al_water/Fix_volume/BOMD/Temperature_fix/';
 system = 'Al_water';
-Trajectory = 'Al_water_20900to44800_100step.xyz';
+Trajectory = 'Al_water-pos-1.xyz';
 
 % BaseFldr = '/Users/mtdarby/Dropbox/Mac/Documents/MattProjects/TempAnalysis/';
 % system = 'CP_Pit_20F';
@@ -94,4 +94,7 @@ else
 end
 
 saveas(gcf, [BaseFldr 'MassDensityProfiles' PathSep system '.jpg']);
+
+[FirstLayerIndx, SecondLayerIndx, MinimaZ] = getWaterLayerIndicesPerSnapRestrictedRev(Indx, XYZ, Dens_O, z, [100 -100])
+[FirstLayerIndx_low, SecondLayerIndx_low, MinimaZ] = getWaterLayerIndicesPerSnapRestricted(Indx, XYZ, Dens_O, z, [100 -100])
 
