@@ -38,7 +38,7 @@ end
 
 Minima = LocateStationaryPoints(smooth(g));
 % Minima = LocateStationaryPoints(g);
-RadialMinima = r(Minima{1}+1);
+RadialMinima = r(Minima(1)+1);
 
 if plotTF == 1
     figure

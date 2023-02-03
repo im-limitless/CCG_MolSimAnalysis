@@ -1,9 +1,9 @@
 clear all;
 close all;
 
-BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge/5lyr_systems/Al_AlO/';
-system = 'AlO_water_1ML';
-Trajectory = 'AlO_water_1ML_14100to19000_100step.xyz';
+BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge/5lyr_systems/Al_AlO_OH/AlO_OH/';
+system = 'AlO_1ML_OH';
+Trajectory = 'AlO_1ML_OH_0to123000_1000step.xyz';
 
 % % get the names of atoms from original xyz input file
 [~, ~, AtomIndx, ~, ~, ~, ~] = getAtomInfoFromInput(BaseFldr, system);
@@ -23,6 +23,7 @@ RadFunOO = cell(nConfigs,1);
 RadFunPtO = cell(nConfigs,1);
 RadFunPtEO = cell(nConfigs,1);
 RadFunPtSO = cell(nConfigs,1);
+RadFunAlO = cell(nConfigs,1);
 % DistPtO = cell(1,nConfigs);
 
 
@@ -38,22 +39,24 @@ for snap = startConfig:nConfigs
 % % %    [VecOO, DistOO] = GetAtomCorrelation(XYZ_snap, AtomIndx.Omid, AtomIndx.O, ABC);
 
     
-%     [VecOH, DistOH] = GetAtomCorrelation(XYZ_snap, AtomIndx.O, AtomIndx.H, ABC);
+    [VecOH, DistOH] = GetAtomCorrelation(XYZ_snap, AtomIndx.O, AtomIndx.H, ABC);
 %     [VecOH, DistOH] = GetAtomCorrelation(XYZ_snap, [AtomIndx.O; AtomIndx.OtU; AtomIndx.OtL], AtomIndx.H, ABC);
 %     [VecFH, DistFH] = GetAtomCorrelation(XYZ_snap, Indx.F, Indx.H, ABC);
 %     [VecFO, DistFO] = GetAtomCorrelation(XYZ_snap, Indx.F, Indx.O, ABC);
 %     [VecHH, DistHH] = GetAtomCorrelation(XYZ_snap, Indx.H, Indx.H, ABC);
-    [VecOO, DistOO] = GetAtomCorrelation(XYZ_snap, AtomIndx.Al1, AtomIndx.Al1, ABC);
+    [VecOO, DistOO] = GetAtomCorrelation(XYZ_snap, AtomIndx.O, AtomIndx.O, ABC);
+    [VecAlO, DistAlO] = GetAtomCorrelation(XYZ_snap, AtomIndx.Al1, AtomIndx.O, ABC);
 %     [VecPtO, DistPtO] = GetAtomCorrelation(XYZ_snap, AtomIndx.Pts, Indx.O, ABC);
 
 % [VecPt, DistPt] = GetAtomCorrelation(XYZ_snap, AtomIndx.Pts, [AtomIndx.Pts; AtomIndx.Ptss], ABC);
 %     RadFunOH{snap} = reshape(DistPt, [numel(DistPt), 1]);
 %     
-%     RadFunOH{snap} = reshape(DistOH, [numel(DistOH), 1]);
+    RadFunOH{snap} = reshape(DistOH, [numel(DistOH), 1]);
 %     RadFunFH{snap} = reshape(DistFH, [numel(DistFH), 1]);
 %     RadFunFO{snap} = reshape(DistFO, [numel(DistFO), 1]);
 %     RadFunHH{snap} = reshape(DistHH, [numel(DistHH), 1]);
     RadFunOO{snap} = reshape(DistOO, [numel(DistOO), 1]);
+    RadFunAlO{snap} = reshape(DistAlO, [numel(DistAlO), 1]);
 %     RadFunPtO{snap} = reshape(DistPtO{snap}, [numel(DistPtO{snap}), 1]);
     
 % [VecPtSO, DistPtSO] = GetAtomCorrelation(XYZ_snap, AtomIndx.Pts, Indx.O, ABC);
@@ -64,11 +67,12 @@ for snap = startConfig:nConfigs
 %         [r1all{snap}, ~] = find(DistPtEO <= MinimaPtEO(1)+0.1);
 end
 
-% RadialDistribution(RadFunOH, ABC, ['O'; 'H'], 1);
+RadialDistribution_new(RadFunOH, ABC, ['O'; 'H'], 1);
 % RadialDistribution(RadFunFH, ABC, ['H'; 'F'], 1);
 % RadialDistribution(RadFunFO, ABC, ['O'; 'F'], 1);
 % RadialDistribution(RadFunHH, ABC, ['H'; 'H'], 1);
-RadialDistribution(RadFunOO, ABC, ['O'; 'O'], 1);
+RadialDistribution_new(RadFunOO, ABC, ['O'; 'O'], 1);
+RadialDistribution_new(RadFunAlO, ABC, ['Al'; 'O '], 1);  % "Dimensions of arrays being concatenated are not consistent." Error
 % MinimaPtSO = RadialDistribution(RadFunPtSO, ABC, ['Pts'; 'O  '],1);
 % [r1stflat, ~] = find(DistPtSO <= MinimaPtSO(1));
 % 
