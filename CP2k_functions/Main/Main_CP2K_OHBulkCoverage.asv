@@ -28,27 +28,29 @@ for i = 1:nConfigs
 
     % get the distances between pairs of atoms
     [~, DistAlO] = GetAtomCorrelation(XYZ_snap, Indx.Al1, Indx.O, ABC);
-    [r,c] = find(DistAlO > 2.6); % Rashid to fix this "2" by looking at RDF minimum - r = row aka O atom number, c = column aka Al1 atom number
+    [r,c] = find(DistAlO < 2.6); % Rashid to fix this "2" by looking at RDF minimum - r = row aka O atom number, c = column aka Al1 atom number
 
     [~, DistOH] = GetAtomCorrelation(XYZ_snap, Indx.H, Indx.O(r), ABC);
+%     [~, DistOH] = GetAtomCorrelation(XYZ_snap, Indx.H, Indx.O, ABC);
     [rOH,cOH] = find(DistOH < 1.28);
     [GR, GC] = groupcounts(rOH);
     O_Coverage(i) = sum(GR(GR == 0));
     OH_Coverage(i) = sum(GR(GR == 1));
-    H2O_Coverage(i) = sum(GR(GR == 2));
+    H2O_Coverage(i) = sum(GR(GR == 2))/2;
     H3O_Coverage(i) = sum(GR(GR == 3));
 
 
 end
 
-Total_Coverage = OH_Coverage+H2O_Coverage;
+Total_Coverage = OH_Coverage+H2O_Coverage+H3O_Coverage;
 
 figure
 hold on
 plot((1:nConfigs)*0.5, OH_Coverage, '-ok', 'markerfacecolor', 'r')
 plot((1:nConfigs)*0.5, H2O_Coverage, '-ok', 'markerfacecolor', 'b')
+plot((1:nConfigs)*0.5, H3O_Coverage, '-ok', 'markerfacecolor', 'auto')
 plot((1:nConfigs)*0.5, Total_Coverage, '-ok', 'markerfacecolor', [0 0.8 0])
-legend('OH', 'Water', 'Total')
+legend('OH', 'Water','H3O', 'Total')
 xlabel('Time (ps)')
 ylabel('Number of Molecules')
 

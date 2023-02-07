@@ -27,18 +27,23 @@ for i = 1:nConfigs
     XYZ_snap(:,:) = XYZ(i,:,:);
 
     % get the distances between pairs of atoms
-%     [~, DistAlO] = GetAtomCorrelation(XYZ_snap, Indx.Al1, Indx.O, ABC);
-%     [r,c] = find(DistAlO > 2.6); % Rashid to fix this "2" by looking at RDF minimum - r = row aka O atom number, c = column aka Al1 atom number
+    [~, DistAlO] = GetAtomCorrelation(XYZ_snap, Indx.Al1, Indx.O, ABC);
+    [r,c] = find(DistAlO < 2.6); % Rashid to fix this "2" by looking at RDF minimum - r = row aka O atom number, c = column aka Al1 atom number
 
-%     [~, DistOH] = GetAtomCorrelation(XYZ_snap, Indx.H, Indx.O(r), ABC);
-    [~, DistOH] = GetAtomCorrelation(XYZ_snap, Indx.H, Indx.O, ABC);
+    [~, DistOH] = GetAtomCorrelation(XYZ_snap, Indx.H, setdiff(Indx.O,Indx.O(r)), ABC);
+%     [~, DistOH] = GetAtomCorrelation(XYZ_snap, Indx.H, Indx.O, ABC);
     [rOH,cOH] = find(DistOH < 1.28);
     [GR, GC] = groupcounts(rOH);
-    O_Coverage(i) = sum(GR(GR == 0));
-    OH_Coverage(i) = sum(GR(GR == 1));
-    H2O_Coverage(i) = sum(GR(GR == 2))/2;
-    H3O_Coverage(i) = sum(GR(GR == 3));
+    O_Coverage(i) = sum(GR == 0);
+    OH_Coverage(i) = sum(GR == 1);
+    H2O_Coverage(i) = sum(GR == 2);
 
+    [gH3O, cH3O]= groupcounts(cOH);
+    H3O_Coverage(i) = sum(GR == 3)-sum(gH3O==2); %Potential bug, we are picking up any shared H atom shared between two O atoms that might not be H3O and it might be a H shuttling between OH and H2O!
+%One idea is to loop over the shared oxygens and then identify any OH
+%molecules and if there are any then they would be excluded from the
+%subtraction somehow, i.e. we want to only remove shared O between two
+%H2O's and nothing else, those are the suspected double countings.
 
 end
 

@@ -1,9 +1,9 @@
 clear all;
 close all;
 
-BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge/5lyr_systems/Al_AlO_OH/AlO_OH/';
-system = 'AlO_1ML_OH';
-Trajectory = 'AlO_1ML_OH_0to123000_1000step.xyz';
+BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge/5lyr_systems/Al_AlO_OH/Al_OH/New-Al_OH/';
+system = 'OH_0.33ML';
+Trajectory = 'OH_0.33ML_0to68000_1000step.xyz';
 
 % % get the names of atoms from original xyz input file
 [~, ~, AtomIndx, ~, ~, ~, ~] = getAtomInfoFromInput(BaseFldr, system);
@@ -72,7 +72,7 @@ RadialDistribution_new(RadFunOH, ABC, ['O'; 'H'], 1);
 % RadialDistribution(RadFunFO, ABC, ['O'; 'F'], 1);
 % RadialDistribution(RadFunHH, ABC, ['H'; 'H'], 1);
 RadialDistribution_new(RadFunOO, ABC, ['O'; 'O'], 1);
-RadialDistribution_new(RadFunAlO, ABC, ['Al'; 'O '], 1);  % "Dimensions of arrays being concatenated are not consistent." Error
+RadialDistribution_new(RadFunAlO, ABC, ['Al'; 'O '], 1);  
 % MinimaPtSO = RadialDistribution(RadFunPtSO, ABC, ['Pts'; 'O  '],1);
 % [r1stflat, ~] = find(DistPtSO <= MinimaPtSO(1));
 % 
