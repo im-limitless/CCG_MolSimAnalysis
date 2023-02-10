@@ -4,8 +4,8 @@ PathSep = setOSpathSep;
 
 %% Home
 BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge/5lyr_systems/Al_AlO_OH/AlO_OH/';
-system = 'AlO_0.5ML_OH';
-Trajectory = 'AlO_0.33ML_OH_50000to134000_1000step.xyz';
+system = 'AlO_0.33ML_OH';
+Trajectory = 'AlO_0.33ML_OH_0to134000_1000step.xyz';
 
 % % Call function to find ABC vectors from .inp file
 ABC = getABCvectors(BaseFldr, system);
@@ -28,15 +28,15 @@ for i = 1:nConfigs
 
     % get the distances between pairs of atoms
     [~, DistAlO] = GetAtomCorrelation(XYZ_snap, Indx.Al1, Indx.O, ABC);
-    [r,c] = find(DistAlO < 2.6); % Rashid to fix this "2" by looking at RDF minimum - r = row aka O atom number, c = column aka Al1 atom number
+    [r,c] = find(DistAlO < 2.85); % Rashid to fix this "2" by looking at RDF minimum - r = row aka O atom number, c = column aka Al1 atom number
 
     [~, DistOH] = GetAtomCorrelation(XYZ_snap, Indx.H, Indx.O(r), ABC);
     [rOH,cOH] = find(DistOH < 1.28);
     [GR, GC] = groupcounts(rOH);
-    O_Coverage(i) = sum(GR(GR == 0));
-    OH_Coverage(i) = sum(GR(GR == 1));
-    H2O_Coverage(i) = sum(GR(GR == 2))/2; %divided by 2 cause this counts the H atoms where each water has 2H
-    H3O_Coverage(i) = sum(GR(GR == 3));
+    O_Coverage(i) = sum(GR == 0);
+    OH_Coverage(i) = sum(GR == 1);
+    H2O_Coverage(i) = sum(GR == 2); 
+    H3O_Coverage(i) = sum(GR == 3);
 
 
 end

@@ -4,8 +4,8 @@ PathSep = setOSpathSep;
 
 %% Home
 BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge/5lyr_systems/Al_AlO_OH/Al_OH/New-Al_OH/';
-system = 'OH_0.33ML';
-Trajectory = 'OH_0.33ML_0to68000_1000step.xyz';
+system = 'OH_0.185ML';
+Trajectory = 'OH_0.185ML_0to71000_1000step.xyz';
 
 % % Call function to find ABC vectors from .inp file
 ABC = getABCvectors(BaseFldr, system);
@@ -28,7 +28,7 @@ for i = 1:nConfigs
 
     % get the distances between pairs of atoms
     [~, DistAlO] = GetAtomCorrelation(XYZ_snap, Indx.Al1, Indx.O, ABC);
-    [r,c] = find(DistAlO < 2.6); % Rashid to fix this "2" by looking at RDF minimum - r = row aka O atom number, c = column aka Al1 atom number
+    [r,c] = find(DistAlO < 2.83); % Rashid to fix this "2" by looking at RDF minimum - r = row aka O atom number, c = column aka Al1 atom number
 
     [~, DistOH] = GetAtomCorrelation(XYZ_snap, Indx.H, setdiff(Indx.O,Indx.O(r)), ABC);
 %     [~, DistOH] = GetAtomCorrelation(XYZ_snap, Indx.H, Indx.O, ABC);
@@ -49,6 +49,7 @@ end
 
 Total_Coverage = OH_Coverage+H2O_Coverage+H3O_Coverage;
 
+%H2O,H3O,OH and total 
 figure
 hold on
 plot((1:nConfigs)*0.5, OH_Coverage, '-ok', 'markerfacecolor', 'r')
@@ -59,6 +60,18 @@ legend('OH', 'Water','H3O', 'Total')
 xlabel('Time (ps)')
 ylabel('Number of Molecules')
 
+%H3O and OH only
+figure
+hold on
+plot((1:nConfigs)*0.5, OH_Coverage, '-ok', 'markerfacecolor', 'r')
+plot((1:nConfigs)*0.5, H3O_Coverage, '-ok', 'markerfacecolor', 'auto')
+legend('OH','H3O')
+xlabel('Time (ps)')
+ylabel('Number of Molecules')
+
+
+
+%Stats
 disp(['Ave. coverage of OH = ' num2str(mean(OH_Coverage(30:end)/108), '%.2f') ' +/- ' num2str(std(OH_Coverage(30:end)/108), '%.2f') ' ML'])
 disp(['Ave. coverage of H2O = ' num2str(mean(H2O_Coverage(30:end)/108), '%.2f') ' +/- ' num2str(std(H2O_Coverage(30:end)/108), '%.2f') ' ML'])
 disp(['Ave. coverage of H3O = ' num2str(mean(H3O_Coverage(30:end)/108), '%.2f') ' +/- ' num2str(std(H3O_Coverage(30:end)/108), '%.2f') ' ML'])
