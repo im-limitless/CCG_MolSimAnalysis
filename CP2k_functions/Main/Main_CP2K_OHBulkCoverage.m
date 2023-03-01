@@ -3,9 +3,9 @@ close all;
 PathSep = setOSpathSep;
 
 %% Home
-BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge/5lyr_systems/Al_AlO_OH/Al_OH/New-Al_OH/';
-system = 'OH_0.185ML';
-Trajectory = 'OH_0.185ML_0to71000_1000step.xyz';
+BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge/5lyr_systems/Al_AlO/';
+system = 'AlO_water_1ML';
+Trajectory = 'AlO_water_1ML_22000to75000_1000step.xyz';
 
 % % Call function to find ABC vectors from .inp file
 ABC = getABCvectors(BaseFldr, system);
@@ -28,7 +28,7 @@ for i = 1:nConfigs
 
     % get the distances between pairs of atoms
     [~, DistAlO] = GetAtomCorrelation(XYZ_snap, Indx.Al1, Indx.O, ABC);
-    [r,c] = find(DistAlO < 2.83); % Rashid to fix this "2" by looking at RDF minimum - r = row aka O atom number, c = column aka Al1 atom number
+    [r,c] = find(DistAlO < 2.85); % Rashid to fix this "2" by looking at RDF minimum - r = row aka O atom number, c = column aka Al1 atom number
 
     [~, DistOH] = GetAtomCorrelation(XYZ_snap, Indx.H, setdiff(Indx.O,Indx.O(r)), ABC);
 %     [~, DistOH] = GetAtomCorrelation(XYZ_snap, Indx.H, Indx.O, ABC);

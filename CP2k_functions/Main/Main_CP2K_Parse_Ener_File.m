@@ -9,6 +9,7 @@ BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Curren
 system = 'Al_water'; % Name of calculation directory (no "\")
 
 % Set the number of steps before the end that are used to compute averages
+% SampleRange = 100;
 SampleRange = 1000;
 % SampleRange = 6000;
 % SampleRange = 10000;

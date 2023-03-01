@@ -1,5 +1,5 @@
 clear all;
-% close all;
+close all;
 
 PathSep =  setOSpathSep;
 
@@ -8,9 +8,9 @@ PathSep =  setOSpathSep;
 %     Trajectory = 'Al_water_14300to18100_100step.xyz';
 
 
-BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge/5lyr_systems/Al_AlO/Al_water/Fix_volume/BOMD/Temperature_fix/';
-    system = 'Al_water';
-    Trajectory = 'Al_water-pos-1.xyz';
+BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge/5lyr_systems/Al_AlO_OH/AlO_OH/';
+    system = 'AlO_1ML_OH';
+    Trajectory = 'AlO_1ML_OH_0to123000_1000step.xyz';
 
 ABC = getABCvectors(BaseFldr, system);
 [xyz, XYZ, Indx, Atoms, AtomList, nAtoms, startConfig, nConfigs, StepNum] = ReadAndParsexyz_new(BaseFldr, system, Trajectory, ABC, [0; 0; 0]);
@@ -30,8 +30,11 @@ ABC = getABCvectors(BaseFldr, system);
 % [Dens_O, Dens_H, Dens_F, TotDen, AveDen, z] = getDensityProfile(xyz, ABC);
 % [Dens_O, Dens_H, Dens_Na, Dens_Cl, TotDen, AveDen, z] = getDensityProfile(xyz, ABC);
 
-[FirstLayerIndx, SecondLayerIndx, ThirdLayerIndx, FourthLayerIndx, Minima] = getWaterLayerIndices(AtomIndx, XYZ, Dens_O, z);
-
+%-Rashid  
+% [FirstLayerIndx, SecondLayerIndx, ThirdLayerIndx, FourthLayerIndx, Minima] = getWaterLayerIndices(AtomIndx, XYZ, Dens_O, z);-Rashid  
+% [FirstLayerIndx, SecondLayerIndx, MinimaZ, ThirdLayerIndx] = getWaterLayerIndicesPerSnap(Indx, XYZ, Dens_O, z)-Rashid  
+%-Rashid  
+[FirstLayerIndx, SecondLayerIndx, MinimaZ] = getWaterLayerIndicesPerSnapRestrictedRev(Indx, XYZ, Dens_O, z, [100 -100])
 
 for snap = startConfig:nConfigs
 %     disp(['Processing snapshot ' num2str(StepNum(snap)) ' - ' num2str(100*(snap/nConfigs)) ' % complete']);
@@ -67,10 +70,14 @@ for snap = startConfig:nConfigs
                 Phi1 = acosd(dot(VecOH(BondOH(1),:,j),zVec)/(norm(VecOH(BondOH(1),:,j))*norm(zVec)));
                 Phi2 = acosd(dot(VecOH(BondOH(2),:,j),zVec)/(norm(VecOH(BondOH(2),:,j))*norm(zVec)));
             end
+            %-Rashid  
+            ThetaSnaps{snap,j} = Theta;
+            PhiSnaps{snap,j} = [Phi1 Phi2];
         end
-        
-        ThetaSnaps{snap,j} = Theta;
-        PhiSnaps{snap,j} = [Phi1 Phi2];
+% This part is for when BondOH condition is not satisfied -Rashid        
+%         ThetaSnaps{snap,j} = 0;
+%         PhiSnaps{snap,j} = [0 0];
+        continue
     end
     
     DL_Indx = [FirstLayerIndx{snap}; SecondLayerIndx{snap}];
@@ -104,12 +111,18 @@ for snap = startConfig:nConfigs
                 Phi1DL = acosd(dot(VecOH(BondOH(1),:,j),zVec)/(norm(VecOH(BondOH(1),:,j))*norm(zVec)));
                 Phi2DL = acosd(dot(VecOH(BondOH(2),:,j),zVec)/(norm(VecOH(BondOH(2),:,j))*norm(zVec)));
             end
+            %-Rashid  
+            ThetaSnapsDL{snap,j} = ThetaDL;
+            PhiSnapsDL{snap,j} = [Phi1DL Phi2DL];
+        
+            DL_Indx_H = [DL_Indx_H; AtomIndx.H(BondOH)];
         end
+% This part is for when BondOH condition is not satisfied  -Rashid         
+%         ThetaSnapsDL{snap,j} = 0;
+%         PhiSnapsDL{snap,j} = [0 0];
         
-        ThetaSnapsDL{snap,j} = ThetaDL;
-        PhiSnapsDL{snap,j} = [Phi1DL Phi2DL];
-        
-        DL_Indx_H = [DL_Indx_H; AtomIndx.H(BondOH)];
+%         DL_Indx_H = [];
+        continue
     end
     
     % write a sample snapshot to .xyz and convert to MS file (only for last
@@ -123,6 +136,7 @@ for snap = startConfig:nConfigs
     DL_Indx = FirstLayerIndx{snap};
     for j = 1:length(DL_Indx)
         BondOH = find(DistOH(:,find(AtomIndx.O == DL_Indx(j))) <= 1.28);
+       if BondOH ~=0
         % find the O atoms with ONLY two O-H bonds within 1.3 Ang, i.e. water
         if length(BondOH) == 2
             
@@ -147,12 +161,21 @@ for snap = startConfig:nConfigs
                 Phi1DL = acosd(dot(VecOH(BondOH(1),:,j),zVec)/(norm(VecOH(BondOH(1),:,j))*norm(zVec)));
                 Phi2DL = acosd(dot(VecOH(BondOH(2),:,j),zVec)/(norm(VecOH(BondOH(2),:,j))*norm(zVec)));
             end
+%-Rashid  
+%             ThetaSnaps1stWL{snap,j} = ThetaDL;
+%             PhiSnaps1stWL{snap,j} = [Phi1DL Phi2DL];
         end
-        
-        ThetaSnaps1stWL{snap,j} = ThetaDL;
-        PhiSnaps1stWL{snap,j} = [Phi1DL Phi2DL];
-        
+% This part is for when BondOH condition is not satisfied -Rashid  
+%         ThetaSnaps1stWL{snap,j} = 0;
+%         PhiSnaps1stWL{snap,j} = [0 0];
+%         continue
+            ThetaSnaps1stWL{snap,j} = ThetaDL;
+            PhiSnaps1stWL{snap,j} = [Phi1DL Phi2DL];        
         %                 DL_Indx_H = [DL_Indx_H; AtomIndx.H(BondOH)];
+      end
+ 
+         ThetaSnaps1stWL{snap,j} = 0;
+         PhiSnaps1stWL{snap,j} = [0 0];
     end
     
 end
