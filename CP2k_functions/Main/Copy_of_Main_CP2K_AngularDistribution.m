@@ -8,9 +8,9 @@ PathSep =  setOSpathSep;
 %     Trajectory = 'Al_water_14300to18100_100step.xyz';
 
 
-BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge/5lyr_systems/Al_AlO_OH/AlO_OH/';
-    system = 'AlO_1ML_OH';
-    Trajectory = 'AlO_1ML_OH_0to123000_1000step.xyz';
+BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge/5lyr_systems/Al_AlO/';
+    system = 'Al_water';
+    Trajectory = 'Al_water_21000to88000_1000step.xyz';
 
 ABC = getABCvectors(BaseFldr, system);
 [xyz, XYZ, Indx, Atoms, AtomList, nAtoms, startConfig, nConfigs, StepNum] = ReadAndParsexyz_new(BaseFldr, system, Trajectory, ABC, [0; 0; 0]);
@@ -34,7 +34,8 @@ ABC = getABCvectors(BaseFldr, system);
 % [FirstLayerIndx, SecondLayerIndx, ThirdLayerIndx, FourthLayerIndx, Minima] = getWaterLayerIndices(AtomIndx, XYZ, Dens_O, z);-Rashid  
 % [FirstLayerIndx, SecondLayerIndx, MinimaZ, ThirdLayerIndx] = getWaterLayerIndicesPerSnap(Indx, XYZ, Dens_O, z)-Rashid  
 %-Rashid  
-[FirstLayerIndx, SecondLayerIndx, MinimaZ] = getWaterLayerIndicesPerSnapRestrictedRev(Indx, XYZ, Dens_O, z, [100 -100])
+% [FirstLayerIndx, SecondLayerIndx, MinimaZ] = getWaterLayerIndicesPerSnapRestrictedRev(Indx, XYZ, Dens_O, z, [100 -100])
+[FirstLayerIndx, SecondLayerIndx, ~] = getWaterLayerIndicesPerSnap_new(AtomIndx, XYZ, Dens_O, z);
 
 for snap = startConfig:nConfigs
 %     disp(['Processing snapshot ' num2str(StepNum(snap)) ' - ' num2str(100*(snap/nConfigs)) ' % complete']);
@@ -136,7 +137,7 @@ for snap = startConfig:nConfigs
     DL_Indx = FirstLayerIndx{snap};
     for j = 1:length(DL_Indx)
         BondOH = find(DistOH(:,find(AtomIndx.O == DL_Indx(j))) <= 1.28);
-       if BondOH ~=0
+%        if BondOH ~=0
         % find the O atoms with ONLY two O-H bonds within 1.3 Ang, i.e. water
         if length(BondOH) == 2
             
@@ -174,10 +175,10 @@ for snap = startConfig:nConfigs
         %                 DL_Indx_H = [DL_Indx_H; AtomIndx.H(BondOH)];
       end
  
-         ThetaSnaps1stWL{snap,j} = 0;
-         PhiSnaps1stWL{snap,j} = [0 0];
-    end
-    
+%          ThetaSnaps1stWL{snap,j} = 0;
+%          PhiSnaps1stWL{snap,j} = [0 0];
+%     end
+%     
 end
 
 % % % % % % % % Theta is the angle of the water H-O-H bisector with the surface normal/c-vector

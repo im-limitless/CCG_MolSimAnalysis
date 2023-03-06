@@ -1,42 +1,26 @@
 clear all;
-% close all;
+close all;
 
-PathSep =  setOSpathSep;
-
-% BaseFldr = 'G:\Imperial\PhD\Rashid\Pictures\';
-%     system = 'Al_water';
-%     Trajectory = 'Al_water_14300to18100_100step.xyz';
-
-
-BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge/5lyr_systems/Al_AlO/';
+BaseFldr = 'G:\Imperial\PhD\Rashid\Pictures\';
     system = 'Al_water';
-    Trajectory = 'Al_water_21000to88000_1000step.xyz';
+    Trajectory = 'Al_water_14300to18100_100step.xyz';
+
+
+% BaseFldr = 'G:\Imperial\MattProjects\Pt_Clean\CP_Like\';
+%     system = 'CP_Like_1010_Fluorine';
+%     Trajectory = 'CP_Like_1010_Fluorine_46000to58000_500step.xyz';
 
 ABC = getABCvectors(BaseFldr, system);
 [xyz, XYZ, Indx, Atoms, AtomList, nAtoms, startConfig, nConfigs, StepNum] = ReadAndParsexyz_new(BaseFldr, system, Trajectory, ABC, [0; 0; 0]);
 
-%% Modify which O atoms go into mass density accoring to explicit naming in
-% input xyz. AtomIndx is the Index of atoms by name from input.xyz. Modify
-% ismember argument to choose which atoms are used.
 [~, ~, AtomIndx, ~, ~, ~, ~] = getAtomInfoFromInput(BaseFldr, system);
-% [~, ~, AtomIndx] = getAtomNamesFromInputXYZ(BaseFldr, system);
-% [~, OIndxxyz] = ismember([AtomIndx.O; AtomIndx.OtL; AtomIndx.OtU; AtomIndx.OtS] , Indx.O);
-% [~, OIndxxyz] = ismember(AtomIndx.O , Indx.O);
-% xyz.O = xyz.O(:,OIndxxyz,:);
-
-%%
-
-[Dens_O, Dens_H, TotDen, AveDen, z] = getDensityProfile(xyz, ABC);
-% [Dens_O, Dens_H, Dens_F, TotDen, AveDen, z] = getDensityProfile(xyz, ABC);
-% [Dens_O, Dens_H, Dens_Na, Dens_Cl, TotDen, AveDen, z] = getDensityProfile(xyz, ABC);
-
-% [FirstLayerIndx, SecondLayerIndx, ThirdLayerIndx, FourthLayerIndx, Minima] = getWaterLayerIndices(AtomIndx, XYZ, Dens_O, z);
-[FirstLayerIndx, SecondLayerIndx, Minima] = getWaterLayerIndicesPerSnap_new(AtomIndx, XYZ, Dens_O, z);
+[Dens_O, Dens_H, TotDen, AveDen, z] = getDensityProfile(xyz, ABC, 120);
 
 
 for snap = startConfig:nConfigs
 %     disp(['Processing snapshot ' num2str(StepNum(snap)) ' - ' num2str(100*(snap/nConfigs)) ' % complete']);
-    
+    [FirstLayerIndx, SecondLayerIndx, MinimaZ] = getWaterLayerIndicesPerSnap(Indx, XYZ, Dens_O, z);
+
     XYZ_snap = zeros(size(XYZ,2), size(XYZ,3));
     XYZ_snap(:,:) = XYZ(snap,:,:);
     
@@ -51,30 +35,36 @@ for snap = startConfig:nConfigs
             VecH2O = VecOH(BondOH(1),:,j)+VecOH(BondOH(2),:,j);
             
             % % %             % if we want to assume only one direction for both halves if the cell
-            % % %                     zVec = [0 0 1];
-            % % %                        Theta = acosd(dot(VecH2O,zVec)/(norm(VecH2O)*norm(zVec)));
+            zVec = [0 0 1];
+            Theta = acosd(dot(VecH2O,zVec)/(norm(VecH2O)*norm(zVec)));
+            Phi1 = acosd(dot(VecOH(BondOH(1),:,j),zVec)/(norm(VecOH(BondOH(1),:,j))*norm(zVec)));
+            Phi2 = acosd(dot(VecOH(BondOH(2),:,j),zVec)/(norm(VecOH(BondOH(2),:,j))*norm(zVec)));
             
             % split the cell into half and determine if O is in upper or lower half
             % then take the dot product of resultant water vector with both
             % surface normals (assuming the normal is c)
-            if XYZ_snap(AtomIndx.O(j),3) < ABC(3)/2
-                zVec = [0 0 1];
-                Theta = acosd(dot(VecH2O,zVec)/(norm(VecH2O)*norm(zVec)));
-                Phi1 = acosd(dot(VecOH(BondOH(1),:,j),zVec)/(norm(VecOH(BondOH(1),:,j))*norm(zVec)));
-                Phi2 = acosd(dot(VecOH(BondOH(2),:,j),zVec)/(norm(VecOH(BondOH(2),:,j))*norm(zVec)));
-            elseif XYZ_snap(AtomIndx.O(j),3) >= ABC(3)/2
-                zVec = [0 0 -1];
-                Theta = acosd(dot(VecH2O,zVec)/(norm(VecH2O)*norm(zVec)));
-                Phi1 = acosd(dot(VecOH(BondOH(1),:,j),zVec)/(norm(VecOH(BondOH(1),:,j))*norm(zVec)));
-                Phi2 = acosd(dot(VecOH(BondOH(2),:,j),zVec)/(norm(VecOH(BondOH(2),:,j))*norm(zVec)));
-            end
+%             if XYZ_snap(AtomIndx.O(j),3) < ABC(3)/2
+%                 zVec = [0 0 1];
+%                 Theta = acosd(dot(VecH2O,zVec)/(norm(VecH2O)*norm(zVec)));
+%                 Phi1 = acosd(dot(VecOH(BondOH(1),:,j),zVec)/(norm(VecOH(BondOH(1),:,j))*norm(zVec)));
+%                 Phi2 = acosd(dot(VecOH(BondOH(2),:,j),zVec)/(norm(VecOH(BondOH(2),:,j))*norm(zVec)));
+%             elseif XYZ_snap(AtomIndx.O(j),3) >= ABC(3)/2
+%                 zVec = [0 0 -1];
+%                 Theta = acosd(dot(VecH2O,zVec)/(norm(VecH2O)*norm(zVec)));
+%                 Phi1 = acosd(dot(VecOH(BondOH(1),:,j),zVec)/(norm(VecOH(BondOH(1),:,j))*norm(zVec)));
+%                 Phi2 = acosd(dot(VecOH(BondOH(2),:,j),zVec)/(norm(VecOH(BondOH(2),:,j))*norm(zVec)));
+%             end
+            ThetaSnaps{snap,j} = Theta;
+            PhiSnaps{snap,j} = [Phi1 Phi2];
+
+        else
+            ThetaSnaps{snap,j} = [];
+            PhiSnaps{snap,j} = [];
         end
-        
-        ThetaSnaps{snap,j} = Theta;
-        PhiSnaps{snap,j} = [Phi1 Phi2];
+
     end
     
-    DL_Indx = [FirstLayerIndx{snap}; SecondLayerIndx{snap}];
+    DL_Indx = [SecondLayerIndx{snap}];
     %     DL_Indx = SecondLayerIndx{snap};
     DL_Indx_H = [];
     %     DL_Indx = FirstLayerIndx{snap};
@@ -88,23 +78,25 @@ for snap = startConfig:nConfigs
             VecH2O = VecOH(BondOH(1),:,j)+VecOH(BondOH(2),:,j);
             
             % % %             % if we want to assume only one direction for both halves if the cell
-            % % %                     zVec = [0 0 1];
-            % % %                        Theta = acosd(dot(VecH2O,zVec)/(norm(VecH2O)*norm(zVec)));
+            zVec = [0 0 1];
+            ThetaDL = acosd(dot(VecH2O,zVec)/(norm(VecH2O)*norm(zVec)));
+            Phi1DL = acosd(dot(VecOH(BondOH(1),:,j),zVec)/(norm(VecOH(BondOH(1),:,j))*norm(zVec)));
+            Phi2DL = acosd(dot(VecOH(BondOH(2),:,j),zVec)/(norm(VecOH(BondOH(2),:,j))*norm(zVec)));
             
             % split the cell into half and determine if O is in upper or lower half
             % then take the dot product of resultant water vector with both
             % surface normals (assuming the normal is c)
-            if XYZ_snap(DL_Indx(j),3) < ABC(3)/2
-                zVec = [0 0 1];
-                ThetaDL = acosd(dot(VecH2O,zVec)/(norm(VecH2O)*norm(zVec)));
-                Phi1DL = acosd(dot(VecOH(BondOH(1),:,j),zVec)/(norm(VecOH(BondOH(1),:,j))*norm(zVec)));
-                Phi2DL = acosd(dot(VecOH(BondOH(2),:,j),zVec)/(norm(VecOH(BondOH(2),:,j))*norm(zVec)));
-            elseif XYZ_snap(DL_Indx(j),3) >= ABC(3)/2
-                zVec = [0 0 -1];
-                ThetaDL = acosd(dot(VecH2O,zVec)/(norm(VecH2O)*norm(zVec)));
-                Phi1DL = acosd(dot(VecOH(BondOH(1),:,j),zVec)/(norm(VecOH(BondOH(1),:,j))*norm(zVec)));
-                Phi2DL = acosd(dot(VecOH(BondOH(2),:,j),zVec)/(norm(VecOH(BondOH(2),:,j))*norm(zVec)));
-            end
+%             if XYZ_snap(DL_Indx(j),3) < ABC(3)/2
+%                 zVec = [0 0 1];
+%                 ThetaDL = acosd(dot(VecH2O,zVec)/(norm(VecH2O)*norm(zVec)));
+%                 Phi1DL = acosd(dot(VecOH(BondOH(1),:,j),zVec)/(norm(VecOH(BondOH(1),:,j))*norm(zVec)));
+%                 Phi2DL = acosd(dot(VecOH(BondOH(2),:,j),zVec)/(norm(VecOH(BondOH(2),:,j))*norm(zVec)));
+%             elseif XYZ_snap(DL_Indx(j),3) >= ABC(3)/2
+%                 zVec = [0 0 -1];
+%                 ThetaDL = acosd(dot(VecH2O,zVec)/(norm(VecH2O)*norm(zVec)));
+%                 Phi1DL = acosd(dot(VecOH(BondOH(1),:,j),zVec)/(norm(VecOH(BondOH(1),:,j))*norm(zVec)));
+%                 Phi2DL = acosd(dot(VecOH(BondOH(2),:,j),zVec)/(norm(VecOH(BondOH(2),:,j))*norm(zVec)));
+%             end
         end
         
         ThetaSnapsDL{snap,j} = ThetaDL;
@@ -131,23 +123,25 @@ for snap = startConfig:nConfigs
             VecH2O = VecOH(BondOH(1),:,j)+VecOH(BondOH(2),:,j);
             
             % % %             % if we want to assume only one direction for both halves if the cell
-            % % %                     zVec = [0 0 1];
-            % % %                        Theta = acosd(dot(VecH2O,zVec)/(norm(VecH2O)*norm(zVec)));
+            zVec = [0 0 1];
+            ThetaDL = acosd(dot(VecH2O,zVec)/(norm(VecH2O)*norm(zVec)));
+            Phi1DL = acosd(dot(VecOH(BondOH(1),:,j),zVec)/(norm(VecOH(BondOH(1),:,j))*norm(zVec)));
+            Phi2DL = acosd(dot(VecOH(BondOH(2),:,j),zVec)/(norm(VecOH(BondOH(2),:,j))*norm(zVec)));
             
             % split the cell into half and determine if O is in upper or lower half
             % then take the dot product of resultant water vector with both
             % surface normals (assuming the normal is c)
-            if XYZ_snap(DL_Indx(j),3) < ABC(3)/2
-                zVec = [0 0 1];
-                ThetaDL = acosd(dot(VecH2O,zVec)/(norm(VecH2O)*norm(zVec)));
-                Phi1DL = acosd(dot(VecOH(BondOH(1),:,j),zVec)/(norm(VecOH(BondOH(1),:,j))*norm(zVec)));
-                Phi2DL = acosd(dot(VecOH(BondOH(2),:,j),zVec)/(norm(VecOH(BondOH(2),:,j))*norm(zVec)));
-            elseif XYZ_snap(DL_Indx(j),3) >= ABC(3)/2
-                zVec = [0 0 -1];
-                ThetaDL = acosd(dot(VecH2O,zVec)/(norm(VecH2O)*norm(zVec)));
-                Phi1DL = acosd(dot(VecOH(BondOH(1),:,j),zVec)/(norm(VecOH(BondOH(1),:,j))*norm(zVec)));
-                Phi2DL = acosd(dot(VecOH(BondOH(2),:,j),zVec)/(norm(VecOH(BondOH(2),:,j))*norm(zVec)));
-            end
+%             if XYZ_snap(DL_Indx(j),3) < ABC(3)/2
+%                 zVec = [0 0 1];
+%                 ThetaDL = acosd(dot(VecH2O,zVec)/(norm(VecH2O)*norm(zVec)));
+%                 Phi1DL = acosd(dot(VecOH(BondOH(1),:,j),zVec)/(norm(VecOH(BondOH(1),:,j))*norm(zVec)));
+%                 Phi2DL = acosd(dot(VecOH(BondOH(2),:,j),zVec)/(norm(VecOH(BondOH(2),:,j))*norm(zVec)));
+%             elseif XYZ_snap(DL_Indx(j),3) >= ABC(3)/2
+%                 zVec = [0 0 -1];
+%                 ThetaDL = acosd(dot(VecH2O,zVec)/(norm(VecH2O)*norm(zVec)));
+%                 Phi1DL = acosd(dot(VecOH(BondOH(1),:,j),zVec)/(norm(VecOH(BondOH(1),:,j))*norm(zVec)));
+%                 Phi2DL = acosd(dot(VecOH(BondOH(2),:,j),zVec)/(norm(VecOH(BondOH(2),:,j))*norm(zVec)));
+%             end
         end
         
         ThetaSnaps1stWL{snap,j} = ThetaDL;
@@ -171,7 +165,7 @@ for j = 1:size(ThetaSnaps1stWL,1)
     nH2O_1stWL(j) = size(ThetaSnaps1stWL,2) - nnz(cellfun(@isempty,ThetaSnaps1stWL(j,:)));
 end
 
-disp(['Ave. number of water molecules in 1st + 2nd WL = ' num2str(mean(nH2O_DL)/2) ' \pm ' num2str(std(nH2O_DL)/2)]);
+disp(['Ave. number of water molecules in 2nd WL = ' num2str(mean(nH2O_DL)/2) ' \pm ' num2str(std(nH2O_DL)/2)]);
 disp(['Ave. number of water molecules in 1st WL = ' num2str(mean(nH2O_1stWL)/2) ' \pm ' num2str(std(nH2O_1stWL)/2)]);
 
 figure
