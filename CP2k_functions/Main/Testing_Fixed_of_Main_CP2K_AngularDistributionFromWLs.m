@@ -1,9 +1,9 @@
 clear all;
 close all;
 
-BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge/5lyr_systems/Al_AlO/Al_water/Fix_volume/BOMD/Temperature_fix/';
+BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge/5lyr_systems/Al_AlO/Al_water/Test/';
     system = 'Al_water';
-    Trajectory = 'Al_water_114000to120000_1000step.xyz';
+    Trajectory = 'Al_water-pos-1.xyz';
 
 
 % BaseFldr = 'G:\Imperial\MattProjects\Pt_Clean\CP_Like\';
@@ -17,18 +17,18 @@ ABC = getABCvectors(BaseFldr, system);
 %[Dens_O, Dens_H, TotDen, AveDen, z] = getDensityProfile(xyz, ABC, 120);
 [Dens_O, Dens_H, TotDen, AveDen, z] = getDensityProfile(xyz, ABC);
 
- prompt = "Is this an oxide ('y'/'n'): ";
- oxide = input(prompt);
+%  prompt = "Is this an oxide ('y'/'n'): ";
+%  oxide = input(prompt);
 for snap = startConfig:nConfigs
 %     disp(['Processing snapshot ' num2str(StepNum(snap)) ' - ' num2str(100*(snap/nConfigs)) ' % complete']);
    
-    if (oxide == 'n')
-        [FirstLayerIndx, SecondLayerIndx, MinimaZ] = getWaterLayerIndicesPerSnap_new(Indx, XYZ, Dens_O, z);
-    elseif(oxide=='y')
-        [FirstLayerIndx, SecondLayerIndx, MinimaZ] = Oxide_getWaterLayerIndicesPerSnap_new(Indx, XYZ, Dens_O, z);
-    else 
-        error ('Incorrect value for the usr prompt');
-    end
+%     if (oxide == 'n')
+%         [FirstLayerIndx, SecondLayerIndx, MinimaZ] = getWaterLayerIndicesPerSnap_new(Indx, XYZ, Dens_O, z);
+%     elseif(oxide=='y')
+%         [FirstLayerIndx, SecondLayerIndx, MinimaZ] = Oxide_getWaterLayerIndicesPerSnap_new(Indx, XYZ, Dens_O, z);
+%     else 
+%         error ('Incorrect value for the usr prompt');
+%     end
 
     XYZ_snap = zeros(size(XYZ,2), size(XYZ,3));
     XYZ_snap(:,:) = XYZ(snap,:,:);
@@ -199,33 +199,33 @@ title(['H-O-H Bisector Angle Distribution for ' system], 'interpreter', 'none')
 % histogram(Theta,60);
 plot(x,smooth(smooth(f))/length(AtomIndx.O)/nConfigs, 'k', 'linewidth', 2)
 
-%%% 1st+2nd WL %%%
-[f, x] = hist(Theta_1st2ndWL,60);
-% histogram(Theta_DL,60);
-plot(x,smooth(smooth(f))/length(AtomIndx.O)/nConfigs, 'g', 'linewidth', 2)
-
-%%% 2nd WL %%%
-[f, x] = hist(Theta_DL,60);
-% histogram(Theta_DL,60);
-plot(x,smooth(smooth(f))/length(AtomIndx.O)/nConfigs, 'r', 'linewidth', 2)
-
-%%% 1st WL %%%
-[f, x] = hist(Theta_1stWL,60);
-% histogram(Theta_DL,60);
-plot(x,smooth(smooth(f))/length(AtomIndx.O)/nConfigs, 'b', 'linewidth', 2)
+% %%% 1st+2nd WL %%%
+% [f, x] = hist(Theta_1st2ndWL,60);
+% % histogram(Theta_DL,60);
+% plot(x,smooth(smooth(f))/length(AtomIndx.O)/nConfigs, 'g', 'linewidth', 2)
+% 
+% %%% 2nd WL %%%
+% [f, x] = hist(Theta_DL,60);
+% % histogram(Theta_DL,60);
+% plot(x,smooth(smooth(f))/length(AtomIndx.O)/nConfigs, 'r', 'linewidth', 2)
+% 
+% %%% 1st WL %%%
+% [f, x] = hist(Theta_1stWL,60);
+% % histogram(Theta_DL,60);
+% plot(x,smooth(smooth(f))/length(AtomIndx.O)/nConfigs, 'b', 'linewidth', 2)
 
 xlabel('\Theta (deg)');
 ylabel('Abundance');
-% legend('Global', '1st+2nd Layer', '1st Layer');
-legend('Global', '1st+2nd Layer', '2nd Layer', '1st Layer');
+legend('Global');
+% legend('Global', '1st+2nd Layer', '2nd Layer', '1st Layer');
 hold off
 
 % % % % % % % % Phi is the angle of the O-H bond vector made with the surface normal
 Phi=reshape(vertcat(PhiSnaps{:}), [2*length(vertcat(PhiSnaps{:})),1]);
-Phi_DL=reshape(vertcat(PhiSnapsDL{:}), [2*length(vertcat(PhiSnapsDL{:})),1]);
-Phi_1stWL=reshape(vertcat(PhiSnaps1stWL{:}), [2*length(vertcat(PhiSnaps1stWL{:})),1]);
+% Phi_DL=reshape(vertcat(PhiSnapsDL{:}), [2*length(vertcat(PhiSnapsDL{:})),1]);
+% Phi_1stWL=reshape(vertcat(PhiSnaps1stWL{:}), [2*length(vertcat(PhiSnaps1stWL{:})),1]);
 
-Phi_1st2ndWL=[Phi_1stWL;Phi_DL];
+% Phi_1st2ndWL=[Phi_1stWL;Phi_DL];
 
 figure
 hold on
@@ -236,25 +236,26 @@ title(['O-H Angle Distribution for ' system], 'interpreter', 'none')
 % histogram(Phi,60);
 plot(x,smooth(smooth(f))/length(AtomIndx.O)/2/nConfigs, 'k', 'linewidth', 2)
 
-%%% 1st+2nd WL %%%
-[f, x] = hist(Phi_1st2ndWL,60);
-% histogram(Phi_DL,60);
-plot(x,smooth(smooth(f))/length(AtomIndx.O)/2/nConfigs, 'g', 'linewidth', 2)
-
-%%% 2nd WL %%%
-[f, x] = hist(Phi_DL,60);
-% histogram(Phi_DL,60);
-plot(x,smooth(smooth(f))/length(AtomIndx.O)/2/nConfigs, 'r', 'linewidth', 2)
-
-%%% 1st WL %%%
-[f, x] = hist(Phi_1stWL,60);
-% histogram(Phi_DL,60);
-plot(x,smooth(smooth(f))/length(AtomIndx.O)/2/nConfigs, 'b', 'linewidth', 2)
+% %%% 1st+2nd WL %%%
+% [f, x] = hist(Phi_1st2ndWL,60);
+% % histogram(Phi_DL,60);
+% plot(x,smooth(smooth(f))/length(AtomIndx.O)/2/nConfigs, 'g', 'linewidth', 2)
+% 
+% %%% 2nd WL %%%
+% [f, x] = hist(Phi_DL,60);
+% % histogram(Phi_DL,60);
+% plot(x,smooth(smooth(f))/length(AtomIndx.O)/2/nConfigs, 'r', 'linewidth', 2)
+% 
+% %%% 1st WL %%%
+% [f, x] = hist(Phi_1stWL,60);
+% % histogram(Phi_DL,60);
+% plot(x,smooth(smooth(f))/length(AtomIndx.O)/2/nConfigs, 'b', 'linewidth', 2)
 
 
 xlabel('\phi (deg)');
 ylabel('Abundance');
-legend('Global', '1st+2nd Layer', '2nd Layer', '1st Layer');
+legend('Global');
+% legend('Global', '1st+2nd Layer', '2nd Layer', '1st Layer');
 hold off
 
 % % % % % % % % plot the average value of theta as a function of z-coordinate
