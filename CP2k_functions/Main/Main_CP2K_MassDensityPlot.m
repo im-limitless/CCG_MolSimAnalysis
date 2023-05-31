@@ -6,7 +6,7 @@ PathSep =  setOSpathSep;
 %% Set the location of the calculation output
 BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge_2/The_rest/';
 system = 'OH_0.5ML';
-Trajectory = 'OH_0.5ML-pos-1.xyz';
+Trajectory = 'OH_0.5ML_65000to80400_100step.xyz';
 
 % BaseFldr = '/Users/mtdarby/Dropbox/Mac/Documents/MattProjects/TempAnalysis/';
 % system = 'CP_Pit_20F';
@@ -40,6 +40,7 @@ ABC = getABCvectors(BaseFldr, system);
 % [Dens_O, Dens_H, Dens_Na, Dens_Cl, TotDen, AveDen, z] = getDensityProfile(xyz, ABC);
 
 % [FirstLayerIndx, SecondLayerIndx, ThirdLayerIndx, FourthLayerIndx, MinimaZ] = getWaterLayerIndices(Indx, XYZ, Dens_O, z);
+getBulkMacroscopicAve(TotDen, z, ABC);
 
 zmax = ABC(3);
 bins = length(z) + 1;

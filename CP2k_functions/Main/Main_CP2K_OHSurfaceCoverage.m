@@ -50,7 +50,7 @@ hold on
 % plot((1:nConfigs)*0.5, Total_Coverage, '-ok', 'markerfacecolor', [0 0.8 0])
 plot((1:nConfigs)/2000, OH_Coverage, '-ok', 'markerfacecolor', 'r')
 plot((1:nConfigs)/2000, H2O_Coverage, '-ok', 'markerfacecolor', 'b')
-plot((1:nConfigs)/20000, Total_Coverage, '-ok', 'markerfacecolor', [0 0.8 0])
+plot((1:nConfigs)/2000, Total_Coverage, '-ok', 'markerfacecolor', [0 0.8 0])
 legend('OH', 'Water', 'Total')
 xlabel('Time (ps)')
 ylabel('Number of Molecules')
