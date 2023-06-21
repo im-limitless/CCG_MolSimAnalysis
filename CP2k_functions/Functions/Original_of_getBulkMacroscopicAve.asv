@@ -1,4 +1,4 @@
-function [AveTotDen]= getBulkMacroscopicAve(TotDen, z, ABC)
+function [AveTotDen]= Original_getBulkMacroscopicAve(TotDen, z, ABC)
 
 AveTotDen= mean(TotDen,2);
 

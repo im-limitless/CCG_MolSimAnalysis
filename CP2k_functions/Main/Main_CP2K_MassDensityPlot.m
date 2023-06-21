@@ -4,9 +4,9 @@ close all; clc;
 PathSep =  setOSpathSep;
 
 %% Set the location of the calculation output
-BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge_2/The_rest/';
-system = 'OH_0.5ML';
-Trajectory = 'OH_0.5ML_65000to80400_100step.xyz';
+BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge_2/Phase_diagram_sys/';
+system = 'OH_0.66ML';
+Trajectory = 'OH_0.66ML-pos-1.xyz';
 
 % BaseFldr = '/Users/mtdarby/Dropbox/Mac/Documents/MattProjects/TempAnalysis/';
 % system = 'CP_Pit_20F';
@@ -40,8 +40,22 @@ ABC = getABCvectors(BaseFldr, system);
 % [Dens_O, Dens_H, Dens_Na, Dens_Cl, TotDen, AveDen, z] = getDensityProfile(xyz, ABC);
 
 % [FirstLayerIndx, SecondLayerIndx, ThirdLayerIndx, FourthLayerIndx, MinimaZ] = getWaterLayerIndices(Indx, XYZ, Dens_O, z);
-getBulkMacroscopicAve(TotDen, z, ABC);
 
+%%%%%%%%%%%%%%%%% Macroscopic ave (uncomment) %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% prompt = "Macroscopic average using (1)Iterating the average with fixed <vox> [M1], or, (2)Varying <voxels> [M2]? ('1'/'2'/'both'): ";
+% oxide = input(prompt);
+% if (oxide == '1')
+%     M1_getBulkMacroscopicAve(TotDen, z, ABC, BaseFldr, system);
+% elseif(oxide=='2')
+%     M2_getBulkMacroscopicAve(TotDen, z, ABC, BaseFldr, system);
+% elseif(oxide=='both')
+%     M1_getBulkMacroscopicAve(TotDen, z, ABC, BaseFldr, system);
+%     M2_getBulkMacroscopicAve(TotDen, z, ABC, BaseFldr, system);
+% else
+%     error ('Incorrect value for the usr prompt');
+% end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 zmax = ABC(3);
 bins = length(z) + 1;
 % Plot each snapshot
@@ -94,8 +108,8 @@ else
     mkdir([BaseFldr 'MassDensityProfiles']);
 end
 
-saveas(gcf, [BaseFldr 'MassDensityProfiles' PathSep system '.jpg']);
+% saveas(gcf, [BaseFldr 'MassDensityProfiles' PathSep system '.jpg']);
 
-[FirstLayerIndx, SecondLayerIndx, MinimaZ] = getWaterLayerIndicesPerSnapRestrictedRev(Indx, XYZ, Dens_O, z, [100 -100])
-[FirstLayerIndx_low, SecondLayerIndx_low, MinimaZ] = getWaterLayerIndicesPerSnapRestricted(Indx, XYZ, Dens_O, z, [100 -100])
+ [FirstLayerIndx, SecondLayerIndx, MinimaZ] = getWaterLayerIndicesPerSnapRestrictedRev(Indx, XYZ, Dens_O, z, [100 -100])
+ [FirstLayerIndx_low, SecondLayerIndx_low, MinimaZ] = getWaterLayerIndicesPerSnapRestricted(Indx, XYZ, Dens_O, z, [100 -100])
 
