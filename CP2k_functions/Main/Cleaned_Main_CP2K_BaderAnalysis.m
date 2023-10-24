@@ -3,9 +3,9 @@ close all;
 
 %%%%%%%%%%%%%% Data collections %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge/5lyr_systems/Al_AlO/';
-system = 'Al_water';
-Trajectory = 'final.xyz';
+BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge_2/Phase_diagram_sys/';
+system = 'AlO_1ML_OH';
+Trajectory = 'AlO_1ML_OH_95000to104000_1000step.xyz';
 
 
 fldrname = [BaseFldr system '/Bader_Analysis/'];
@@ -92,7 +92,7 @@ if strcmp(DoubleAnalType, 'MassDensity')
     [Dens_O, ~, ~, ~, z] = getDensityProfile(xyz, ABC);
     %change getwaterlayerIndices to the name of the new function (same name
     %but add persnap at the end) +  [same same minimaZ] = same
-    [FirstLayerIndx, SecondLayerIndx] = getWaterLayerIndices(Indx, XYZ, Dens_O, z);
+    [FirstLayerIndx, SecondLayerIndx] = getWaterLayerIndicesPerSnap_new(Indx, XYZ, Dens_O, z);
     
     for i = startConfig:nConfigs
         DL1st{i} = [FirstLayerIndx{i}];

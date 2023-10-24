@@ -5,8 +5,8 @@ PathSep =  setOSpathSep;
 
 %% Set the location of the calculation output
 BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge_2/Phase_diagram_sys/';
-system = 'OH_0.66ML';
-Trajectory = 'OH_0.66ML-pos-1.xyz';
+system = 'Al_water';
+Trajectory = 'Al_water-pos-1.xyz';
 
 % BaseFldr = '/Users/mtdarby/Dropbox/Mac/Documents/MattProjects/TempAnalysis/';
 % system = 'CP_Pit_20F';

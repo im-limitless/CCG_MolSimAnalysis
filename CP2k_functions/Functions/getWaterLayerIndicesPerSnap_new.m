@@ -1,4 +1,4 @@
-function [FirstLayerIndx, SecondLayerIndx, MinimaZ] = getWaterLayerIndicesPerSnap(Indx, XYZ, Dens_O, z)
+function [FirstLayerIndx, SecondLayerIndx, MinimaZ] = getWaterLayerIndicesPerSnap_new(Indx, XYZ, Dens_O, z)
 
 GlobalMinima = LocateStationaryPoints(mean(Dens_O,2));
 Minima = zeros(size(Dens_O,1), size(Dens_O,2));
