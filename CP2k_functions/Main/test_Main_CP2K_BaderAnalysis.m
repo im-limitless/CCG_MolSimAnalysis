@@ -105,7 +105,8 @@ if strcmp(DoubleAnalType, 'MassDensity')
     
     % % get the O atom distribution and corresponding indices of DL atoms
     [Dens_O, ~, ~, ~, z] = getDensityProfile(xyz, ABC);
-    [FirstLayerIndx, SecondLayerIndx] = getWaterLayerIndices(Indx, XYZ, Dens_O, z);
+    %[FirstLayerIndx, SecondLayerIndx] = getWaterLayerIndices(Indx, XYZ, Dens_O, z);
+    [FirstLayerIndx, SecondLayerIndx] = getWaterLayerIndicesPerSnap_new(Indx, XYZ, Dens_O, z);
     
     for i = startConfig:nConfigs
         DL1st{i} = [FirstLayerIndx{i}];

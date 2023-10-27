@@ -3,9 +3,9 @@ close all;
 
 %%%%%%%%%%%%%% Data collections %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge_2/The_rest/';
-system = 'OH_0.26ML';
-Trajectory = 'OH_0.26ML_36000to56000_1000step.xyz';
+BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge_2/Phase_diagram_sys/';
+system = 'AlO_1ML_OH';
+Trajectory = 'AlO_1ML_OH_95000to104000_1000step.xyz';
 
 
 fldrname = [BaseFldr system '/Bader_Analysis/'];
@@ -172,7 +172,6 @@ for i = 1:length(StepNum)
     else % redundant?
         DL1st_sum(i) = 0;
         DL2nd_sum(i) = 0;
-        nonDL_sum(i) = 0;
     end
     
     for j = 1:length(AtomList)
@@ -197,17 +196,11 @@ MeanCharge = MeanCharge(:,sortIdx);
 StdCharge = StdCharge(:,sortIdx);
 DL1st_sum = DL1st_sum(sortIdx);
 DL2nd_sum = DL2nd_sum(sortIdx);
-nonDL_sum = nonDL_sum(sortIdx);
+%nonDL_sum = nonDL_sum(sortIdx);
 %%%%%%%%%%%%%% End of data collection, below are graphs and data
-
-% prompt1 = "Do you want to analyze Al? ('y'/'n'): ";
-% Al_prompt = input(prompt1);
-
 %%%%%%%%%%%%%% illustrations %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%% ----- Al ----- %%%%
-        
-
 % Total charge per Al type
 figure
 box on
@@ -218,11 +211,11 @@ ylabel('Total Charge (e)');
 C = [218/255 165/255 32/255; 0.25 0.25 0.25; 0 0.5 0; 0 0 1; 1 0 0];
 AlC = [];
 for i = 1:length(AlList)
-    if contains(AtomList(AlList(i), :), 'Al1')
+    if contains(AtomList(AlList(i), :), 'Al11')
         AlC = C(1,:);
     elseif contains(AtomList(AlList(i), :), 'Al12')
         AlC = C(2,:);
-    elseif contains(AtomList(AlList(i), :), 'Al2')
+    elseif contains(AtomList(AlList(i), :), 'Al21')
         AlC = C(3,:);
     elseif contains(AtomList(AlList(i), :), 'Al22')
         AlC = C(4,:);
@@ -240,11 +233,11 @@ elseif length(AlList) == 5
 end
 
 for i = 1:length(AlList)
-    if contains(AtomList(AlList(i), :), 'Al1')
+    if contains(AtomList(AlList(i), :), 'Al11')
         AlC = C(1,:);
     elseif contains(AtomList(AlList(i), :), 'Al12')
         AlC = C(2,:);
-    elseif contains(AtomList(AlList(i), :), 'Al2')
+    elseif contains(AtomList(AlList(i), :), 'Al21')
         AlC = C(3,:);
     elseif contains(AtomList(AlList(i), :), 'Al22')
         AlC = C(4,:);
@@ -262,7 +255,6 @@ elseif length(AlList) == 5
 end
 hold off
 
-
 % mean charge per Al type
 figure
 box on
@@ -272,11 +264,11 @@ ylabel('Ave. Charge per Atom (e)');
 % title(['Total Bader charge for Pt Atoms in ' system], 'interpreter', 'none')
 AlC = [];
 for i = 1:length(AlList)
-    if contains(AtomList(AlList(i), :), 'Al1')
+    if contains(AtomList(AlList(i), :), 'Al11')
         AlC = C(1,:);
     elseif contains(AtomList(AlList(i), :), 'Al12')
         AlC = C(2,:);
-    elseif contains(AtomList(AlList(i), :), 'Al2')
+    elseif contains(AtomList(AlList(i), :), 'Al21')
         AlC = C(3,:);
     elseif contains(AtomList(AlList(i), :), 'Al22')
         AlC = C(4,:);
@@ -468,7 +460,7 @@ plot(StepNum(nonDL_sum~=0)/2000, (nonDL_sum(nonDL_sum~=0)), '-o', 'color', 'k', 
 plot([StepNum(1)/2000 StepNum(end)/2000], [mean(nonDL_sum) mean(nonDL_sum)], '--', 'color', 'g');
 ylabel('Total Charge (e)');
 
-legend('1st Water Layer', '<1st Water Layer>', '2nd Water Layer', '<2nd Water Layer>', 'Bulk Water', '<Bulk Water>', 'interpreter', 'tex')
+% legend('1st Water Layer', '<1st Water Layer>', '2nd Water Layer', '<2nd Water Layer>', 'Bulk Water', '<Bulk Water>', 'interpreter', 'tex')
 
 xlabel('Time (ps)');
 ylabel('Total Charge (e)');
@@ -476,11 +468,11 @@ ylabel('Total Charge (e)');
 C = [218/255 165/255 32/255; 0.25 0.25 0.25; 0 0.5 0; 0 0 1; 1 0 0];
 AlC = [];
 for i = 1:length(AlList)
-    if contains(AtomList(AlList(i), :), 'Al1')
+    if contains(AtomList(AlList(i), :), 'Al11')
         AlC = C(1,:);
     elseif contains(AtomList(AlList(i), :), 'Al12')
         AlC = C(2,:);
-    elseif contains(AtomList(AlList(i), :), 'Al2')
+    elseif contains(AtomList(AlList(i), :), 'Al21')
         AlC = C(3,:);
     elseif contains(AtomList(AlList(i), :), 'Al22')
         AlC = C(4,:);
@@ -491,11 +483,11 @@ for i = 1:length(AlList)
 end
 
 for i = 1:length(AlList)
-    if contains(AtomList(AlList(i), :), 'Al1')
+    if contains(AtomList(AlList(i), :), 'Al11')
         AlC = C(1,:);
     elseif contains(AtomList(AlList(i), :), 'Al12')
         AlC = C(2,:);
-    elseif contains(AtomList(AlList(i), :), 'Al2')
+    elseif contains(AtomList(AlList(i), :), 'Al21')
         AlC = C(3,:);
     elseif contains(AtomList(AlList(i), :), 'Al22')
         AlC = C(4,:);
@@ -523,88 +515,6 @@ hold off
 
 %Output: Heat map for atoms of interest per all snapshots
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Everything Below is working fine %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Al11_xy_tbl= randi(Indx.Al11,n);
 
-AlNums = [];
-for i = 1:length(AlList)
-    AlNums = [AlNums; Indx.(Indxfns{AlList(i)})];
-end
-
-% Creating a double that includes all the Al atoms + 1st Layer of water;
-
-d_DL1st= DL1st(1,12);
-%%%% Note: The atoms of the water are added from a single snapshot instead
-%%%% of an average (might need to add the average later) %%%%
-d_DL1st = cell2mat(d_DL1st);
-AlDL1st= cat(1,AlNums,d_DL1st);
-
-% Creating a double that includes all the Al atoms + 1st&2nd Layer of water;
-
-d_DL2nd= DL2nd(1,12);
-%%%% Note: The atoms of the water are added from a single snapshot instead
-%%%% of an average (might need to add the average later) %%%%
-d_DL2nd = cell2mat(d_DL2nd);
-AlDL2nd= cat(1,AlNums,d_DL2nd);
-AlDL= cat(1,AlNums,d_DL1st,d_DL2nd);
-
-% XYZ_ave(:,:) = mean(XYZ, 1);
-
-%% Average over all ACF snapshots
-MeanQnet = mean(Qnet(AlNums,1:end),2);
-Bader3DCharge(XYZ_snap(AlNums,:), ABC, MeanQnet);
-% light
-% XYZ_snap = zeros(size(XYZ,2), size(XYZ,3));
-% XYZ_snap(:,:) = XYZ(1,:,:);
-% MeanQnet = mean(Qnet(PtNums,:),2);
-
-%% Last snapshot (change it base on the system at hand)
-Bader3DCharge(XYZ_snap(AlNums,:), ABC, Qnet(AlNums,51));
-% light
-
-%% Last snapshot (Al+DL_1st) (change it base on the system at hand)
-Bader3DCharge(XYZ_snap(d_DL1st,:), ABC, Qnet(d_DL1st,8));
-% light
-Bader3DCharge(XYZ_snap(AlDL1st,:), ABC, Qnet(AlDL1st,8));
-% light
-
-%% Last snapshot (Al+DL_2nd) (change it base on the system at hand)
-Bader3DCharge(XYZ_snap(d_DL2nd,:), ABC, Qnet(d_DL2nd,8));
-% light
-Bader3DCharge(XYZ_snap(AlDL2nd,:), ABC, Qnet(AlDL2nd,8));
-% light
-
-%% Last snapshot (Al+DL) (change it base on the system at hand)
-Bader3DCharge(XYZ_snap(AlDL,:), ABC, Qnet(AlDL,8));
-% light
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Everything up is working fine %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%%%% The part below is for the potential drop which requires the
-%%%% v-Hartree.cube files for the whole system, water, and the metal
-%%%% surface. I currently have the files for the full system but not the
-%%%% other two!
-
-% [StepNumPot, EffPotDrop] = CP2K_CalcEffectivePotentialDrop(BaseFldr, system);
-% 
-% [tf, indx] = ismember(StepNumPot, StepNum);
-% 
-% figure
-% hold on
-% ylabel('Total Charge (e)');
-% xlabel('Electrostatic Potential (V)');
-% % plot(EffPotDrop, HalfElectro(indx), 'o', 'color', 'k', 'markerfacecolor', 'r')
-% 
-% WLElectro = HalfElectro(DL1st_sum~=0)+(DL1st_sum(DL1st_sum~=0)/2)+(DL2nd_sum(DL1st_sum~=0)/2);
-% plot(EffPotDrop, etoC*WLElectro(indx), 'o', 'color', 'k', 'markerfacecolor', 'r')
-% for i = 1:length(indx)
-%     text(EffPotDrop(i), etoC*WLElectro(indx(i)), [num2str(StepNum(indx(i))/2000) ' s'], 'verticalalignment', 'top', 'horizontalalignment', 'right')
-% end
-% hold off
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -------------------------------- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%%% Side Notes and helpful commands:
-%1)To turn off the light :
-           % delete(findall(gcf,'Type','light'))
 

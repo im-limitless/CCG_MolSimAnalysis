@@ -20,7 +20,7 @@ cmap(3,:) = [0 0 1];   %// blue
 
 [X,Y] = meshgrid([1:3],[1:n]);  %// mesh of indices
 
-Colors = interp2(X([1,n/2,n],:),Y([1,n/2,n],:),cmap,X,Y); %// interpolate colormap
+Colors = interp2(X([1,floor(n/2),n],:),Y([1,floor(n/2),n],:),cmap,X,Y); %// interpolate colormap
 % colormap(cmap) %// set color map
 
 % Colors = [ones(length(Qmc),1) linspace(0,1,length(Qmc))' zeros(length(Qmc),1)];
