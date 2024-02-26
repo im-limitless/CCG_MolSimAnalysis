@@ -12,7 +12,7 @@ system = 'Al_water'; % Name of calculation directory (no "\")
 % SampleRange = 100;
 % SampleRange = 1000;
 SampleRange = 6000;
-% SampleRange = 10000;
+%SampleRange = 10000;
 
 % Choose whether to plot an inset
 % Inset = 'Yes';
