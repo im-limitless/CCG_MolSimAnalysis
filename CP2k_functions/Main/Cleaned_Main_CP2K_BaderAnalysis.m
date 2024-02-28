@@ -212,9 +212,9 @@ end
 avenum_DL2nd=temp2/length(DL2nd);
 
 for i = 1:length(nonDL)
-    temp3=temp3+numel(nonDL{i})
+    temp3=temp3+numel(nonDL{i});
 end
-avenum_nonDL=temp3/length(nonDL)
+avenum_nonDL=temp3/length(nonDL);
 
 % Number of Alb, Al1, Al2, and total Al
 total_Al=size(xyz.Al,2);
@@ -504,7 +504,7 @@ ylabel('Total Charge (e)');
 legend('1st Water Layer', '<1st Water Layer>', 'Al Layers', '<Al Layers>', 'interpreter', 'tex')
 hold off
 
-%Per "O" atom 
+%Per DL1st molecule 
 figure
 box on
 hold on
@@ -539,7 +539,7 @@ plot(StepNum(DL2nd_sum~=0)/2000, (DL2nd_sum(DL2nd_sum~=0)), '-o', 'color', 'k', 
 plot([StepNum(1)/2000 StepNum(end)/2000], [mean(DL2nd_sum(DL2nd_sum~=0)) mean(DL2nd_sum(DL2nd_sum~=0))], '--', 'color', 'b');
 
 plot(StepNum/2000, totalAlsCharge/total_Al, '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'c');
-plot([StepNum(1)/2000 StepNum(end)/2000], [mean(totalAlsCharge) mean(totalAlsCharge)], '--', 'color', 'c');
+plot([StepNum(1)/2000 StepNum(end)/2000], [mean(totalAlsCharge)/total_Al mean(totalAlsCharge)/total_Al], '--', 'color', 'c');
 ylabel('Total Charge (e)');
 
 legend('1st Water Layer', '<1st Water Layer>', '2nd Water Layer', '<2nd Water Layer>', 'Al Layers', '<Al Layers>', 'interpreter', 'tex')
