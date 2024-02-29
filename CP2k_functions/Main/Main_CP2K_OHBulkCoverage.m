@@ -5,8 +5,8 @@ PathSep = setOSpathSep;
 %% Home
 % BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge/5lyr_systems/Al_AlO/Al_water/Fix_volume/BOMD/Temperature_fix/';
 BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge_2/Phase_diagram_sys/';
-system = 'AlO_water_1ML';
-Trajectory = 'AlO_water_1ML-pos-1.xyz';
+system = 'Al_water';
+Trajectory = 'Al_water-pos-1.xyz';
 
 % % Call function to find ABC vectors from .inp file
 ABC = getABCvectors(BaseFldr, system);
@@ -74,8 +74,8 @@ cond_OH=cOH(GC(GR==1));
 % OH_Mat_indx=Indx.O(cOH(GC(GR==1)));
 OH_O_Mat_indx=Indx.O(cond_OH);
 OH_H_Mat_indx=Indx.H(cOH(ismember(rOH,cond_OH)));
-OH_O_vmd_indx=OH_O_Mat_indx-1
-OH_H_vmd_indx=OH_H_Mat_indx-1
+OH_O_vmd_indx=OH_O_Mat_indx-1;
+OH_H_vmd_indx=OH_H_Mat_indx-1;
 % O_OH_vmd_indx(i)=OH_O_vmd_indx;
 % H_OH_vmd_indx(i)=OH_H_vmd_indx;
 
@@ -85,8 +85,8 @@ cond_H3O=cOH(GC(GR==3));
 % H3O_Mat_indx=Indx.O(cOH(GC(GR==3)));
 H3O_O_Mat_indx=Indx.O(cond_H3O);
 H3O_H_Mat_indx=Indx.H(cOH(ismember(rOH,cond_H3O)));
-H3O_O_vmd_indx=H3O_O_Mat_indx-1
-H3O_H_vmd_indx=H3O_H_Mat_indx-1
+H3O_O_vmd_indx=H3O_O_Mat_indx-1;
+H3O_H_vmd_indx=H3O_H_Mat_indx-1;
 % O_H3O_vmd_indx(i)=H3O_O_vmd_indx;
 end
 
@@ -97,10 +97,10 @@ Total_Coverage = OH_Coverage+H2O_Coverage+H3O_Coverage;
 %H2O,H3O,OH and total 
 figure
 hold on
-plot((1:nConfigs)*0.5, OH_Coverage, '-ok', 'markerfacecolor', 'r')
-plot((1:nConfigs)*0.5, H2O_Coverage, '-ok', 'markerfacecolor', 'b')
-plot((1:nConfigs)*0.5, H3O_Coverage, '-ok', 'markerfacecolor', 'auto')
-plot((1:nConfigs)*0.5, Total_Coverage, '-ok', 'markerfacecolor', [0 0.8 0])
+plot(StepNum_Traj/2000, OH_Coverage, '-ok', 'markerfacecolor', 'r')
+plot(StepNum_Traj/2000, H2O_Coverage, '-ok', 'markerfacecolor', 'b')
+plot(StepNum_Traj/2000, H3O_Coverage, '-ok', 'markerfacecolor', 'auto')
+plot(StepNum_Traj/2000, Total_Coverage, '-ok', 'markerfacecolor', [0 0.8 0])
 % plot((1:nConfigs)/200, OH_Coverage, '-ok', 'markerfacecolor', 'r')
 % plot((1:nConfigs)/200, H2O_Coverage, '-ok', 'markerfacecolor', 'b')
 % plot((1:nConfigs)/200, H3O_Coverage, '-ok', 'markerfacecolor', 'auto')
@@ -112,8 +112,8 @@ ylabel('Number of Molecules')
 %H3O and OH only
 figure
 hold on
-plot((1:nConfigs)*0.5, OH_Coverage, '-ok', 'markerfacecolor', 'r')
-plot((1:nConfigs)*0.5, H3O_Coverage, '-ok', 'markerfacecolor', 'auto')
+plot(StepNum_Traj/2000, OH_Coverage, '-ok', 'markerfacecolor', 'r')
+plot(StepNum_Traj/2000, H3O_Coverage, '-ok', 'markerfacecolor', 'auto')
 % plot((1:nConfigs)/200, OH_Coverage, '-ok', 'markerfacecolor', 'r')
 % plot((1:nConfigs)/200, H3O_Coverage, '-ok', 'markerfacecolor', 'auto')
 legend('OH','H3O')

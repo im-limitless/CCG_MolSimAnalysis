@@ -4,9 +4,9 @@ PathSep = setOSpathSep;
 
 %% Home
 %BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge/5lyr_systems/Al_AlO/Al_water/Fix_volume/BOMD/Temperature_fix/';
-BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge_2/The_rest/';
-system = 'OH_0.185ML';
-Trajectory = 'OH_0.185ML_36000to56000_1000step.xyz';
+BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge_2/Phase_diagram_sys/';
+system = 'Al_water';
+Trajectory = 'Al_water_153000to163000_1000step.xyz';
 
 % % Call function to find ABC vectors from .inp file
 ABC = getABCvectors(BaseFldr, system);
@@ -46,12 +46,12 @@ Total_Coverage = OH_Coverage+H2O_Coverage;
 
 figure
 hold on
-plot((1:nConfigs)*0.5, OH_Coverage, '-ok', 'markerfacecolor', 'r')
-plot((1:nConfigs)*0.5, H2O_Coverage, '-ok', 'markerfacecolor', 'b')
-plot((1:nConfigs)*0.5, Total_Coverage, '-ok', 'markerfacecolor', [0 0.8 0])
-% plot((1:nConfigs)/2000, OH_Coverage, '-ok', 'markerfacecolor', 'r')
-% plot((1:nConfigs)/2000, H2O_Coverage, '-ok', 'markerfacecolor', 'b')
-% plot((1:nConfigs)/2000, Total_Coverage, '-ok', 'markerfacecolor', [0 0.8 0])
+% plot((1:nConfigs)*0.5, OH_Coverage, '-ok', 'markerfacecolor', 'r')
+% plot((1:nConfigs)*0.5, H2O_Coverage, '-ok', 'markerfacecolor', 'b')
+% plot((1:nConfigs)*0.5, Total_Coverage, '-ok', 'markerfacecolor', [0 0.8 0])
+plot(StepNum_Traj/2000, OH_Coverage, '-ok', 'markerfacecolor', 'r')
+plot(StepNum_Traj/2000, H2O_Coverage, '-ok', 'markerfacecolor', 'b')
+plot(StepNum_Traj/2000, Total_Coverage, '-ok', 'markerfacecolor', [0 0.8 0])
 legend('OH', 'Water', 'Total')
 xlabel('Time (ps)')
 ylabel('Number of Molecules')

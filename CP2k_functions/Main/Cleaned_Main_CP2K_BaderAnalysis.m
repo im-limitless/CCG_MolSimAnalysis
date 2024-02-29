@@ -308,7 +308,7 @@ figure
 box on
 hold on
 xlabel('Time (ps)');
-ylabel('Ave. Charge per Atom (e)');
+ylabel('Ave. Charge per Atom type (e)');
 % title(['Total Bader charge for Pt Atoms in ' system], 'interpreter', 'none')
 AlC = [];
 for i = 1:length(AlList)
@@ -340,7 +340,7 @@ hold on
 xlabel('Time (ps)');
 ylabel('Total Charge (e)');
 title(['Total Bader charge for all electrolyte species in ' system], 'interpreter', 'none')
-C = [1 0 0; 1 0 0; 1 0 0; 0 0.5 0; 0 0 1; 218/255 165/255 32/255;219/255 166/255 34/255];
+C = [1 0 0; 1 1 0; 1 0 0; 0 0.5 0; 0 0 1; 218/255 165/255 32/255;219/255 166/255 34/255];
 IonList = 1:length(AtomList);
 IonList(AlList) = [];
 IonSumCharge = sum(SumCharge(IonList,:));
@@ -545,7 +545,7 @@ ylabel('Total Charge (e)');
 legend('1st Water Layer', '<1st Water Layer>', '2nd Water Layer', '<2nd Water Layer>', 'Al Layers', '<Al Layers>', 'interpreter', 'tex')
 hold off
 
-%Per "O" atom
+%Per atom
 figure
 box on
 hold on
@@ -560,7 +560,7 @@ plot([StepNum(1)/2000 StepNum(end)/2000], [mean(DL2nd_sum(DL2nd_sum~=0)/avenum_D
 
 plot(StepNum/2000, totalAlsCharge/total_Al, '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'c');
 plot([StepNum(1)/2000 StepNum(end)/2000], [mean(totalAlsCharge)/total_Al mean(totalAlsCharge)/total_Al], '--', 'color', 'c');
-ylabel('Charge (e) per O or Al ');
+ylabel('Charge (e) per Water or Al ');
 
 legend('1st Water Layer', '<1st Water Layer>', '2nd Water Layer', '<2nd Water Layer>', 'Al Layers', '<Al Layers>', 'interpreter', 'tex')
 hold off
