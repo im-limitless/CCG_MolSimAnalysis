@@ -88,16 +88,12 @@ if strcmp(DoubleAnalType, 'MassDensity')
     
     disp('Determining water layering from mass density profile...');
     
-    %% % get the O atom distribution and corresponding indices of DL atoms
+    %%% get the O atom distribution and corresponding indices of DL atoms (both O and H)
     [Dens_O, Dens_H, ~, ~, z] = getDensityProfile(xyz, ABC);
     %change getwaterlayerIndices to the name of the new function (same name
     %but add persnap at the end) +  [same same minimaZ] = same
     [FirstLayerIndx, SecondLayerIndx] = getWaterLayerIndicesPerSnap_new(Indx, XYZ, Dens_O, z);
     
-    %% getting the H atoms distribution and corresponding indicies of DL atoms
-    % ERROR: when using "Dens_H" I get very wrong number of H (based on
-    % tracked O atoms and that we have 2H for each of them or 3 max) 
-    [FirstLayerIndx_H, SecondLayerIndx_H] = H_getWaterLayerIndicesPerSnap_new(Indx, XYZ, Dens_O, z);
     
     for i = startConfig:nConfigs
         DL1st{i} = [FirstLayerIndx{i}];
@@ -245,6 +241,10 @@ end
 
 %% %%%%%%%%%%%%%% illustrations %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% NOTE:
+% The collected "Qnet" charges are the excess charges, thus in the graphs
+% we do an absolute value report where +ve means there was a gain
+% and -ve means there was a loss based on excess charge.
 %% %%%% ----- Al ----- %%%%
         
 
@@ -253,7 +253,7 @@ figure
 box on
 hold on
 xlabel('Time (ps)');
-ylabel('Total Charge (e)');
+ylabel('Total Excess Charge (|e|)');
 % title(['Total Bader charge for Al Atoms in ' system], 'interpreter', 'none')
 C = [218/255 165/255 32/255; 0.25 0.25 0.25; 0 0.5 0; 0 0 1; 1 0 0];
 AlC = [];
@@ -269,7 +269,7 @@ for i = 1:length(AlList)
     elseif contains(AtomList(AlList(i), :), 'Alb')
         AlC = C(5,:);
     end
-    plot(StepNum/2000, SumCharge(AlList(i),:), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', AlC);
+    plot(StepNum/2000, -SumCharge(AlList(i),:), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', AlC);
 end
 if length(AlList) == 2
     legend(AtomList(AlList(1),:), AtomList(AlList(2),:), 'interpreter', 'tex')
@@ -291,7 +291,7 @@ for i = 1:length(AlList)
     elseif contains(AtomList(AlList(i), :), 'Alb')
         AlC = C(5,:);
     end
-    plot([StepNum(1)/2000 StepNum(end)/2000], [mean(SumCharge(AlList(i),:)) mean(SumCharge(AlList(i),:))], '--', 'color', AlC);
+    plot([StepNum(1)/2000 StepNum(end)/2000], [-mean(SumCharge(AlList(i),:)) -mean(SumCharge(AlList(i),:))], '--', 'color', AlC);
 end
 if length(AlList) == 2
     legend(AtomList(AlList(1),:), AtomList(AlList(2),:), 'interpreter', 'tex')
@@ -307,8 +307,9 @@ hold off
 figure
 box on
 hold on
+C = [218/255 165/255 32/255; 0.25 0.25 0.25; 0 0.5 0; 0 0 1; 1 0 0];
 xlabel('Time (ps)');
-ylabel('Ave. Charge per Atom type (e)');
+ylabel('Ave. Excess Charge per Atom type (|e|)');
 % title(['Total Bader charge for Pt Atoms in ' system], 'interpreter', 'none')
 AlC = [];
 for i = 1:length(AlList)
@@ -323,7 +324,7 @@ for i = 1:length(AlList)
     elseif contains(AtomList(AlList(i), :), 'Alb')
         AlC = C(5,:);
     end
-    errorbar(StepNum/2000, MeanCharge(AlList(i),:), StdCharge(AlList(i),:), '-o', 'color', AlC, 'markeredgecolor', 'k', 'markerfacecolor', AlC);
+    errorbar(StepNum/2000, -MeanCharge(AlList(i),:), -StdCharge(AlList(i),:), '-o', 'color', AlC, 'markeredgecolor', 'k', 'markerfacecolor', AlC);
 end
 if length(AlList) == 2
     legend(AtomList(AlList(1),:), AtomList(AlList(2),:), 'interpreter', 'tex')
@@ -338,14 +339,16 @@ figure
 box on
 hold on
 xlabel('Time (ps)');
-ylabel('Total Charge (e)');
-title(['Total Bader charge for all electrolyte species in ' system], 'interpreter', 'none')
+ylabel('Total Excess Charge (|e|)');
+title(['Total Excess Bader charge for all electrolyte species in ' system], 'interpreter', 'none')
 C = [1 0 0; 1 1 0; 1 0 0; 0 0.5 0; 0 0 1; 218/255 165/255 32/255;219/255 166/255 34/255];
 IonList = 1:length(AtomList);
 IonList(AlList) = [];
 IonSumCharge = sum(SumCharge(IonList,:));
-plot(StepNum/2000, IonSumCharge, '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'm');
-legend('Total Electrolyte', 'interpreter', 'tex')
+plot(StepNum/2000, -IonSumCharge, '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'm');
+plot([StepNum(1)/2000 StepNum(end)/2000], [-mean(IonSumCharge(1,2:end)) -mean(IonSumCharge(1,2:end))], '--', 'color', [0.7 0.7 0.7]);
+AveStr = ['Traj. Ave. = ' num2str(mean(-IonSumCharge(1,2:end)), '%.2f') '\pm'  num2str(std(-IonSumCharge(1,2:end)), '%.2f')];
+legend('Total Electrolyte',AveStr, 'interpreter', 'tex')
 hold off
 
 for i = 1:length(AtomList)
@@ -353,12 +356,12 @@ for i = 1:length(AtomList)
         figure
         box on
         hold on
-        h1 = plot(StepNum/2000, SumCharge(i,:), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', C(i,:));
-        h2 = plot([StepNum(1)/2000 StepNum(end)/2000], [mean(SumCharge(i,2:end)) mean(SumCharge(i,2:end))], '--', 'color', [0.7 0.7 0.7]);
-        AveStr = ['Traj. Ave. = ' num2str(mean(SumCharge(i,2:end)), '%.2f') '\pm'  num2str(std(SumCharge(i,2:end)), '%.2f')];
+        h1 = plot(StepNum/2000, -SumCharge(i,:), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', C(i,:));
+        h2 = plot([StepNum(1)/2000 StepNum(end)/2000], [-mean(SumCharge(i,2:end)) -mean(SumCharge(i,2:end))], '--', 'color', [0.7 0.7 0.7]);
+        AveStr = ['Traj. Ave. = ' num2str(mean(-SumCharge(i,2:end)), '%.2f') '\pm'  num2str(std(-SumCharge(i,2:end)), '%.2f')];
         legend(AtomList(i,:), AveStr, 'interpreter', 'tex')
         xlabel('Time (ps)');
-        ylabel('Total Charge (e)');
+        ylabel('Total Excess Charge (|e|)');
         title(['Total Bader charge for ' AtomList(i,:) ' in ' system], 'interpreter', 'none')
         uistack(h1, 'top');
         hold off
@@ -373,9 +376,9 @@ box on
 hold on
 set(gca, 'colororder', [0 0 0]);
 xlabel('Time (ps)');
-plot(StepNum(DL1st_sum~=0)/2000, (DL1st_sum(DL1st_sum~=0)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'r');
-plot([StepNum(1)/2000 StepNum(end)/2000], [mean(DL1st_sum(DL1st_sum~=0)) mean(DL1st_sum(DL1st_sum~=0))], '--', 'color', 'r');
-ylabel('Total Charge (e)');
+plot(StepNum(DL1st_sum~=0)/2000, (-DL1st_sum(DL1st_sum~=0)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'r');
+plot([StepNum(1)/2000 StepNum(end)/2000], [-mean(DL1st_sum(DL1st_sum~=0)) -mean(DL1st_sum(DL1st_sum~=0))], '--', 'color', 'r');
+ylabel('Total Excess Charge (|e|)');
 legend('1st Water Layer')
 hold off
 % Per average number of "O"
@@ -384,9 +387,9 @@ box on
 hold on
 set(gca, 'colororder', [0 0 0]);
 xlabel('Time (ps)');
-plot(StepNum(DL1st_sum~=0)/2000, (DL1st_sum(DL1st_sum~=0)/avenum_DL1st), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'r');
-plot([StepNum(1)/2000 StepNum(end)/2000], [mean(DL1st_sum(DL1st_sum~=0)/avenum_DL1st) mean(DL1st_sum(DL1st_sum~=0)/avenum_DL1st)], '--', 'color', 'r');
-ylabel('Total Charge (e)');
+plot(StepNum(DL1st_sum~=0)/2000, (-DL1st_sum(DL1st_sum~=0)/avenum_DL1st), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'r');
+plot([StepNum(1)/2000 StepNum(end)/2000], [-mean(DL1st_sum(DL1st_sum~=0)/avenum_DL1st) -mean(DL1st_sum(DL1st_sum~=0)/avenum_DL1st)], '--', 'color', 'r');
+ylabel('Excess Charge (|e|) / Molecule');
 legend('1st Water Layer')
 hold off
 
@@ -398,9 +401,9 @@ hold on
 set(gca, 'colororder', [0 0 0]);
 ....
 xlabel('Time (ps)');
-plot(StepNum(DL2nd_sum~=0)/2000, (DL2nd_sum(DL2nd_sum~=0)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'r');
-plot([StepNum(1)/2000 StepNum(end)/2000], [mean(DL2nd_sum(DL2nd_sum~=0)) mean(DL2nd_sum(DL2nd_sum~=0))], '--', 'color', 'r');
-ylabel('Total Charge (e)');
+plot(StepNum(DL2nd_sum~=0)/2000, (-DL2nd_sum(DL2nd_sum~=0)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'r');
+plot([StepNum(1)/2000 StepNum(end)/2000], [-mean(DL2nd_sum(DL2nd_sum~=0)) -mean(DL2nd_sum(DL2nd_sum~=0))], '--', 'color', 'r');
+ylabel('Total Excess Charge (|e|)');
 legend('2nd Water Layer')
 hold off
 % Per average number of "O"
@@ -410,9 +413,9 @@ hold on
 set(gca, 'colororder', [0 0 0]);
 ....
 xlabel('Time (ps)');
-plot(StepNum(DL2nd_sum~=0)/2000, (DL2nd_sum(DL2nd_sum~=0)/avenum_DL2nd), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'r');
-plot([StepNum(1)/2000 StepNum(end)/2000], [mean(DL2nd_sum(DL2nd_sum~=0)/avenum_DL2nd) mean(DL2nd_sum(DL2nd_sum~=0)/avenum_DL2nd)], '--', 'color', 'r');
-ylabel('Total Charge (e)');
+plot(StepNum(DL2nd_sum~=0)/2000, (-DL2nd_sum(DL2nd_sum~=0)/avenum_DL2nd), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'r');
+plot([StepNum(1)/2000 StepNum(end)/2000], [-mean(DL2nd_sum(DL2nd_sum~=0)/avenum_DL2nd) -mean(DL2nd_sum(DL2nd_sum~=0)/avenum_DL2nd)], '--', 'color', 'r');
+ylabel('Excess Charge (|e|) / Molecule');
 legend('2nd Water Layer')
 hold off
 
@@ -423,9 +426,9 @@ hold on
 set(gca, 'colororder', [0 0 0]);
 ....
 xlabel('Time (ps)');
-plot(StepNum(nonDL_sum~=0)/2000, (nonDL_sum(nonDL_sum~=0)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'g');
-plot([StepNum(1)/2000 StepNum(end)/2000], [mean(nonDL_sum(nonDL_sum~=0)) mean(nonDL_sum(nonDL_sum~=0))], '--', 'color', 'g');
-ylabel('Total Charge (e)');
+plot(StepNum(nonDL_sum~=0)/2000, (-nonDL_sum(nonDL_sum~=0)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'g');
+plot([StepNum(1)/2000 StepNum(end)/2000], [-mean(nonDL_sum(nonDL_sum~=0)) -mean(nonDL_sum(nonDL_sum~=0))], '--', 'color', 'g');
+ylabel('Total Excess Charge (|e|)');
 legend('Bulk Water')
 hold off
 % Per average number of "O"
@@ -435,9 +438,9 @@ hold on
 set(gca, 'colororder', [0 0 0]);
 ....
 xlabel('Time (ps)');
-plot(StepNum(nonDL_sum~=0)/2000, (nonDL_sum(nonDL_sum~=0)/avenum_nonDL), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'g');
-plot([StepNum(1)/2000 StepNum(end)/2000], [mean(nonDL_sum(nonDL_sum~=0)/avenum_nonDL) mean(nonDL_sum(nonDL_sum~=0)/avenum_nonDL)], '--', 'color', 'g');
-ylabel('Charge (e) / O atom');
+plot(StepNum(nonDL_sum~=0)/2000, (-nonDL_sum(nonDL_sum~=0)/avenum_nonDL), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'g');
+plot([StepNum(1)/2000 StepNum(end)/2000], [-mean(nonDL_sum(nonDL_sum~=0)/avenum_nonDL) -mean(nonDL_sum(nonDL_sum~=0)/avenum_nonDL)], '--', 'color', 'g');
+ylabel('Excess Charge (|e|) / Molecule');
 legend('Bulk Water')
 hold off
 
@@ -452,13 +455,13 @@ hold on
 set(gca, 'colororder', [0 0 0]);
 ....
 xlabel('Time (ps)');
-plot(StepNum(DL1st_sum~=0)/2000, (DL1st_sum(DL1st_sum~=0)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'r');
-plot([StepNum(1)/2000 StepNum(end)/2000], [mean(DL1st_sum(DL1st_sum~=0)) mean(DL1st_sum(DL1st_sum~=0))], '--', 'color', 'r');
+plot(StepNum(DL1st_sum~=0)/2000, (-DL1st_sum(DL1st_sum~=0)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'r');
+plot([StepNum(1)/2000 StepNum(end)/2000], [-mean(DL1st_sum(DL1st_sum~=0)) -mean(DL1st_sum(DL1st_sum~=0))], '--', 'color', 'r');
 % ylabel('Total Charge (e)');
 % legend('1st Water Layer')
-plot(StepNum(DL2nd_sum~=0)/2000, (DL2nd_sum(DL2nd_sum~=0)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'b');
-plot([StepNum(1)/2000 StepNum(end)/2000], [mean(DL2nd_sum(DL2nd_sum~=0)) mean(DL2nd_sum(DL2nd_sum~=0))], '--', 'color', 'b');
-ylabel('Total Charge (e)');
+plot(StepNum(DL2nd_sum~=0)/2000, (-DL2nd_sum(DL2nd_sum~=0)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'b');
+plot([StepNum(1)/2000 StepNum(end)/2000], [-mean(DL2nd_sum(DL2nd_sum~=0)) -mean(DL2nd_sum(DL2nd_sum~=0))], '--', 'color', 'b');
+ylabel('Total Excess Charge (|e|)');
 % legend('2nd Water Layer')
 legend('1st Water Layer', '<1st Water Layer>', '2nd Water Layer', '<2nd Water Layer>', 'interpreter', 'tex')
 hold off
@@ -470,15 +473,15 @@ hold on
 set(gca, 'colororder', [0 0 0]);
 ....
 xlabel('Time (ps)');
-plot(StepNum(DL1st_sum~=0)/2000, (DL1st_sum(DL1st_sum~=0)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'r');
-plot([StepNum(1)/2000 StepNum(end)/2000], [mean(DL1st_sum(DL1st_sum~=0)) mean(DL1st_sum(DL1st_sum~=0))], '--', 'color', 'r');
+plot(StepNum(DL1st_sum~=0)/2000, (-DL1st_sum(DL1st_sum~=0)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'r');
+plot([StepNum(1)/2000 StepNum(end)/2000], [-mean(DL1st_sum(DL1st_sum~=0)) -mean(DL1st_sum(DL1st_sum~=0))], '--', 'color', 'r');
 
-plot(StepNum(DL2nd_sum~=0)/2000, (DL2nd_sum(DL2nd_sum~=0)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'b');
-plot([StepNum(1)/2000 StepNum(end)/2000], [mean(DL2nd_sum(DL2nd_sum~=0)) mean(DL2nd_sum(DL2nd_sum~=0))], '--', 'color', 'b');
+plot(StepNum(DL2nd_sum~=0)/2000, (-DL2nd_sum(DL2nd_sum~=0)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'b');
+plot([StepNum(1)/2000 StepNum(end)/2000], [-mean(DL2nd_sum(DL2nd_sum~=0)) -mean(DL2nd_sum(DL2nd_sum~=0))], '--', 'color', 'b');
 
-plot(StepNum(nonDL_sum~=0)/2000, (nonDL_sum(nonDL_sum~=0)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'g');
-plot([StepNum(1)/2000 StepNum(end)/2000], [mean(nonDL_sum(nonDL_sum~=0)) mean(nonDL_sum(nonDL_sum~=0))], '--', 'color', 'g');
-ylabel('Total Charge (e)');
+plot(StepNum(nonDL_sum~=0)/2000, (-nonDL_sum(nonDL_sum~=0)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'g');
+plot([StepNum(1)/2000 StepNum(end)/2000], [-mean(nonDL_sum(nonDL_sum~=0)) -mean(nonDL_sum(nonDL_sum~=0))], '--', 'color', 'g');
+ylabel('Total Excess Charge (|e|)');
 
 legend('1st Water Layer', '<1st Water Layer>', '2nd Water Layer', '<2nd Water Layer>', 'Bulk Water', '<Bulk Water>', 'interpreter', 'tex')
 hold off
@@ -494,12 +497,12 @@ hold on
 set(gca, 'colororder', [0 0 0]);
 ....
 xlabel('Time (ps)');
-plot(StepNum(DL1st_sum~=0)/2000, (DL1st_sum(DL1st_sum~=0)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'r');
-plot([StepNum(1)/2000 StepNum(end)/2000], [mean(DL1st_sum(DL1st_sum~=0)) mean(DL1st_sum(DL1st_sum~=0))], '--', 'color', 'r');
+plot(StepNum(DL1st_sum~=0)/2000, (-DL1st_sum(DL1st_sum~=0)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'r');
+plot([StepNum(1)/2000 StepNum(end)/2000], [-mean(DL1st_sum(DL1st_sum~=0)) -mean(DL1st_sum(DL1st_sum~=0))], '--', 'color', 'r');
 
-plot(StepNum/2000, totalAlsCharge, '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'c');
-plot([StepNum(1)/2000 StepNum(end)/2000], [mean(totalAlsCharge) mean(totalAlsCharge)], '--', 'color', 'c');
-ylabel('Total Charge (e)');
+plot(StepNum/2000, -totalAlsCharge, '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'c');
+plot([StepNum(1)/2000 StepNum(end)/2000], [-mean(totalAlsCharge) -mean(totalAlsCharge)], '--', 'color', 'c');
+ylabel('Total Excess Charge (|e|)');
 
 legend('1st Water Layer', '<1st Water Layer>', 'Al Layers', '<Al Layers>', 'interpreter', 'tex')
 hold off
@@ -511,12 +514,12 @@ hold on
 set(gca, 'colororder', [0 0 0]);
 ....
 xlabel('Time (ps)');
-plot(StepNum(DL1st_sum~=0)/2000, (DL1st_sum(DL1st_sum~=0)/avenum_DL1st), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'r');
-plot([StepNum(1)/2000 StepNum(end)/2000], [mean(DL1st_sum(DL1st_sum~=0))/avenum_DL1st mean(DL1st_sum(DL1st_sum~=0))/avenum_DL1st], '--', 'color', 'r');
+plot(StepNum(DL1st_sum~=0)/2000, (-DL1st_sum(DL1st_sum~=0)/avenum_DL1st), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'r');
+plot([StepNum(1)/2000 StepNum(end)/2000], [-mean(DL1st_sum(DL1st_sum~=0))/avenum_DL1st -mean(DL1st_sum(DL1st_sum~=0))/avenum_DL1st], '--', 'color', 'r');
 
-plot(StepNum/2000, totalAlsCharge/total_Al, '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'c');
-plot([StepNum(1)/2000 StepNum(end)/2000], [mean(totalAlsCharge)/total_Al mean(totalAlsCharge)/total_Al], '--', 'color', 'c');
-ylabel('Total Charge (e)');
+plot(StepNum/2000, -totalAlsCharge/total_Al, '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'c');
+plot([StepNum(1)/2000 StepNum(end)/2000], [-mean(totalAlsCharge)/total_Al -mean(totalAlsCharge)/total_Al], '--', 'color', 'c');
+ylabel('Total Excess Charge (|e|)');
 
 legend('1st Water Layer', '<1st Water Layer>', 'Al Layers', '<Al Layers>', 'interpreter', 'tex')
 hold off
@@ -532,15 +535,15 @@ hold on
 set(gca, 'colororder', [0 0 0]);
 ....
 xlabel('Time (ps)');
-plot(StepNum(DL1st_sum~=0)/2000, (DL1st_sum(DL1st_sum~=0)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'r');
-plot([StepNum(1)/2000 StepNum(end)/2000], [mean(DL1st_sum(DL1st_sum~=0)) mean(DL1st_sum(DL1st_sum~=0))], '--', 'color', 'r');
+plot(StepNum(DL1st_sum~=0)/2000, (-DL1st_sum(DL1st_sum~=0)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'r');
+plot([StepNum(1)/2000 StepNum(end)/2000], [-mean(DL1st_sum(DL1st_sum~=0)) -mean(DL1st_sum(DL1st_sum~=0))], '--', 'color', 'r');
 
-plot(StepNum(DL2nd_sum~=0)/2000, (DL2nd_sum(DL2nd_sum~=0)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'b');
-plot([StepNum(1)/2000 StepNum(end)/2000], [mean(DL2nd_sum(DL2nd_sum~=0)) mean(DL2nd_sum(DL2nd_sum~=0))], '--', 'color', 'b');
+plot(StepNum(DL2nd_sum~=0)/2000, (-DL2nd_sum(DL2nd_sum~=0)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'b');
+plot([StepNum(1)/2000 StepNum(end)/2000], [-mean(DL2nd_sum(DL2nd_sum~=0)) -mean(DL2nd_sum(DL2nd_sum~=0))], '--', 'color', 'b');
 
-plot(StepNum/2000, totalAlsCharge/total_Al, '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'c');
-plot([StepNum(1)/2000 StepNum(end)/2000], [mean(totalAlsCharge)/total_Al mean(totalAlsCharge)/total_Al], '--', 'color', 'c');
-ylabel('Total Charge (e)');
+plot(StepNum/2000, -totalAlsCharge/total_Al, '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'c');
+plot([StepNum(1)/2000 StepNum(end)/2000], [-mean(totalAlsCharge)/total_Al -mean(totalAlsCharge)/total_Al], '--', 'color', 'c');
+ylabel('Total Excess Charge (|e|)');
 
 legend('1st Water Layer', '<1st Water Layer>', '2nd Water Layer', '<2nd Water Layer>', 'Al Layers', '<Al Layers>', 'interpreter', 'tex')
 hold off
@@ -552,15 +555,15 @@ hold on
 set(gca, 'colororder', [0 0 0]);
 ....
 xlabel('Time (ps)');
-plot(StepNum(DL1st_sum~=0)/2000, (DL1st_sum(DL1st_sum~=0)/avenum_DL1st), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'r');
-plot([StepNum(1)/2000 StepNum(end)/2000], [mean(DL1st_sum(DL1st_sum~=0)/avenum_DL1st) mean(DL1st_sum(DL1st_sum~=0)/avenum_DL1st)], '--', 'color', 'r');
+plot(StepNum(DL1st_sum~=0)/2000, (-DL1st_sum(DL1st_sum~=0)/avenum_DL1st), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'r');
+plot([StepNum(1)/2000 StepNum(end)/2000], [-mean(DL1st_sum(DL1st_sum~=0)/avenum_DL1st) -mean(DL1st_sum(DL1st_sum~=0)/avenum_DL1st)], '--', 'color', 'r');
 
-plot(StepNum(DL2nd_sum~=0)/2000, (DL2nd_sum(DL2nd_sum~=0)/avenum_DL2nd), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'b');
-plot([StepNum(1)/2000 StepNum(end)/2000], [mean(DL2nd_sum(DL2nd_sum~=0)/avenum_DL2nd) mean(DL2nd_sum(DL2nd_sum~=0)/avenum_DL2nd)], '--', 'color', 'b');
+plot(StepNum(DL2nd_sum~=0)/2000, (-DL2nd_sum(DL2nd_sum~=0)/avenum_DL2nd), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'b');
+plot([StepNum(1)/2000 StepNum(end)/2000], [-mean(DL2nd_sum(DL2nd_sum~=0)/avenum_DL2nd) -mean(DL2nd_sum(DL2nd_sum~=0)/avenum_DL2nd)], '--', 'color', 'b');
 
-plot(StepNum/2000, totalAlsCharge/total_Al, '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'c');
-plot([StepNum(1)/2000 StepNum(end)/2000], [mean(totalAlsCharge)/total_Al mean(totalAlsCharge)/total_Al], '--', 'color', 'c');
-ylabel('Charge (e) per Water or Al ');
+plot(StepNum/2000, -totalAlsCharge/total_Al, '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'c');
+plot([StepNum(1)/2000 StepNum(end)/2000], [-mean(totalAlsCharge)/total_Al -mean(totalAlsCharge)/total_Al], '--', 'color', 'c');
+ylabel('Excess Charge (|e|) per Water or Al ');
 
 legend('1st Water Layer', '<1st Water Layer>', '2nd Water Layer', '<2nd Water Layer>', 'Al Layers', '<Al Layers>', 'interpreter', 'tex')
 hold off
@@ -568,27 +571,27 @@ hold off
 
 %% %%%%%%%%%%%%%%%% ----- Everything ----- %%%%%%%%%%%%%%%%
 
-%Total Charge
+%Total Excess Charge
 figure
 box on
 hold on
 set(gca, 'colororder', [0 0 0]);
 ....
 xlabel('Time (ps)');
-plot(StepNum(DL1st_sum~=0)/2000, (DL1st_sum(DL1st_sum~=0)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'r');
-plot([StepNum(1)/2000 StepNum(end)/2000], [mean(DL1st_sum(DL1st_sum~=0)) mean(DL1st_sum(DL1st_sum~=0))], '--', 'color', 'r');
+plot(StepNum(DL1st_sum~=0)/2000, (-DL1st_sum(DL1st_sum~=0)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'r');
+plot([StepNum(1)/2000 StepNum(end)/2000], [-mean(DL1st_sum(DL1st_sum~=0)) -mean(DL1st_sum(DL1st_sum~=0))], '--', 'color', 'r');
 
-plot(StepNum(DL2nd_sum~=0)/2000, (DL2nd_sum(DL2nd_sum~=0)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'b');
-plot([StepNum(1)/2000 StepNum(end)/2000], [mean(DL2nd_sum(DL2nd_sum~=0)) mean(DL2nd_sum(DL2nd_sum~=0))], '--', 'color', 'b');
+plot(StepNum(DL2nd_sum~=0)/2000, (-DL2nd_sum(DL2nd_sum~=0)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'b');
+plot([StepNum(1)/2000 StepNum(end)/2000], [-mean(DL2nd_sum(DL2nd_sum~=0)) -mean(DL2nd_sum(DL2nd_sum~=0))], '--', 'color', 'b');
 
-plot(StepNum(nonDL_sum~=0)/2000, (nonDL_sum(nonDL_sum~=0)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'g');
-plot([StepNum(1)/2000 StepNum(end)/2000], [mean(nonDL_sum(nonDL_sum~=0)) mean(nonDL_sum(nonDL_sum~=0))], '--', 'color', 'g');
-ylabel('Total Charge (e)');
+plot(StepNum(nonDL_sum~=0)/2000, (-nonDL_sum(nonDL_sum~=0)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'g');
+plot([StepNum(1)/2000 StepNum(end)/2000], [-mean(nonDL_sum(nonDL_sum~=0)) -mean(nonDL_sum(nonDL_sum~=0))], '--', 'color', 'g');
+ylabel('Total Excess Charge (|e|)');
 
 % legend('1st Water Layer', '<1st Water Layer>', '2nd Water Layer', '<2nd Water Layer>', 'Bulk Water', '<Bulk Water>', 'interpreter', 'tex')
 
 xlabel('Time (ps)');
-ylabel('Total Charge (e)');
+ylabel('Total Excess Charge (|e|)');
 % title(['Total Bader charge for Al Atoms in ' system], 'interpreter', 'none')
 C = [218/255 165/255 32/255; 0.25 0.25 0.25; 0 0.5 0; 0 0 1; 139/255 0 139/255];
 AlC = [];
@@ -604,7 +607,7 @@ for i = 1:length(AlList)
     elseif contains(AtomList(AlList(i), :), 'Alb')
         AlC = C(5,:);
     end
-    plot(StepNum/2000, SumCharge(AlList(i),:), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', AlC);
+    plot(StepNum/2000, -SumCharge(AlList(i),:), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', AlC);
 end
 
 for i = 1:length(AlList)
@@ -619,7 +622,7 @@ for i = 1:length(AlList)
     elseif contains(AtomList(AlList(i), :), 'Alb')
         AlC = C(5,:);
     end
-    plot([StepNum(1)/2000 StepNum(end)/2000], [mean(SumCharge(AlList(i),:)) mean(SumCharge(AlList(i),:))], '--', 'color', AlC);
+    plot([StepNum(1)/2000 StepNum(end)/2000], [-mean(SumCharge(AlList(i),:)) -mean(SumCharge(AlList(i),:))], '--', 'color', AlC);
 end
 % if length(AlList) == 2
 %     legend(AtomList(AlList(1),:), AtomList(AlList(2),:), 'interpreter', 'tex')
@@ -643,9 +646,15 @@ hold off
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Everything Below is working fine %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-AlNums = [];
+AlNums =[];
+Al1=[];
+Al2=[];
+Alb=[];
 for i = 1:length(AlList)
     AlNums = [AlNums; Indx.(Indxfns{AlList(i)})];
+    Al1=[Al1; Indx.(Indxfns{AlList(1)})];
+    Al2=[Al2; Indx.(Indxfns{AlList(2)})];
+    Alb=[Alb; Indx.(Indxfns{AlList(3)})];
 end
 
 % Creating a double that includes all the Al atoms + 1st Layer of water;
@@ -671,12 +680,34 @@ AlDL= cat(1,AlNums,d_DL1st,d_DL2nd);
 
 %% Average over all ACF snapshots %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Als ONLY %%
-MeanQnet = mean(Qnet(AlNums,1:end),2);
-Bader3DCharge(XYZ_snap(AlNums,:), ABC, MeanQnet);
+MeanQnet = mean(Qnet(Al1,1:end),2);
+Bader3DCharge(XYZ_snap(Al1,:), ABC, MeanQnet);
 % light
 % XYZ_snap = zeros(size(XYZ,2), size(XYZ,3));
 % XYZ_snap(:,:) = XYZ(1,:,:);
 % MeanQnet = mean(Qnet(PtNums,:),2);
+
+%% Al1 ONLY %%
+MeanQnet = mean(Qnet(Al1,1:end),2);
+Bader3DCharge(XYZ_snap(Al1,:), ABC, MeanQnet);
+
+%% Al2 ONLY %%
+MeanQnet = mean(Qnet(Al2,1:end),2);
+Bader3DCharge(XYZ_snap(Al2,:), ABC, MeanQnet);
+
+%% Alb ONLY %%
+MeanQnet = mean(Qnet(Alb,1:end),2);
+Bader3DCharge(XYZ_snap(Alb,:), ABC, MeanQnet);
+
+%% DL1st ONLY %%
+MeanQnet = mean(Qnet(d_DL1st,1:end),2);
+Bader3DCharge(XYZ_snap(d_DL1st,:), ABC, MeanQnet);
+
+%% DL2nd ONLY %%
+MeanQnet = mean(Qnet(d_DL2nd,1:end),2);
+Bader3DCharge(XYZ_snap(d_DL2nd,:), ABC, MeanQnet);
+
+
 %% Als + 1WL ONLY %%
 MeanQnet = mean(Qnet(AlDL1st,1:end),2);
 Bader3DCharge(XYZ_snap(AlDL1st,:), ABC, MeanQnet);

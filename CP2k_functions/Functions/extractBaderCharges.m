@@ -38,7 +38,10 @@ Bader = readmatrix([fldrname flname], 'headerlines', 2, 'FileType', 'Text');
 %     PtIndxs = find(ismember(AtomList, 'Pt'));
 %     PtIndxs = PtIndxs(PtIndxs < length(AtomList)+1);
 %     
-    NetCharge = (NetCharge-TotalCharge).*Indx;
+    
+    NetCharge = (NetCharge-TotalCharge).*Indx; 
+    %% Potential error in the above line in sign convention CHECK? (chemists vs physicsts conventions or surface teminologies)
+    % NetCharge = (TotalCharge-NetCharge).*Indx;
     Qnet = sum(NetCharge,2);
       
     return
