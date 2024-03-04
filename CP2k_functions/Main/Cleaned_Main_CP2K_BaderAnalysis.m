@@ -70,11 +70,13 @@ for snap = startConfig:nConfigs
     [VecOH, DistOH] = GetAtomCorrelation(XYZ_snap, Indx.O, Indx.H, ABC);
 %     [VecFH, DistFH] = GetAtomCorrelation(XYZ_snap, Indx.F, Indx.H, ABC);
 %     [VecFO, DistFO] = GetAtomCorrelation(XYZ_snap, Indx.F, Indx.O, ABC);
+    [VecAl1_Al1, DistAl1_Al1{snap}] = GetAtomCorrelation(XYZ_snap, [Indx.Al1], Indx.Al1, ABC);
     
     RadFunOH{snap} = reshape(DistOH, [numel(DistOH), 1]);
 % %     RadFunFH{snap} = reshape(DistFH, [numel(DistFH), 1]);
 % %     RadFunFO{snap} = reshape(DistFO, [numel(DistFO), 1]);
     RadFunAlO{snap} = reshape(DistAlO{snap}, [numel(DistAlO{snap}), 1]);
+    RadFunAl1_Al1{snap} = reshape(DistAl1_Al1{snap}, [numel(DistAl1_Al1{snap}), 1]);
 
 end
 
@@ -82,6 +84,7 @@ MinimaOH = RadialDistribution(RadFunOH, ABC, ['O'; 'H'], 1);
 % % MinimaFH = RadialDistribution(RadFunFH, ABC, ['F'; 'H'], 0);
 % % MinimaFO = RadialDistribution(RadFunFO, ABC, ['F'; 'O'], 0);
 MinimaAlO = RadialDistribution(RadFunAlO, ABC, ['Al'; 'O '], 1);
+MinimaAl1_Al1 = RadialDistribution(RadFunAl1_Al1, ABC, ['Al1'; 'Al1'], 1);
 
 
 if strcmp(DoubleAnalType, 'MassDensity')
@@ -99,13 +102,16 @@ if strcmp(DoubleAnalType, 'MassDensity')
         DL1st{i} = [FirstLayerIndx{i}];
         DL2nd{i} = [SecondLayerIndx{i}];
         nonDL{i} = setdiff(Indx.O, [DL1st{i}; DL2nd{i}]);
+        DL1st_AlO{i} = [];
+     
         
         XYZ_snap = zeros(size(XYZ,2), size(XYZ,3));
         XYZ_snap(:,:) = XYZ(i,:,:);
         [~, DistOH1stWL] = GetAtomCorrelation(XYZ_snap, DL1st{i}, Indx.H, ABC);
         [~, DistOH2ndWL] = GetAtomCorrelation(XYZ_snap, DL2nd{i}, Indx.H, ABC);
         [~, DistOHnonDL] = GetAtomCorrelation(XYZ_snap, nonDL{i}, Indx.H, ABC);
-        
+        [~, DistOAl1stWL] = GetAtomCorrelation(XYZ_snap, DL1st{i}, Indx.Al1, ABC);
+
         for j = 1:length(DL1st{i})
             DL1st{i} = [DL1st{i}; Indx.H(find(DistOH1stWL(:,j)<MinimaOH(1)))];
         end
@@ -117,7 +123,29 @@ if strcmp(DoubleAnalType, 'MassDensity')
         for j = 1:length(nonDL{i})
             nonDL{i} = [nonDL{i}; Indx.H(find(DistOHnonDL(:,j)<MinimaOH(1)))];
         end
+% % DL1st_AlO finds the "Al" that are connected to the "O" of the 1st WL in
+% the DL (i.e. the "O" in the DL1st or the indices in the FirstLayerIndx)
+         for j = 1:length(FirstLayerIndx{i})
+            DL1st_AlO{i} = [DL1st_AlO{i}; Indx.Al1(find(DistOAl1stWL(:,j)<=MinimaAlO(1)))];
+        end
     end
+
+% % to get the neighboring Al atoms to the ones in DL1st_AlO we do the
+% following:
+% Note [Mar 4 '24 @21:49 GMT]: DL1st_nAlO seems to include BOTH the
+% DL1st_AlO and its neighbors! there are many dublicates as well 
+for i = startConfig:nConfigs
+        DL1st_nAlO{i} = [];
+
+        XYZ_snap = zeros(size(XYZ,2), size(XYZ,3));
+        XYZ_snap(:,:) = XYZ(i,:,:);
+        [~, Dist_n_OAl1stWL] = GetAtomCorrelation(XYZ_snap, DL1st_AlO{i}, Indx.Al1, ABC);
+
+        for j = 1:length( DL1st_AlO{i})
+            DL1st_nAlO{i} = [DL1st_nAlO{i}; Indx.Al1(find(Dist_n_OAl1stWL(:,j)<=MinimaAl1_Al1(1)))];
+        end
+end
+
     
 elseif strcmp(DoubleAnalType, 'Radial')
     
@@ -659,13 +687,15 @@ end
 
 % Creating a double that includes all the Al atoms + 1st Layer of water;
 
-d_DL1st= DL1st(1,11);
+d_DL1st= DL1st(1,1);
 %%%% Note: The atoms of the water are added from a single snapshot instead
 %%%% of an average (might need to add the average later). 
 %%%% Feb 26, 2024: this is not an issue for the 1st WL (in the clean system for sure)
 %%%% as the atoms of this layer are stable. %%%%
 d_DL1st = cell2mat(d_DL1st);
 AlDL1st= cat(1,AlNums,d_DL1st);
+
+
 
 % Creating a double that includes all the Al atoms + 1st&2nd Layer of water;
 
@@ -675,6 +705,16 @@ d_DL2nd= DL2nd(1,11);
 d_DL2nd = cell2mat(d_DL2nd);
 AlDL2nd= cat(1,AlNums,d_DL2nd);
 AlDL= cat(1,AlNums,d_DL1st,d_DL2nd);
+
+
+%Same as the note above%
+% These are the Al1 atoms affected by 1st WL (bonded and surface neighbors)
+d_AlDL1st=DL1st_nAlO(1,1);
+d_AlDL1st=cell2mat(d_AlDL1st);
+
+%Al1 atoms affected + 1st WL
+nAl1DL1st=cat(1,d_AlDL1st,d_DL1st);
+
 
 % XYZ_ave(:,:) = mean(XYZ, 1);
 
@@ -699,6 +739,10 @@ Bader3DCharge(XYZ_snap(Al2,:), ABC, MeanQnet);
 MeanQnet = mean(Qnet(Alb,1:end),2);
 Bader3DCharge(XYZ_snap(Alb,:), ABC, MeanQnet);
 
+%% Al affected by DL1st Water only %%
+MeanQnet = mean(Qnet(d_AlDL1st,1:end),2);
+Bader3DCharge(XYZ_snap(d_AlDL1st,:), ABC, MeanQnet);
+
 %% DL1st ONLY %%
 MeanQnet = mean(Qnet(d_DL1st,1:end),2);
 Bader3DCharge(XYZ_snap(d_DL1st,:), ABC, MeanQnet);
@@ -707,6 +751,10 @@ Bader3DCharge(XYZ_snap(d_DL1st,:), ABC, MeanQnet);
 MeanQnet = mean(Qnet(d_DL2nd,1:end),2);
 Bader3DCharge(XYZ_snap(d_DL2nd,:), ABC, MeanQnet);
 
+
+%% Al affected by DL1st Water + 1WL only %%
+MeanQnet = mean(Qnet(nAl1DL1st,1:end),2);
+Bader3DCharge(XYZ_snap(nAl1DL1st,:), ABC, MeanQnet);
 
 %% Als + 1WL ONLY %%
 MeanQnet = mean(Qnet(AlDL1st,1:end),2);
