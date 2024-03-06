@@ -2,7 +2,7 @@ function Bader3DCharge(XYZ, ABC, Qmc)
 
 disp('Creating 3D charge distribution map...');
 
-[xs,ys,zs] = sphere(10,100);   %//sphere(n) will give an sphere with n X n faces (cross sectional and vertical lines)
+[xs,ys,zs] = sphere(10,100);   %//sphere(n) will give an sphere with n X n faces (cross sectional and vertical lines).
 Radius = 1;
 
 figure('Color','w')
