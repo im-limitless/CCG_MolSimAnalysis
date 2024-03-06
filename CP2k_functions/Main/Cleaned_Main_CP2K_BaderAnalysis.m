@@ -72,6 +72,7 @@ for snap = startConfig:nConfigs
 %     [VecFO, DistFO] = GetAtomCorrelation(XYZ_snap, Indx.F, Indx.O, ABC);
     [VecAl1_Al1, DistAl1_Al1{snap}] = GetAtomCorrelation(XYZ_snap, [Indx.Al1], Indx.Al1, ABC); 
     [VecAl1_Al2, DistAl1_Al2{snap}] = GetAtomCorrelation(XYZ_snap, [Indx.Al1], Indx.Al2, ABC);
+    [VecAl2_Alb, DistAl2_Alb{snap}] = GetAtomCorrelation(XYZ_snap, [Indx.Al2], Indx.Alb, ABC);
     
     RadFunOH{snap} = reshape(DistOH, [numel(DistOH), 1]);
 % %     RadFunFH{snap} = reshape(DistFH, [numel(DistFH), 1]);
@@ -79,6 +80,7 @@ for snap = startConfig:nConfigs
     RadFunAlO{snap} = reshape(DistAlO{snap}, [numel(DistAlO{snap}), 1]);
     RadFunAl1_Al1{snap} = reshape(DistAl1_Al1{snap}, [numel(DistAl1_Al1{snap}), 1]);
     RadFunAl1_Al2{snap} = reshape(DistAl1_Al2{snap}, [numel(DistAl1_Al2{snap}), 1]);
+    RadFunAl2_Alb{snap} = reshape(DistAl2_Alb{snap}, [numel(DistAl2_Alb{snap}), 1]);
 
 end
 
@@ -88,6 +90,7 @@ MinimaOH = RadialDistribution(RadFunOH, ABC, ['O'; 'H'], 1);
 MinimaAlO = RadialDistribution(RadFunAlO, ABC, ['Al'; 'O '], 1);
 MinimaAl1_Al1 = RadialDistribution(RadFunAl1_Al1, ABC, ['Al1'; 'Al1'], 1);
 MinimaAl1_Al2 = RadialDistribution(RadFunAl1_Al2, ABC, ['Al1'; 'Al2'], 1);
+MinimaAl2_Alb = RadialDistribution(RadFunAl2_Alb, ABC, ['Al2'; 'Alb'], 1);
 
 
 if strcmp(DoubleAnalType, 'MassDensity')
@@ -135,9 +138,12 @@ if strcmp(DoubleAnalType, 'MassDensity')
 
 % % [On the above] to get the neighboring Al atoms to the ones in DL1st_AlO we do the
 % following:
-% Note [Mar 4 '24 @21:49 GMT]: DL1st_nAlO seems to include BOTH the
+% Note [Mar 4 '24 @21:49 GMT]: DL1st_nAlO (in the loop below) seems to include BOTH the
 % DL1st_AlO and its neighbors! there are many dublicates as well 
 
+
+% % [Below] This is collecting the Al2 nearest neighbours using the bonded
+% Al1
 for i = startConfig:nConfigs
         DL1st_nAlO{i} = [];
         DL1st_Al2_nAlO{i} = [];
@@ -151,6 +157,26 @@ for i = startConfig:nConfigs
             DL1st_nAlO{i} = [DL1st_nAlO{i}; Indx.Al1(find(Dist_n_OAl1stWL(:,j)<=MinimaAl1_Al1(1)))]; %This captures all Al1 bonded to 1WL and its Al1 neighbours
             DL1st_Al2_nAlO{i} = [DL1st_Al2_nAlO{i}; Indx.Al2(find(Dist_n_Al2_OAl1stWL(:,j)<=MinimaAl1_Al2(1)))]; %This captures all Al2 neighbours to Al1 bonded to 1WL
         end
+end
+
+% % [Below] This is collecting the Alb nearest neighbours of the Al2 nearest neighbours collected above 
+for i = startConfig:nConfigs
+        DL1st_Alb_nAl2O{i} = [];
+
+        XYZ_snap = zeros(size(XYZ,2), size(XYZ,3));
+        XYZ_snap(:,:) = XYZ(i,:,:);
+        [~, Dist_n_Alb_OAl1stWL] = GetAtomCorrelation(XYZ_snap, DL1st_Al2_nAlO{i}, Indx.Alb, ABC); %This is the distribution of the Al2 nearest neighbours to 1WL "O" and all Alb
+
+        for j = 1:length(DL1st_Al2_nAlO{i})
+            DL1st_Alb_nAl2O{i} = [DL1st_Alb_nAl2O{i}; Indx.Alb(find(Dist_n_Alb_OAl1stWL(:,j)<=MinimaAl2_Alb(1)))]; %This captures all Alb neighbours to Al2 nearest neighbours to 1WL
+        end
+end
+
+% % Getting rid of dublicates in the fllowing variables:
+for i = startConfig:nConfigs
+    DL1st_nAlO{i}=unique(DL1st_nAlO{i});
+    DL1st_Al2_nAlO{i}=unique(DL1st_Al2_nAlO{i});
+    DL1st_Alb_nAl2O{i}=unique(DL1st_Alb_nAl2O{i});
 end
 
 %%%%%%%%%%%%%%%%%% Special Investigation %%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -173,11 +199,17 @@ S_DL1st_AlO = [Indx.Al1(find(S_DistOAl1stWL(:,:)<=MinimaAlO(1)))]; %The Al1 bond
 [~, S_Dist_n_OAl1stWL] = GetAtomCorrelation(XYZ_snap, S_DL1st_AlO, Indx.Al1, ABC); %This is the distribution of the Al1 bonded to 1WL "O" and all Al1
 [~, S_Dist_n_Al2_OAl1stWL] = GetAtomCorrelation(XYZ_snap, S_DL1st_AlO, Indx.Al2, ABC); %This is the distribution of the Al1 bonded to 1WL "O" and all Al2
 
+
 S_DL1st_nAlO = [Indx.Al1(find(S_Dist_n_OAl1stWL(:,:)<=MinimaAl1_Al1(1)))]; %This captures all Al1 bonded to 1WL and its Al1 neighbours
 S_DL1st_Al2_nAlO = [Indx.Al2(find(S_Dist_n_Al2_OAl1stWL(:,:)<=MinimaAl1_Al2(1)))]; %This captures all Al2 neighbours to Al1 bonded to 1WL
 
-S_all_Single1WL=[Single1WL;S_DL1st_nAlO;S_DL1st_Al2_nAlO]; % The singel 1st WL and all its nearest neighbours in Al1 and Al2
-S_Als_Single1WL=[S_DL1st_nAlO;S_DL1st_Al2_nAlO]; % nearest neighbours in Al1 and Al2
+[~, S_Dist_n_Alb_OAl1stWL] = GetAtomCorrelation(XYZ_snap, S_DL1st_Al2_nAlO, Indx.Alb, ABC); %This is the distribution of the Al2 nearest neighbours to 1WL "O" and all Alb
+for j = 1:length(S_DL1st_Al2_nAlO)
+    S_DL1st_Alb_nAl2O = [Indx.Alb(find(S_Dist_n_Alb_OAl1stWL(:,j)<=MinimaAl2_Alb(1)))]; %This captures all Alb neighbours to Al2 nearest neighbours to 1WL
+end
+
+S_all_Single1WL=[Single1WL;S_DL1st_nAlO;S_DL1st_Al2_nAlO;S_DL1st_Alb_nAl2O]; % The singel 1st WL and all its nearest neighbours in Al1, Al2, and Alb
+S_Als_Single1WL=[S_DL1st_nAlO;S_DL1st_Al2_nAlO;S_DL1st_Alb_nAl2O]; % nearest neighbours in Al1, Al2, and Alb
 
 % CHARGES %%%
 S_Single1WL_MeanQnet = mean(Qnet(Single1WL,1:end),2); %Only the Single1WL 
@@ -186,9 +218,10 @@ S_S_DL1st_AlO_MeanQnet = mean(Qnet(S_DL1st_AlO,1:end),2); %Only the bonded Al
 
 S_S_DL1st_nAlO_MeanQnet = mean(Qnet(S_DL1st_nAlO,1:end),2); %Only the bonded Al + Al1s nearest neighbours
 S_S_DL1st_Al2_nAlO_MeanQnet = mean(Qnet(S_DL1st_Al2_nAlO,1:end),2); %Only the Al2s nearest neighbours
+S_S_DL1st_Alb_nAl2O_MeanQnet = mean(Qnet(S_DL1st_Alb_nAl2O,1:end),2); %Only the Albs nearest neighbours
 S_Als_MeanQnet = mean(Qnet(S_Als_Single1WL,1:end),2); %Only the Als (boneded + nearest neighbours)
 S_MeanQnet = mean(Qnet(S_all_Single1WL,1:end),2); %All
-% Bader3DCharge(XYZ_snap(S_all_Single1WL,:), ABC, S_MeanQnet);
+Bader3DCharge(XYZ_snap(S_Als_Single1WL,:), ABC, S_Als_MeanQnet);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
 elseif strcmp(DoubleAnalType, 'Radial')
