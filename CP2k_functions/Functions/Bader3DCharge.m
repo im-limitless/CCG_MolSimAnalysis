@@ -2,7 +2,7 @@ function Bader3DCharge(XYZ, ABC, Qmc)
 
 disp('Creating 3D charge distribution map...');
 
-[xs,ys,zs] = sphere(10,100);
+[xs,ys,zs] = sphere(10,100);   %//sphere(n) will give an sphere with n X n faces (cross sectional and vertical lines)
 Radius = 1;
 
 figure('Color','w')
@@ -21,6 +21,11 @@ cmap(3,:) = [0 0 1];   %// blue
 [X,Y] = meshgrid([1:3],[1:n]);  %// mesh of indices
 
 Colors = interp2(X([1,floor(n/2),n],:),Y([1,floor(n/2),n],:),cmap,X,Y); %// interpolate colormap
+%// on "interp2(X,Y,V,Xq,Yq)": X and Y contains specific locations to be
+%//replaced by V and then interpolation happens between these points and are
+%//placed in Xq and Yq
+
+
 % colormap(cmap) %// set color map
 
 % Colors = [ones(length(Qmc),1) linspace(0,1,length(Qmc))' zeros(length(Qmc),1)];
