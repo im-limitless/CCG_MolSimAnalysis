@@ -187,8 +187,30 @@ end
 i=1; %Snapshot
 Single1WL= FirstLayerIndx{i}(1,:); % "O" atom (n,:) in snapshot "i" 
 
+
+for snap = startConfig:nConfigs
+    XYZ_snap = zeros(size(XYZ,2), size(XYZ,3));
+    XYZ_snap(:,:) = XYZ(snap,:,:);
+
+    [Vec1stWL_2ndWL, Dist1stWL_2ndWL{snap}] = GetAtomCorrelation(XYZ_snap, FirstLayerIndx{snap}(:), SecondLayerIndx{snap}(:),  ABC);
+    RadFunSingle1WL_2ndWL{snap} = reshape(Dist1stWL_2ndWL{snap}, [numel(Dist1stWL_2ndWL{snap}), 1]);
+end
+MinimaSingle1WL_2ndWL = RadialDistribution(RadFunSingle1WL_2ndWL, ABC, ['Single1WL'; '2ndWL    '], 1);  %vertcat error related to matrix length comes from the names (they have to be equal in length)
+
+
+
 XYZ_snap = zeros(size(XYZ,2), size(XYZ,3));
 XYZ_snap(:,:) = XYZ(i,:,:);
+
+[~, S_DistO2ndWL] = GetAtomCorrelation(XYZ_snap, Single1WL, SecondLayerIndx{i}(:), ABC);
+for j = 1:length(Single1WL)
+    S_DLSingle1WL_2ndWL = [SecondLayerIndx{i}(find(S_DistO2ndWL(:,j)<=MinimaSingle1WL_2ndWL(1)))]; %The 2nd WL "O" closest to the Single1WL
+end
+
+[~, S_DistOH2ndWL] = GetAtomCorrelation(XYZ_snap,S_DLSingle1WL_2ndWL, Indx.H, ABC);
+for j = 1:length(S_DLSingle1WL_2ndWL)
+            S_DLSingle1WL_2ndWL = [S_DLSingle1WL_2ndWL; Indx.H(find(S_DistOH2ndWL(:,j)<MinimaOH(1)))]; %Adding "H" to the 2nd WL "O" closest to the Single1WL
+end
 
 [~, S_DistOH1stWL] = GetAtomCorrelation(XYZ_snap, Single1WL, Indx.H, ABC);
 [~, S_DistOAl1stWL] = GetAtomCorrelation(XYZ_snap, Single1WL, Indx.Al1, ABC); %This is the distribution of Single1WL 1WL "O" and all its Al1
@@ -208,12 +230,12 @@ for j = 1:length(S_DL1st_Al2_nAlO)
     S_DL1st_Alb_nAl2O = [Indx.Alb(find(S_Dist_n_Alb_OAl1stWL(:,j)<=MinimaAl2_Alb(1)))]; %This captures all Alb neighbours to Al2 nearest neighbours to 1WL
 end
 
-S_all_Single1WL=[Single1WL;S_DL1st_nAlO;S_DL1st_Al2_nAlO;S_DL1st_Alb_nAl2O]; % The singel 1st WL and all its nearest neighbours in Al1, Al2, and Alb
+S_all_Single1WL=[Single1WL;S_DL1st_nAlO;S_DL1st_Al2_nAlO;S_DLSingle1WL_2ndWL;S_DL1st_Alb_nAl2O]; % The singel 1st WL and all its nearest neighbours in 2ndWL, Al1, Al2, and Alb
 S_Als_Single1WL=[S_DL1st_nAlO;S_DL1st_Al2_nAlO;S_DL1st_Alb_nAl2O]; % nearest neighbours in Al1, Al2, and Alb
 
 % CHARGES %%%
 S_Single1WL_MeanQnet = mean(Qnet(Single1WL,1:end),2); %Only the Single1WL 
-
+S_Single1WL_2ndWL_MeanQnet = mean(Qnet(S_DLSingle1WL_2ndWL,1:end),2); %Only the closest 2ndWL to Single1WL 
 S_S_DL1st_AlO_MeanQnet = mean(Qnet(S_DL1st_AlO,1:end),2); %Only the bonded Al
 
 S_S_DL1st_nAlO_MeanQnet = mean(Qnet(S_DL1st_nAlO,1:end),2); %Only the bonded Al + Al1s nearest neighbours
@@ -221,7 +243,7 @@ S_S_DL1st_Al2_nAlO_MeanQnet = mean(Qnet(S_DL1st_Al2_nAlO,1:end),2); %Only the Al
 S_S_DL1st_Alb_nAl2O_MeanQnet = mean(Qnet(S_DL1st_Alb_nAl2O,1:end),2); %Only the Albs nearest neighbours
 S_Als_MeanQnet = mean(Qnet(S_Als_Single1WL,1:end),2); %Only the Als (boneded + nearest neighbours)
 S_MeanQnet = mean(Qnet(S_all_Single1WL,1:end),2); %All
-Bader3DCharge(XYZ_snap(S_Als_Single1WL,:), ABC, S_Als_MeanQnet);
+Bader3DCharge(XYZ_snap(S_all_Single1WL,:), ABC, S_MeanQnet);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
 elseif strcmp(DoubleAnalType, 'Radial')
