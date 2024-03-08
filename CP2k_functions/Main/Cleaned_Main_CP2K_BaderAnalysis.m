@@ -179,13 +179,19 @@ for i = startConfig:nConfigs
     DL1st_Alb_nAl2O{i}=unique(DL1st_Alb_nAl2O{i});
 end
 
-%%%%%%%%%%%%%%%%%% Special Investigation %%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Special Investigation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % We are only going to pick one 1st WL molecule and all its nearest
 % neighbours (Al1 and Al2) and then investigate their Bader charge 
 % 
 % NOTE: SINGLE molecule, in ONE snapshot
-i=1; %Snapshot
-Single1WL= FirstLayerIndx{i}(1,:); % "O" atom (n,:) in snapshot "i" 
+i=7; %Snapshot
+
+
+
+for n = 1:length(FirstLayerIndx{i}(:))
+Sum_S_Q{n}=[];
+
+Single1WL= FirstLayerIndx{i}(n,:); % "O" atom (n,:) in snapshot "i" 
 
 
 for snap = startConfig:nConfigs
@@ -195,7 +201,7 @@ for snap = startConfig:nConfigs
     [Vec1stWL_2ndWL, Dist1stWL_2ndWL{snap}] = GetAtomCorrelation(XYZ_snap, FirstLayerIndx{snap}(:), SecondLayerIndx{snap}(:),  ABC);
     RadFunSingle1WL_2ndWL{snap} = reshape(Dist1stWL_2ndWL{snap}, [numel(Dist1stWL_2ndWL{snap}), 1]);
 end
-MinimaSingle1WL_2ndWL = RadialDistribution(RadFunSingle1WL_2ndWL, ABC, ['Single1WL'; '2ndWL    '], 1);  %vertcat error related to matrix length comes from the names (they have to be equal in length)
+MinimaSingle1WL_2ndWL = RadialDistribution(RadFunSingle1WL_2ndWL, ABC, ['Single1WL'; '2ndWL    '], 0);  %vertcat error related to matrix length comes from the names (they have to be equal in length)
 
 
 
@@ -234,17 +240,42 @@ S_all_Single1WL=[Single1WL;S_DL1st_nAlO;S_DL1st_Al2_nAlO;S_DLSingle1WL_2ndWL;S_D
 S_Als_Single1WL=[S_DL1st_nAlO;S_DL1st_Al2_nAlO;S_DL1st_Alb_nAl2O]; % nearest neighbours in Al1, Al2, and Alb
 
 % CHARGES %%%
-S_Single1WL_MeanQnet = mean(Qnet(Single1WL,1:end),2); %Only the Single1WL 
-S_Single1WL_2ndWL_MeanQnet = mean(Qnet(S_DLSingle1WL_2ndWL,1:end),2); %Only the closest 2ndWL to Single1WL 
-S_S_DL1st_AlO_MeanQnet = mean(Qnet(S_DL1st_AlO,1:end),2); %Only the bonded Al
+S_Single1WL_MeanQnet = mean(Qnet(Single1WL,i),2); %Only the Single1WL 
+S_Single1WL_2ndWL_MeanQnet = mean(Qnet(S_DLSingle1WL_2ndWL,i),2); %Only the closest 2ndWL to Single1WL 
+S_S_DL1st_AlO_MeanQnet = mean(Qnet(S_DL1st_AlO,i),2); %Only the bonded Al
 
-S_S_DL1st_nAlO_MeanQnet = mean(Qnet(S_DL1st_nAlO,1:end),2); %Only the bonded Al + Al1s nearest neighbours
-S_S_DL1st_Al2_nAlO_MeanQnet = mean(Qnet(S_DL1st_Al2_nAlO,1:end),2); %Only the Al2s nearest neighbours
-S_S_DL1st_Alb_nAl2O_MeanQnet = mean(Qnet(S_DL1st_Alb_nAl2O,1:end),2); %Only the Albs nearest neighbours
-S_Als_MeanQnet = mean(Qnet(S_Als_Single1WL,1:end),2); %Only the Als (boneded + nearest neighbours)
-S_MeanQnet = mean(Qnet(S_all_Single1WL,1:end),2); %All
-Bader3DCharge(XYZ_snap(S_all_Single1WL,:), ABC, S_MeanQnet);
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+S_S_DL1st_nAlO_MeanQnet = mean(Qnet(S_DL1st_nAlO,i),2); %Only the bonded Al + Al1s nearest neighbours
+S_S_DL1st_Al2_nAlO_MeanQnet = mean(Qnet(S_DL1st_Al2_nAlO,i),2); %Only the Al2s nearest neighbours
+S_S_DL1st_Alb_nAl2O_MeanQnet = mean(Qnet(S_DL1st_Alb_nAl2O,i),2); %Only the Albs nearest neighbours
+S_Als_MeanQnet = mean(Qnet(S_Als_Single1WL,i),2); %Only the Als (boneded + nearest neighbours)
+S_MeanQnet = mean(Qnet(S_all_Single1WL,i),2); %All
+
+for ii=1:length(ACFfiles)
+    Sum_S_Q{n} = [Sum_S_Q{n}; sum(mean(Qnet(S_all_Single1WL,ii),2))]; %Collects the total charge of all accross all ACF files/sampled snapshots
+end
+
+Bader3DCharge(XYZ_snap(S_all_Single1WL,:), ABC, S_MeanQnet);  
+end
+
+
+Mat_Sum_S_Q=cell2mat(Sum_S_Q);
+
+% % Plotting the Sum_S_Q vs StepNum_Traj
+figure
+box on
+hold on
+xlabel('Time (ps)');
+ylabel('Total Excess Charge (|e|)');
+title(['Total Excess Bader charge for Single1WL molecule and its surroundings in ' system], 'interpreter', 'none')
+C = [1 0 0; 1 1 0; 1 0 0; 0 0.5 0; 0 0 1; 218/255 165/255 32/255;219/255 166/255 34/255; 1 0 0; 1 1 0; 1 0 0; 0 0.5 0; 0 0 1; 218/255 165/255 32/255;219/255 166/255 34/255];
+for iii =1:width(Mat_Sum_S_Q)
+plot(StepNum/2000, -Mat_Sum_S_Q(:,iii), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor',C(iii,:));
+% plot([StepNum(1)/2000 StepNum(end)/2000], [-mean(Mat_Sum_S_Q(1,1:end)) -mean(Mat_Sum_S_Q(1,1:end))], '--', 'color', [0.7 0.7 0.7]);
+end
+% legend('Total Electrolyte', 'interpreter', 'tex')
+hold off
+                                                                                                                                  
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
 elseif strcmp(DoubleAnalType, 'Radial')
     
@@ -878,7 +909,7 @@ Bader3DCharge(XYZ_snap(d_DL2nd,:), ABC, MeanQnet);
 
 %% Al1 affected by DL1st Water + 1WL only %%
 MeanQnet = mean(Qnet(nAl1DL1st,1:end),2);
-Bader3DCharge(XYZ_snap(nAl1DL1st,:), ABC, MeanQnet);
+Bader3DCharge(XYZ_snap(nAl1DL1st,:), ABC, MeanQnet); 
 
 %% Al2 affected by DL1st Water + 1WL only %%
 MeanQnet = mean(Qnet(nAl2DL1st,1:end),2);
