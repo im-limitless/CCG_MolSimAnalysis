@@ -186,7 +186,8 @@ end
 % NOTE: SINGLE molecule, in ONE snapshot
 i=7; %Snapshot
 
-
+Sum_S_Q=[];
+%length(FirstLayerIndx{i}(:))
 
 for n = 1:length(FirstLayerIndx{i}(:))
 Sum_S_Q{n}=[];
@@ -258,7 +259,7 @@ Bader3DCharge(XYZ_snap(S_all_Single1WL,:), ABC, S_MeanQnet);
 end
 
 
-Mat_Sum_S_Q=cell2mat(Sum_S_Q);
+Mat_Sum_S_Q=cell2mat(Sum_S_Q); %matrix Sum_S_Q
 
 % % Plotting the Sum_S_Q vs StepNum_Traj
 figure
@@ -267,12 +268,15 @@ hold on
 xlabel('Time (ps)');
 ylabel('Total Excess Charge (|e|)');
 title(['Total Excess Bader charge for Single1WL molecule and its surroundings in ' system], 'interpreter', 'none')
-C = [1 0 0; 1 1 0; 1 0 0; 0 0.5 0; 0 0 1; 218/255 165/255 32/255;219/255 166/255 34/255; 1 0 0; 1 1 0; 1 0 0; 0 0.5 0; 0 0 1; 218/255 165/255 32/255;219/255 166/255 34/255];
+Col=colorcube(width(Mat_Sum_S_Q)); %Produce a color map with the size of "width(Mat_Sum_S_Q)" using colormap named "colorcube" for others check the manual doc on colormap
+Legend=cell(width(Mat_Sum_S_Q),1);
 for iii =1:width(Mat_Sum_S_Q)
-plot(StepNum/2000, -Mat_Sum_S_Q(:,iii), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor',C(iii,:));
-% plot([StepNum(1)/2000 StepNum(end)/2000], [-mean(Mat_Sum_S_Q(1,1:end)) -mean(Mat_Sum_S_Q(1,1:end))], '--', 'color', [0.7 0.7 0.7]);
+plot(StepNum/2000, -Mat_Sum_S_Q(:,iii), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor',Col(iii,:));
+% plot([StepNum(1)/2000 StepNum(end)/2000], [-mean(Mat_Sum_S_Q(iii,1:end)) -mean(Mat_Sum_S_Q(iii,1:end))], '--', 'color', C(iii,:));
+AveStr = [' Traj. Ave. = ' num2str(mean(-Mat_Sum_S_Q(iii,1:end)), '%.2f') '\pm'  num2str(std(-Mat_Sum_S_Q(iii,1:end)), '%.2f')];
+Legend{iii}= strcat('1WL Water  ',num2str(iii),AveStr);
 end
-% legend('Total Electrolyte', 'interpreter', 'tex')
+legend(Legend)
 hold off
                                                                                                                                   
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
