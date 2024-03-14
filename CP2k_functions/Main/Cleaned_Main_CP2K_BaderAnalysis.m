@@ -182,7 +182,7 @@ end
 
 prompt = "Do you want to initiate single 1st WL investigation? ('y'/'n'): ";
 END = input(prompt);
-while END == 'y'
+if END == 'y'
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Special Investigation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % We are only going to pick one 1st WL molecule and all its nearest
 % neighbours (Al1 and Al2) and then investigate their Bader charge 
