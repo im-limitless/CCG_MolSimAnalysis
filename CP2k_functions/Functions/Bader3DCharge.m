@@ -16,6 +16,7 @@ n = length(Qmc);                %// number of colors
 cmap(1,:) = [1 0 0];   %// red
 % cmap(2,:) = [255 255 0]/255;   %// yellow
 cmap(2,:) = [0 0.8 0];   %// green
+% cmap(2,:) = [0.5 0 0.5];   %// purple
 cmap(3,:) = [0 0 1];   %// blue
 
 [X,Y] = meshgrid([1:3],[1:n]);  %// mesh of indices
