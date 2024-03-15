@@ -340,6 +340,7 @@ StdCharge = zeros(length(AtomList),length(StepNum));
 SumCharge = zeros(length(AtomList),length(StepNum));
 SumChargeAls= zeros(length(AtomList),length(StepNum));
 totalAlsCharge= zeros(1,length(StepNum));
+totalWLsCharge= zeros(1,length(StepNum));
 
 for i = 1:length(StepNum)
     if any(StepNum(i) == StepNum_Traj)
@@ -371,6 +372,11 @@ for i = 1:length(StepNum)
     totalAlsCharge(:,i)=sum(SumChargeAls(:,i));
 end
 
+for i = 1:length(StepNum)
+
+    totalWLsCharge(:,i)=sum(SumCharge(4:5,i));
+end
+
 % Getting the average number of "O" in the different WLs (1st, 2nd, and
 % Bulk/nonDL, respectively)
 temp=0;
@@ -397,6 +403,9 @@ total_Al=size(xyz.Al,2);
 total_Alb=sum(ismember(Atoms,'Alb ','rows'));
 total_Al1=sum(ismember(Atoms,'Al1 ','rows'));
 total_Al2=sum(ismember(Atoms,'Al2 ','rows'));
+
+% Number of H & O
+total_WLs=size(xyz.O,2)+size(xyz.H,2);
 
 [StepNum,sortIdx] = sort(StepNum,'ascend');
 SumCharge = SumCharge(:,sortIdx);
@@ -707,7 +716,7 @@ hold off
 
 
 
-%% Charge per Al type + 1&2 DL %%
+%% Charge per all Al types  + 1&2 DL %%
 %Total Charge
 figure
 box on
@@ -747,6 +756,8 @@ ylabel('Excess Charge (|e|) per Water or Al ');
 
 legend('1st Water Layer', '<1st Water Layer>', '2nd Water Layer', '<2nd Water Layer>', 'Al Layers', '<Al Layers>', 'interpreter', 'tex')
 hold off
+
+
 
 
 %% %%%%%%%%%%%%%%%% ----- Everything ----- %%%%%%%%%%%%%%%%
@@ -813,6 +824,92 @@ end
 % end
 legend('1st Water Layer', '<1st Water Layer>', '2nd Water Layer', '<2nd Water Layer>', 'Bulk Water', '<Bulk Water>',AtomList(AlList(1),:), AtomList(AlList(2),:), AtomList(AlList(3),:), 'interpreter', 'tex')
 
+hold off
+
+
+
+%% Charge per all Al types + 1&2 DL + Bulk %%
+%Total Charge
+figure
+box on
+hold on
+set(gca, 'colororder', [0 0 0]);
+....
+xlabel('Time (ps)');
+plot(StepNum(DL1st_sum~=0)/2000, (-DL1st_sum(DL1st_sum~=0)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'r');
+plot([StepNum(1)/2000 StepNum(end)/2000], [-mean(DL1st_sum(DL1st_sum~=0)) -mean(DL1st_sum(DL1st_sum~=0))], '--', 'color', 'r');
+
+plot(StepNum(DL2nd_sum~=0)/2000, (-DL2nd_sum(DL2nd_sum~=0)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'b');
+plot([StepNum(1)/2000 StepNum(end)/2000], [-mean(DL2nd_sum(DL2nd_sum~=0)) -mean(DL2nd_sum(DL2nd_sum~=0))], '--', 'color', 'b');
+
+plot(StepNum(nonDL_sum~=0)/2000, (-nonDL_sum(nonDL_sum~=0)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'g');
+plot([StepNum(1)/2000 StepNum(end)/2000], [-mean(nonDL_sum(nonDL_sum~=0)) -mean(nonDL_sum(nonDL_sum~=0))], '--', 'color', 'g');
+
+
+plot(StepNum/2000, -totalAlsCharge, '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'c');
+plot([StepNum(1)/2000 StepNum(end)/2000], [-mean(totalAlsCharge) -mean(totalAlsCharge)], '--', 'color', 'c');
+ylabel('Total Excess Charge (|e|)');
+
+legend('1st Water Layer', '<1st Water Layer>', '2nd Water Layer', '<2nd Water Layer>', 'Bulk Water', '<Bulk Water>', 'Al Layers', '<Al Layers>', 'interpreter', 'tex')
+hold off
+
+%Per atom
+figure
+box on
+hold on
+set(gca, 'colororder', [0 0 0]);
+....
+xlabel('Time (ps)');
+plot(StepNum(DL1st_sum~=0)/2000, (-DL1st_sum(DL1st_sum~=0)/avenum_DL1st), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'r');
+plot([StepNum(1)/2000 StepNum(end)/2000], [-mean(DL1st_sum(DL1st_sum~=0)/avenum_DL1st) -mean(DL1st_sum(DL1st_sum~=0)/avenum_DL1st)], '--', 'color', 'r');
+
+plot(StepNum(DL2nd_sum~=0)/2000, (-DL2nd_sum(DL2nd_sum~=0)/avenum_DL2nd), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'b');
+plot([StepNum(1)/2000 StepNum(end)/2000], [-mean(DL2nd_sum(DL2nd_sum~=0)/avenum_DL2nd) -mean(DL2nd_sum(DL2nd_sum~=0)/avenum_DL2nd)], '--', 'color', 'b');
+
+plot(StepNum(nonDL_sum~=0)/2000, (-nonDL_sum(nonDL_sum~=0)/avenum_nonDL), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'g');
+plot([StepNum(1)/2000 StepNum(end)/2000], [-mean(nonDL_sum(nonDL_sum~=0)/avenum_nonDL) -mean(nonDL_sum(nonDL_sum~=0)/avenum_nonDL)], '--', 'color', 'g');
+
+
+plot(StepNum/2000, -totalAlsCharge/total_Al, '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'c');
+plot([StepNum(1)/2000 StepNum(end)/2000], [-mean(totalAlsCharge)/total_Al -mean(totalAlsCharge)/total_Al], '--', 'color', 'c');
+ylabel('Excess Charge (|e|) per Water or Al ');
+
+legend('1st Water Layer', '<1st Water Layer>', '2nd Water Layer', '<2nd Water Layer>', 'Bulk Water', '<Bulk Water>', 'Al Layers', '<Al Layers>', 'interpreter', 'tex')
+hold off
+
+%% Charge per all Al types + all WLs %%
+%Total Charge
+figure
+box on
+hold on
+set(gca, 'colororder', [0 0 0]);
+....
+xlabel('Time (ps)');
+plot(StepNum/2000, (-totalWLsCharge), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'r');
+plot([StepNum(1)/2000 StepNum(end)/2000], [-mean(totalWLsCharge) -mean(totalWLsCharge)], '--', 'color', 'r');
+
+plot(StepNum/2000, -totalAlsCharge, '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'c');
+plot([StepNum(1)/2000 StepNum(end)/2000], [-mean(totalAlsCharge) -mean(totalAlsCharge)], '--', 'color', 'c');
+ylabel('Total Excess Charge (|e|)');
+
+legend('Water', '<Water>', 'Al Layers', '<Al Layers>', 'interpreter', 'tex')
+hold off
+
+%Per atom
+figure
+box on
+hold on
+set(gca, 'colororder', [0 0 0]);
+....
+xlabel('Time (ps)');
+plot(StepNum/2000, (-totalWLsCharge/total_WLs), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'r');
+plot([StepNum(1)/2000 StepNum(end)/2000], [-mean(totalWLsCharge/total_WLs) -mean(totalWLsCharge/total_WLs)], '--', 'color', 'r');
+
+plot(StepNum/2000, -totalAlsCharge/total_Al, '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'c');
+plot([StepNum(1)/2000 StepNum(end)/2000], [-mean(totalAlsCharge)/total_Al -mean(totalAlsCharge)/total_Al], '--', 'color', 'c');
+ylabel('Excess Charge (|e|) per Water or Al ');
+
+legend('Water', '<Water>', 'Al Layers', '<Al Layers>', 'interpreter', 'tex')
 hold off
 
 %% %%%%%%%%%%%%%% Heat map(s) %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -960,14 +1057,14 @@ MeanQnet = mean(Qnet(:,1:end),2);
 Bader3DCharge(XYZ_snap(:,:), ABC, MeanQnet);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%% Last snapshot (change it base on the system at hand)
+%% Last snapshot (ALs) (change it base on the system at hand)
 Bader3DCharge(XYZ_snap(AlNums,:), ABC, Qnet(AlNums,11));
 % light
 
 %% Last snapshot (Al+DL_1st) (change it base on the system at hand)
-Bader3DCharge(XYZ_snap(d_DL1st,:), ABC, Qnet(d_DL1st,11));
+Bader3DCharge(XYZ_snap(d_DL1st,:), ABC, Qnet(d_DL1st,21));
 % light
-Bader3DCharge(XYZ_snap(AlDL1st,:), ABC, Qnet(AlDL1st,11));
+Bader3DCharge(XYZ_snap(AlDL1st,:), ABC, Qnet(AlDL1st,21));
 % light
 
 %% Last snapshot (Al+DL_2nd) (change it base on the system at hand)
