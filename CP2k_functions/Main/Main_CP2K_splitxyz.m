@@ -7,9 +7,9 @@ PathSep =  setOSpathSep;
 % format for materials studio
 
 % Set the location of the calculation output
-BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge_2/The_rest/'; % Base directory containing calculation directory ("\" included at end)
-system = 'OH_0.185ML'; % Name of calculation directory (no "\")
-Trajectory = 'OH_0.185ML-pos-1.xyz';
+BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge_2/Phase_diagram_sys/'; % Base directory containing calculation directory ("\" included at end)
+system = 'Al_water'; % Name of calculation directory (no "\")
+Trajectory = 'Al_water-pos-1.xyz';
 
 nSampleSteps = 1000; % sampling in units of number of steps
 %nSampleSteps = 100; % sampling in units of number of steps
