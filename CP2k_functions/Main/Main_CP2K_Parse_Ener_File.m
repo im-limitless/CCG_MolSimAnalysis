@@ -5,8 +5,8 @@ close all;
 PathSep =  setOSpathSep;
 
 % Set the location of the calculation output
-BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge_2/Water/'; % Base directory containing calculation directory ("\" included at end)
-system = 'water'; % Name of calculation directory (no "\")
+BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge_2/Phase_diagram_sys/'; % Base directory containing calculation directory ("\" included at end)
+system = 'Al_water'; % Name of calculation directory (no "\")
 
 % Set the number of steps before the end that are used to compute averages
 % SampleRange = 100;
@@ -113,27 +113,30 @@ if size(data,1) > SampleRange && strcmp(Inset, 'Yes')
 end
 TDrift = data(end-SampleRange:end,4)-detrend(data(end-SampleRange:end,4));
 dTDriftdt = mean(diff(TDrift))*2000;
-% fig5 = figure;
-% set(gcf, 'color', 'w', 'position', [388   417   592   420])
-% ax1 = axes;
-% h1 = plot(ax1, data(1:end,2)/1000, 27.211399*(data(1:end,5)+data(1:end,3)), '-', 'linewidth', 1, 'color', 'r');
-% ylabel(ax1, 'Total Energy (eV)')
-% xlabel(ax1, 'Time (ps)')
-% set(ax1, 'fontsize', 12)
-% if size(data,1) > SampleRange
-%     ax2 = axes('Position',[0.64 0.68 0.25 0.2]);
-%     h2 = plot(ax2, data(end-SampleRange:end,2)/1000, 27.211399*(data(end-SampleRange:end,5)+data(end-SampleRange:end,3)), '-', 'linewidth',0.5, 'color', 'r');
-%     ylabel(ax2, 'T. E. (eV)')
-%     xlabel(ax2, 'Time (ps)')
-%     set(ax2, 'fontsize', 8, 'xlim', [data(end-SampleRange,2)/1000 data(end,2)/1000] )
-%         disp(['Ave. Total Energy for last 1 ps = ' num2str(mean(27.211399*(data(end-SampleRange:end,5)+data(end-SampleRange:end,3))))]);
-% end
+
+fig5 = figure;
+set(gcf, 'color', 'w', 'position', [388   417   592   420])
+ax1 = axes;
+h1 = plot(ax1, data(1:end,2)/1000, 27.211399*(data(1:end,5)+data(1:end,3)), '-', 'linewidth', 1, 'color', 'r');
+title(['Ave. T.E. for last ' num2str(SampleRange/2000) ' ps = ' num2str(mean(data(end-SampleRange:end,4)),'%.2f') ' \pm ' num2str(std(27.211399*(data(end-SampleRange:end,5)+data(end-SampleRange:end,3))),'%.2f') ' eV']);
+ylabel(ax1, 'Total Energy (eV)')
+xlabel(ax1, 'Time (ps)')
+set(ax1, 'fontsize', 12)
+if size(data,1) > SampleRange && strcmp(Inset, 'Yes')
+    ax2 = axes('Position',[0.64 0.68 0.25 0.2]);
+    h2 = plot(ax2, data(end-SampleRange:end,2)/1000, 27.211399*(data(end-SampleRange:end,5)+data(end-SampleRange:end,3)), '-', 'linewidth',0.5, 'color', 'r');
+    ylabel(ax2, 'T. E. (eV)')
+    xlabel(ax2, 'Time (ps)')
+    set(ax2, 'fontsize', 8, 'xlim', [data(end-SampleRange,2)/1000 data(end,2)/1000] )
+        disp(['Ave. Total Energy for last 1 ps = ' num2str(mean(27.211399*(data(end-SampleRange:end,5)+data(end-SampleRange:end,3))))]);
+end
 
 
 exportgraphics(fig1,[BaseFldr Allfldrs.name PathSep system '_PE.jpg'],'Resolution',300)
 exportgraphics(fig2,[BaseFldr Allfldrs.name PathSep system '_KE.jpg'],'Resolution',300)
 exportgraphics(fig3,[BaseFldr Allfldrs.name PathSep system '_CQ.jpg'],'Resolution',300)
 exportgraphics(fig4,[BaseFldr Allfldrs.name PathSep system '_Temp.jpg'],'Resolution',300)
+exportgraphics(fig5,[BaseFldr Allfldrs.name PathSep system '_TE.jpg'],'Resolution',300)
 
 disp(['Ave. Total Energy for last ' num2str(SampleRange/2000) ' ps = ' num2str(mean(27.211399*data(end-SampleRange:end,3))+mean(27.211399*data(end-SampleRange:end,5))) ' eV']);
 disp(['Std. Dev. = ' num2str(std(27.211399*data(end-SampleRange:end,6))) ' eV']);
