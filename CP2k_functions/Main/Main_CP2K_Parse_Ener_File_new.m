@@ -4,12 +4,12 @@ close all;
 PathSep = setOSpathSep;
 
 % Set the location of the calculation output
-BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge_2/Phase_diagram_sys/'; % Base directory containing calculation directory ("\" included at end)
+BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge_2/The_rest/'; % Base directory containing calculation directory ("\" included at end)
 system = 'Al'; % Name of calculation directory (no "\")
 
 % Set the number of steps before the end that are used to compute averages
-SampleRange = 6000;
-% SampleRange = 20000;
+% SampleRange = 6000;
+SampleRange = 20000;
 
 % Choose whether to plot an inset
 % Inset = 'Yes';
@@ -103,10 +103,10 @@ for i = 1:length(Allfldrs)
     TDrift = data(end-SampleRange:end,4)-detrend(data(end-SampleRange:end,4));
     dTDriftdt = mean(diff(TDrift))*2000;
 
-    exportgraphics(fig1,[BaseFldr Allfldrs(i).name setOSpathSep Allfldrs(i).name '_PE.jpg'],'Resolution',300)
-    exportgraphics(fig2,[BaseFldr Allfldrs(i).name setOSpathSep Allfldrs(i).name '_KE.jpg'],'Resolution',300)
-    exportgraphics(fig3,[BaseFldr Allfldrs(i).name setOSpathSep Allfldrs(i).name '_CQ.jpg'],'Resolution',300)
-    exportgraphics(fig4,[BaseFldr Allfldrs(i).name setOSpathSep Allfldrs(i).name '_Temp.jpg'],'Resolution',300)
+    % exportgraphics(fig1,[BaseFldr Allfldrs(i).name setOSpathSep Allfldrs(i).name '_PE.jpg'],'Resolution',300)
+    % exportgraphics(fig2,[BaseFldr Allfldrs(i).name setOSpathSep Allfldrs(i).name '_KE.jpg'],'Resolution',300)
+    % exportgraphics(fig3,[BaseFldr Allfldrs(i).name setOSpathSep Allfldrs(i).name '_CQ.jpg'],'Resolution',300)
+    % exportgraphics(fig4,[BaseFldr Allfldrs(i).name setOSpathSep Allfldrs(i).name '_Temp.jpg'],'Resolution',300)
 
     tLast(i) = data(end,2)/1000;
     Range(i) = SampleRange/2000;

@@ -6,13 +6,13 @@ PathSep =  setOSpathSep;
 
 % Set the location of the calculation output
 BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge_2/Phase_diagram_sys/'; % Base directory containing calculation directory ("\" included at end)
-system = 'Al_water'; % Name of calculation directory (no "\")
+system = 'AlO_1ML_OH'; % Name of calculation directory (no "\")
 
 % Set the number of steps before the end that are used to compute averages
 % SampleRange = 100;
 % SampleRange = 1000;
-SampleRange = 6000;
-%SampleRange = 10000;
+% SampleRange = 6000;
+SampleRange = 10000;
 
 % Choose whether to plot an inset
 % Inset = 'Yes';
@@ -118,7 +118,7 @@ fig5 = figure;
 set(gcf, 'color', 'w', 'position', [388   417   592   420])
 ax1 = axes;
 h1 = plot(ax1, data(1:end,2)/1000, 27.211399*(data(1:end,5)+data(1:end,3)), '-', 'linewidth', 1, 'color', 'r');
-title(['Ave. T.E. for last ' num2str(SampleRange/2000) ' ps = ' num2str(mean(data(end-SampleRange:end,4)),'%.2f') ' \pm ' num2str(std(27.211399*(data(end-SampleRange:end,5)+data(end-SampleRange:end,3))),'%.2f') ' eV']);
+title(['Ave. T.E. for last ' num2str(SampleRange/2000) ' ps = ' num2str(mean(27.211399*(data(1:end,5)+data(1:end,3))),'%.2f') ' \pm ' num2str(std(27.211399*(data(end-SampleRange:end,5)+data(end-SampleRange:end,3))),'%.2f') ' eV']);
 ylabel(ax1, 'Total Energy (eV)')
 xlabel(ax1, 'Time (ps)')
 set(ax1, 'fontsize', 12)

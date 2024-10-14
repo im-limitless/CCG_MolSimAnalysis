@@ -189,12 +189,19 @@ if END == 'y'
 % 
 % NOTE: SINGLE molecule, in ONE snapshot
 i=7; %Snapshot
+% i=1; %Snapshot
 
 Sum_S_Q=[];
+Collect_S_all_Single1WL=[];
+Collect_S_MeanQnet=[];
 %length(FirstLayerIndx{i}(:))
 
 for n = 1:length(FirstLayerIndx{i}(:))
+% for n = 14  %% -NOTE: when usign this comment the above line and vice versa- Insert the value of a certain
+% water of interest (i.e. water ('O') number 12 (n=12) in the
+% FirstLayerIndex.
 Sum_S_Q{n}=[];
+
 
 Single1WL= FirstLayerIndx{i}(n,:); % "O" atom (n,:) in snapshot "i" 
 
@@ -268,12 +275,24 @@ end
 %% %%%%%%%%%%%%%%%%%% End Ave Bader per water %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Bader3DCharge(XYZ_snap(S_all_Single1WL,:), ABC, S_MeanQnet);  
 
+
+%% Collecting charges and Indices for all chemisorbed H2O and their sphere of influence %%
+Collect_S_all_Single1WL=[Collect_S_all_Single1WL; S_all_Single1WL];
+Collect_S_MeanQnet=[Collect_S_MeanQnet;S_MeanQnet];
+%% %%%%%%%%%%%%%%%%%%%%%%%%%% END Collecting ...%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 for ii=1:length(ACFfiles)
     Sum_S_Q{n} = [Sum_S_Q{n}; sum(mean(Qnet(S_all_Single1WL,ii),2))]; %Collects the total charge of all accross all ACF files/sampled snapshots
 end
 
 end
 
+%% %%%%%%%%%%%%%%% Collected Single 1st WLs and all Als %%%%%%%%%%%%%%%%%%%%%
+Collect_S_all_Single1WL=[Collect_S_all_Single1WL; Indx.Al_All];
+MeanQnet_Als= mean(Qnet(Indx.Al_All,i),2);
+Collect_S_MeanQnet=[Collect_S_MeanQnet;MeanQnet_Als];
+Bader3DCharge(XYZ_snap(Collect_S_all_Single1WL,:), ABC, Collect_S_MeanQnet);
+%% %%%%%%%%%%%%%%%% End Collected Single 1st WLs and all Als %%%%%%%%%%%%%%%%
 
 Mat_Sum_S_Q=cell2mat(Sum_S_Q); %matrix Sum_S_Q
 
@@ -289,7 +308,7 @@ Legend=cell(width(Mat_Sum_S_Q),1);
 for iii =1:width(Mat_Sum_S_Q)
 plot(StepNum/2000, -Mat_Sum_S_Q(:,iii), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor',Col(iii,:));
 % plot([StepNum(1)/2000 StepNum(end)/2000], [-mean(Mat_Sum_S_Q(iii,1:end)) -mean(Mat_Sum_S_Q(iii,1:end))], '--', 'color', C(iii,:));
-AveStr = [' Traj. Ave. = ' num2str(mean(-Mat_Sum_S_Q(iii,1:end)), '%.2f') '\pm'  num2str(std(-Mat_Sum_S_Q(iii,1:end)), '%.2f')];
+AveStr = [' Traj. Ave. = ' num2str(mean(-Mat_Sum_S_Q(1:end,iii)), '%.2f') '\pm'  num2str(std(-Mat_Sum_S_Q(1:end,iii)), '%.2f')];
 Legend{iii}= strcat('1WL Water  ',num2str(iii),AveStr);
 end
 legend(Legend)
@@ -986,8 +1005,8 @@ S_MeanQnet = mean(Qnet(S_all_Single1WL,1:end),2);
 Bader3DCharge(XYZ_snap(S_all_Single1WL,:), ABC, S_MeanQnet);
 
 %% Als ONLY %%
-MeanQnet = mean(Qnet(Al1,1:end),2);
-Bader3DCharge(XYZ_snap(Al1,:), ABC, MeanQnet);
+MeanQnet = mean(Qnet(AlNums,1:end),2);
+Bader3DCharge(XYZ_snap(AlNums,:), ABC, MeanQnet);
 % light
 % XYZ_snap = zeros(size(XYZ,2), size(XYZ,3));
 % XYZ_snap(:,:) = XYZ(1,:,:);
