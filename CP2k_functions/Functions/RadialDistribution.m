@@ -39,12 +39,13 @@ end
 
 Minima = LocateStationaryPoints(smooth(g));
 % Minima = LocateStationaryPoints(g);
-RadialMinima = r(find(Minima,1,'first')+1);   %Note the the original function was
+RadialMinima = r(find(Minima,10,'first')+1);   %Note the the original function was
                                  % RadialMinima = r(Minima(1)+1);]
                                  % however, this would give the first value
                                  % instead of the position of the first
                                  % nonzero value which is what is needed
                                  % from this line!
+% RadialMinima = [RadialMinima; r(find(Minima,1,'first')+6)];                                 
 
 if plotTF == 1
     figure

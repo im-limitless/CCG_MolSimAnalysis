@@ -183,7 +183,7 @@ end
 prompt = "Do you want to initiate single 1st WL investigation? ('y'/'n'): ";
 END = input(prompt);
 if END == 'y'
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Special Investigation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Special Investigation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % We are only going to pick one 1st WL molecule and all its nearest
 % neighbours (Al1 and Al2) and then investigate their Bader charge 
 % 
@@ -276,27 +276,9 @@ end
 Bader3DCharge(XYZ_snap(S_all_Single1WL,:), ABC, S_MeanQnet);  
 
 
-%% Collecting charges and Indices for all chemisorbed H2O and their sphere of influence %%
-Collect_S_all_Single1WL=[Collect_S_all_Single1WL; S_all_Single1WL];
-Collect_S_MeanQnet=[Collect_S_MeanQnet;S_MeanQnet];
-%% %%%%%%%%%%%%%%%%%%%%%%%%%% END Collecting ...%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-for ii=1:length(ACFfiles)
-    Sum_S_Q{n} = [Sum_S_Q{n}; sum(mean(Qnet(S_all_Single1WL,ii),2))]; %Collects the total charge of all accross all ACF files/sampled snapshots
-end
-
-end
-
-%% %%%%%%%%%%%%%%% Collected Single 1st WLs and all Als %%%%%%%%%%%%%%%%%%%%%
-Collect_S_all_Single1WL=[Collect_S_all_Single1WL; Indx.Al_All];
-MeanQnet_Als= mean(Qnet(Indx.Al_All,i),2);
-Collect_S_MeanQnet=[Collect_S_MeanQnet;MeanQnet_Als];
-Bader3DCharge(XYZ_snap(Collect_S_all_Single1WL,:), ABC, Collect_S_MeanQnet);
-%% %%%%%%%%%%%%%%%% End Collected Single 1st WLs and all Als %%%%%%%%%%%%%%%%
-
 Mat_Sum_S_Q=cell2mat(Sum_S_Q); %matrix Sum_S_Q
 
-% % Plotting the Sum_S_Q vs StepNum_Traj
+%% Plotting the Sum_S_Q vs StepNum_Traj
 figure
 box on
 hold on
@@ -313,8 +295,88 @@ Legend{iii}= strcat('1WL Water  ',num2str(iii),AveStr);
 end
 legend(Legend)
 hold off
-                                                                                                                                  
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% %%%%%%%%%%%%%%%%%%%%%%% All 1st WL sphere of influence + Als %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%Collecting charges and Indices for all chemisorbed H2O and their sphere of influence %%
+Collect_S_all_Single1WL=[Collect_S_all_Single1WL; S_all_Single1WL];
+Collect_S_MeanQnet=[Collect_S_MeanQnet;S_MeanQnet];
+%%%%%%%%%%%%%%%%%%%%%%%%%% END Collecting ...%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+for ii=1:length(ACFfiles)
+    Sum_S_Q{n} = [Sum_S_Q{n}; sum(mean(Qnet(S_all_Single1WL,ii),2))]; %Collects the total charge of all accross all ACF files/sampled snapshots
+end
+
+end
+
+%%%%%%%%%%%%%%% Collected Single 1st WLs and all Als %%%%%%%%%%%%%%%%%%%%%
+Collect_S_all_Single1WL=[Collect_S_all_Single1WL; Indx.Al_All];
+MeanQnet_Als= mean(Qnet(Indx.Al_All,i),2);
+Collect_S_MeanQnet=[Collect_S_MeanQnet;MeanQnet_Als];
+Bader3DCharge(XYZ_snap(Collect_S_all_Single1WL,:), ABC, Collect_S_MeanQnet);
+%%%%%%%%%%%%%%%% End Collected Single 1st WLs and all Als %%%%%%%%%%%%%%%%
+
+
+
+
+%% Collect_S_MeanQnet vs Z
+
+Z_Collect_S_all_Single1WL=XYZ_snap(Collect_S_all_Single1WL,3);
+
+Collect_S_Z_Qnet_Mat=[Z_Collect_S_all_Single1WL,Collect_S_MeanQnet];
+Ord_Z_Collect_S_Z_Mat=sortrows(Collect_S_Z_Qnet_Mat,1);
+
+figure
+box on
+hold on
+xlabel('Z (Ang)');
+ylabel('Total Excess Charge (|e|)');
+title(['Total Excess Bader charge for Single1WL molecule and its surroundings & ALs in ' system], 'interpreter', 'none')
+c=linspace(1,10,length(Z_Collect_S_all_Single1WL));
+sz=25;
+% scatter(Z_Collect_S_all_Single1WL, Collect_S_MeanQnet,sz,c,"filled");
+scatter(Ord_Z_Collect_S_Z_Mat(:,1), Ord_Z_Collect_S_Z_Mat(:,2),sz,c,"filled");
+plot(Ord_Z_Collect_S_Z_Mat(:,1), Ord_Z_Collect_S_Z_Mat(:,2));
+% colororder("reef")
+% colorbar
+hold off
+%% %%%%%%%%%%%%%%%%%%%%%%% End All 1st WL sphere of influence + Als %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%% %%%%%%%%%% For singleWL1st vs nonDL H2O charge %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%nonDL H2O
+S_DL1st{i} = [FirstLayerIndx{i}];
+S_DL2nd{i} = [SecondLayerIndx{i}];
+S_nonDL{i} = setdiff(Indx.O, [S_DL1st{i}; S_DL2nd{i}]);
+[~, S_DistOHnonDL] = GetAtomCorrelation(XYZ_snap, S_nonDL{i}, Indx.H, ABC);
+Single_nonDL = [S_nonDL{i}(1,:); Indx.H(find(S_DistOHnonDL(:,1)<MinimaOH(1)))];
+
+Single_nonDL_Qnet= mean(Qnet(Single_nonDL,i),2);
+
+%single H2O for 1st WL
+
+S_Single1WL= FirstLayerIndx{i}(1,:);
+[~, Single_DistOH1stWL] = GetAtomCorrelation(XYZ_snap, S_Single1WL, Indx.H, ABC);
+S_Single1WL = [S_Single1WL; Indx.H(find(Single_DistOH1stWL(:,:)<MinimaOH(1)))];
+
+S_Single1WL_Qnet=mean(Qnet(S_Single1WL,i),2);
+
+%Show 3D heat map
+% Making the H2O molecule has a uniform charge for the heat map (1stWL&nonDL)
+for S_h=1:length(Single_nonDL_Qnet)
+    Single_nonDL_Qnet(S_h)=sum(mean(Qnet(Single_nonDL,i),2));
+end
+
+for S_h=1:length(S_Single1WL_Qnet)
+    S_Single1WL_Qnet(S_h)=sum(mean(Qnet(S_Single1WL,i),2));
+end
+
+Single_1WL_nonDL_Qnet=[Single_nonDL_Qnet;S_Single1WL_Qnet];
+Single_1WL_nonDL=[Single_nonDL;S_Single1WL];
+
+Bader3DCharge(XYZ_snap(Single_1WL_nonDL,:), ABC, Single_1WL_nonDL_Qnet);
+%% %%%%%%%%%% END For singleWL1st vs nonDL H2O charge %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% End Special Investigation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 end
 
     
@@ -325,7 +387,7 @@ elseif strcmp(DoubleAnalType, 'Radial')
     for i = startConfig:nConfigs
         [r1st, ~] = find(DistAlO{i} <= MinimaAlO(1));
         DL1st{i} = Indx.O(unique(r1st));
-        [r2nd, ~] = find(DistAlO{i} <= MinimaAlO(2) & DistAlO{i} > MinimaAlO(1));
+        [r2nd, ~] = find(DistAlO{i} <= MinimaAlO(2) & DistAlO{i} > MinimaAlO(1)); % Issue with the determining the second minima as there are some snaps with small intermediate water creating very small pockets in the g_AlO(r) for example in the Al_water it seems the second WL lies approx. between minima 1 and 4
         DL2nd{i} = Indx.O(unique(r2nd));
         nonDL{i} = setdiff(Indx.O, [DL1st{i}; DL2nd{i}]);
         
@@ -434,7 +496,7 @@ StdCharge = StdCharge(:,sortIdx);
 DL1st_sum = DL1st_sum(sortIdx);
 DL2nd_sum = DL2nd_sum(sortIdx);
 nonDL_sum = nonDL_sum(sortIdx);
-%%%%%%%%%%%%%% End of data collection, below are graphs and data
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%% End of data collection, below are graphs and data %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 prompt1 = "Data collection is done, do you want to proceed? ('y'/'n'): ";
 End = input(prompt1);
