@@ -275,26 +275,10 @@ end
 %% %%%%%%%%%%%%%%%%%% End Ave Bader per water %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Bader3DCharge(XYZ_snap(S_all_Single1WL,:), ABC, S_MeanQnet);  
 
-
-Mat_Sum_S_Q=cell2mat(Sum_S_Q); %matrix Sum_S_Q
-
-%% Plotting the Sum_S_Q vs StepNum_Traj
-figure
-box on
-hold on
-xlabel('Time (ps)');
-ylabel('Total Excess Charge (|e|)');
-title(['Total Excess Bader charge for Single1WL molecule and its surroundings in ' system], 'interpreter', 'none')
-Col=colorcube(width(Mat_Sum_S_Q)); %Produce a color map with the size of "width(Mat_Sum_S_Q)" using colormap named "colorcube" for others check the manual doc on colormap
-Legend=cell(width(Mat_Sum_S_Q),1);
-for iii =1:width(Mat_Sum_S_Q)
-plot(StepNum/2000, -Mat_Sum_S_Q(:,iii), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor',Col(iii,:));
-% plot([StepNum(1)/2000 StepNum(end)/2000], [-mean(Mat_Sum_S_Q(iii,1:end)) -mean(Mat_Sum_S_Q(iii,1:end))], '--', 'color', C(iii,:));
-AveStr = [' Traj. Ave. = ' num2str(mean(-Mat_Sum_S_Q(1:end,iii)), '%.2f') '\pm'  num2str(std(-Mat_Sum_S_Q(1:end,iii)), '%.2f')];
-Legend{iii}= strcat('1WL Water  ',num2str(iii),AveStr);
+for ii=1:length(ACFfiles)
+    Sum_S_Q{n} = [Sum_S_Q{n}; sum(mean(Qnet(S_all_Single1WL,ii),2))]; %Collects the total charge of all accross all ACF files/sampled snapshots
 end
-legend(Legend)
-hold off
+
 
 %% %%%%%%%%%%%%%%%%%%%%%%% All 1st WL sphere of influence + Als %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%Collecting charges and Indices for all chemisorbed H2O and their sphere of influence %%
@@ -302,11 +286,11 @@ Collect_S_all_Single1WL=[Collect_S_all_Single1WL; S_all_Single1WL];
 Collect_S_MeanQnet=[Collect_S_MeanQnet;S_MeanQnet];
 %%%%%%%%%%%%%%%%%%%%%%%%%% END Collecting ...%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-for ii=1:length(ACFfiles)
-    Sum_S_Q{n} = [Sum_S_Q{n}; sum(mean(Qnet(S_all_Single1WL,ii),2))]; %Collects the total charge of all accross all ACF files/sampled snapshots
-end
+
 
 end
+
+
 
 %%%%%%%%%%%%%%% Collected Single 1st WLs and all Als %%%%%%%%%%%%%%%%%%%%%
 Collect_S_all_Single1WL=[Collect_S_all_Single1WL; Indx.Al_All];
@@ -342,6 +326,27 @@ hold off
 %% %%%%%%%%%%%%%%%%%%%%%%% End All 1st WL sphere of influence + Als %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
+Mat_Sum_S_Q=cell2mat(Sum_S_Q); %matrix Sum_S_Q
+
+%% Plotting the Sum_S_Q vs StepNum_Traj
+figure
+box on
+hold on
+xlabel('Time (ps)');
+ylabel('Total Excess Charge (|e|)');
+title(['Total Excess Bader charge for Single1WL molecule and its surroundings in ' system], 'interpreter', 'none')
+Col=colorcube(width(Mat_Sum_S_Q)); %Produce a color map with the size of "width(Mat_Sum_S_Q)" using colormap named "colorcube" for others check the manual doc on colormap
+Legend=cell(width(Mat_Sum_S_Q),1);
+for iii =1:width(Mat_Sum_S_Q)
+plot(StepNum/2000, -Mat_Sum_S_Q(:,iii), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor',Col(iii,:));
+% plot([StepNum(1)/2000 StepNum(end)/2000], [-mean(Mat_Sum_S_Q(iii,1:end)) -mean(Mat_Sum_S_Q(iii,1:end))], '--', 'color', C(iii,:));
+AveStr = [' Traj. Ave. = ' num2str(mean(-Mat_Sum_S_Q(1:end,iii)), '%.2f') '\pm'  num2str(std(-Mat_Sum_S_Q(1:end,iii)), '%.2f')];
+Legend{iii}= strcat('1WL Water  ',num2str(iii),AveStr);
+end
+legend(Legend)
+hold off
+
+
 %% %%%%%%%%%% For singleWL1st vs nonDL H2O charge %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %nonDL H2O
 S_DL1st{i} = [FirstLayerIndx{i}];
@@ -361,7 +366,7 @@ S_Single1WL = [S_Single1WL; Indx.H(find(Single_DistOH1stWL(:,:)<MinimaOH(1)))];
 S_Single1WL_Qnet=mean(Qnet(S_Single1WL,i),2);
 
 %Show 3D heat map
-% Making the H2O molecule has a uniform charge for the heat map (1stWL&nonDL)
+%Making the H2O molecule has a uniform charge for the heat map (1stWL&nonDL)
 for S_h=1:length(Single_nonDL_Qnet)
     Single_nonDL_Qnet(S_h)=sum(mean(Qnet(Single_nonDL,i),2));
 end
