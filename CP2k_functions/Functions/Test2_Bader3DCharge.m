@@ -14,18 +14,33 @@ axis equal
 n = length(Qmc);                %// number of colors
 
 cmap(1,:) = [1 0 0];   %// red
-% cmap(2,:) = [255 255 0]/255;   %// yellow
-cmap(2,:) = [0 0.8 0];   %// green
+cmap(2,:) = [255 255 0]/255;   %// yellow
+cmap(3,:) = [0 0.8 0];   %// green
+% cmap(2,:) = [0 0.8 0];   %// green
 % cmap(2,:) = [0.5 0 0.5];   %// purple
-cmap(3,:) = [0 0 1];   %// blue
+cmap(4,:) = [0 0 1];   %// blue
+% cmap(3,:) = [0 0 1];   %// blue
 
 [X,Y] = meshgrid([1:3],[1:n]);  %// mesh of indices
 
-Colors = interp2(X([1,floor(n/2),n],:),Y([1,floor(n/2),n],:),cmap,X,Y); %// interpolate colormap 
+% Colors = interp2(X([1,floor(n/2),n],:),Y([1,floor(n/2),n],:),cmap,X,Y); %// interpolate colormap 
 %// on "interp2(X,Y,V,Xq,Yq)": X and Y contains specific locations to be
 %//replaced by V and then interpolation happens between these points and are
 %//placed in Xq and Yq
 
+n_zero=find(Qmsort>=0,1); %//finds place of zero or smallest positive charge to segregate the color map based on the zero of charge
+%//rather than symmetrically
+n_ng=find(Qmsort>=0,1)-1; %//finds place of smallest negative charge
+
+
+Colors = interp2(X([1,n_ng,n_zero,n],:),Y([1,n_ng,n_zero,n],:),cmap,X,Y);%// interpolate colormap
+%// on "interp2(X,Y,V,Xq,Yq)": X and Y contains specific locations to be
+%//replaced by V and then interpolation happens between these points and are
+%//placed in Xq and Yq
+% Colors = interp2(X([1,n_zero,n],:),Y([1,n_zero,n],:),cmap,X,Y);%// interpolate colormap
+%// on "interp2(X,Y,V,Xq,Yq)": X and Y contains specific locations to be
+%//replaced by V and then interpolation happens between these points and are
+%//placed in Xq and Yq
 
 % colormap(cmap) %// set color map
 
@@ -38,13 +53,40 @@ for i = 1:size(XYZ, [1])
     yAt = ys*Radius + XYZ(i,2);
     zAt = zs*Radius + XYZ(i,3);
 
-    %     cIndx = find(QmIndx == i);
-    cIndx = length(Colors)*(Qmc(i)-min(Qmc))/(max(Qmc)-min(Qmc));
-    C=round(cIndx);
-   if C == 0
-       C=1;
+   %  %     cIndx = find(QmIndx == i);
+   %  cIndx = length(Colors)*(Qmc(i)-min(Qmc))/(max(Qmc)-min(Qmc));
+   %  C=round(cIndx);
+   % if C == 0
+   %     C=1;
+   % end
+   if Qmc(i)>=0 & not(Qmc(i)== Qmsort(n_zero))
+
+       cIndx = length(Colors(n_zero:end,:))*(Qmc(i)-Qmsort(n_zero))/(max(Qmc)-Qmsort(n_zero));
+       C=round(cIndx)+n_zero-1;
+
+   elseif Qmc(i)== Qmsort(n_zero)
+
+        C=n_zero;
+
+   elseif Qmc(i)<0 & not(Qmc(i)== Qmsort(n_ng)) & not(Qmc(i)==min(Qmc))
+
+       cIndx = length(Colors(1:n_ng,:))*(Qmc(i)-min(Qmc))/(Qmsort(n_ng)-min(Qmc));
+       C=round(cIndx);
+
+   % elseif Qmc(i)<0 & not(Qmc(i)==min(Qmc))
+   % 
+   %     cIndx = length(Colors(1:n_zero,:))*(Qmc(i)-min(Qmc))/(Qmsort(n_zero)-min(Qmc));
+   %     C=round(cIndx);
+
+   elseif Qmc(i)==min(Qmc)
+
+           C=1;
+
+   elseif Qmc(i)== Qmsort(n_ng)
+
+        C=n_ng;
+
    end
-  
     hsurf = surf(xAt,yAt,zAt,'FaceColor', Colors(C,:),'EdgeColor','None');
     set(hsurf,'AmbientStrength',0.1,...
     'LineStyle','none',...
@@ -89,6 +131,8 @@ end
 
 caxis([min(Qmc) max(Qmc)])
 hcb = colorbar;
+hcb.Ticks=[min(Qmc) Qmsort(n_ng) 0 Qmsort(n_zero) max(Qmc)];
+% hcb.Ticks=[Qmsort(1,:):1:Qmsort(19,:)];
 
 colorTitleHandle = get(hcb,'Title');
 titleString = 'Bader Charge (e)';
