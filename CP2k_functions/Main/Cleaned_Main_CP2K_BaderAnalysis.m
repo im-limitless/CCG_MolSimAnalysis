@@ -4,8 +4,8 @@ close all;
 %% %%%%%%%%%%%%%% Data collections %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge_2/Phase_diagram_sys/';
-system = 'Al_water';
-Trajectory = 'Al_water_153000to163000_1000step.xyz';
+system = 'AlO_1.5ML';
+Trajectory = 'AlO_1.5ML_162000to175000_1000step.xyz';
 
 
 fldrname = [BaseFldr system '/Bader_Analysis/'];
@@ -28,6 +28,8 @@ for n = 1:length(ACFfiles)
     [Q(:,n), Qnet(:,n), StepNum(n)] = extractBaderCharges(fldrname, ACFfiles(n).name, Atoms, AtomList,Kinds,PP);
 end
 
+
+
 % % Find indices of all "Al*" atoms
 if size(AtomList,1) > 1
     AlList = find(ismember(AtomList, 'Al'));
@@ -46,6 +48,8 @@ end
 % % parse coordinates of atoms along trajectory and wrap into cell
 [xyz, XYZ, ~, ~, ~, nAtoms, startConfig, nConfigs, StepNum_Traj] = ReadAndParsexyz_new(BaseFldr, system, Trajectory, ABC, [0 0 0]);
 XYZ = wrapXYZ(XYZ, ABC);
+
+
 
 % % compute radial functions for OH, OF and HF
 RadFunOH = cell(nConfigs,1);
@@ -98,17 +102,46 @@ if strcmp(DoubleAnalType, 'MassDensity')
     disp('Determining water layering from mass density profile...');
     
     %%% get the O atom distribution and corresponding indices of DL atoms (both O and H)
-    [Dens_O, Dens_H, ~, ~, z] = getDensityProfile(xyz, ABC);
+    % [Dens_O, Dens_H, ~, ~, z] = getDensityProfile(xyz, ABC);
+    [Dens_O, Dens_H, TotDen, ~, z] = getDensityProfile(xyz, ABC);
     %change getwaterlayerIndices to the name of the new function (same name
     %but add persnap at the end) +  [same same minimaZ] = same
-    [FirstLayerIndx, SecondLayerIndx] = getWaterLayerIndicesPerSnap_new(Indx, XYZ, Dens_O, z);
+    prompt = "Is this a OH or O_OH system? ('y'/'n'): ";
+    END1 = input(prompt);  
+    if END1 == 'y'
+        % [FirstLayerIndx, SecondLayerIndx, ThirdLayerIndx] = getWaterLayerIndicesPerSnap_new(Indx, XYZ, Dens_H, z);
+        [FirstLayerIndx, SecondLayerIndx] = Oxide_getWaterLayerIndicesPerSnap_new(Indx, XYZ, Dens_O, z, ABC);
+    else
+        [FirstLayerIndx, SecondLayerIndx, ThirdLayerIndx] = getWaterLayerIndicesPerSnap_new(Indx, XYZ, Dens_O, z);
+    end
+    % [FirstLayerIndx, SecondLayerIndx, ThirdLayerIndx] = getWaterLayerIndicesPerSnap_new(Indx, XYZ, Dens_O, z);
     
+    % prompt = "Is this a OH or O_OH system? ('y'/'n'): ";
+    % END1 = input(prompt);  
     
     for i = startConfig:nConfigs
-        DL1st{i} = [FirstLayerIndx{i}];
-        DL2nd{i} = [SecondLayerIndx{i}];
-        nonDL{i} = setdiff(Indx.O, [DL1st{i}; DL2nd{i}]);
-        DL1st_AlO{i} = [];
+       
+        % if END1 == 'y'
+        %     Oxide{i} = [FirstLayerIndx{i}];
+        %     DL1st{i} = [SecondLayerIndx{i}];
+        %     DL2nd{i} = [ThirdLayerIndx{i}];
+        %     nonDL{i} = setdiff(Indx.O, [DL1st{i}; DL2nd{i}; Oxide{i}]);
+        %     DL1st_AlO{i} = [];
+        % else
+            DL1st{i} = [FirstLayerIndx{i}];
+            DL2nd{i} = [SecondLayerIndx{i}];
+            nonDL{i} = setdiff(Indx.O, [DL1st{i}; DL2nd{i}]);
+            DL1st_AlO{i} = [];
+        % end
+        % nonDL{i} = setdiff(Indx.O, [DL1st{i}; DL2nd{i}]);
+        % DL1st_AlO{i} = [];
+
+        DL1st_molecule{i} = []; %// Indicies ordered by water molecule
+        Qnet_DL1st_molecule{i} = []; %// Charges of water molecules/snap
+        DL2nd_molecule{i} = [];
+        Qnet_DL2nd_molecule{i} = []; 
+        nonDL_molecule{i} = [];
+        Qnet_nonDL_molecule{i} = []; 
      
         
         XYZ_snap = zeros(size(XYZ,2), size(XYZ,3));
@@ -117,23 +150,35 @@ if strcmp(DoubleAnalType, 'MassDensity')
         [~, DistOH2ndWL] = GetAtomCorrelation(XYZ_snap, DL2nd{i}, Indx.H, ABC);
         [~, DistOHnonDL] = GetAtomCorrelation(XYZ_snap, nonDL{i}, Indx.H, ABC);
         [~, DistOAl1stWL] = GetAtomCorrelation(XYZ_snap, DL1st{i}, Indx.Al1, ABC); %This is the distribution of 1WL "O" and all Al1
- 
+
+ % % DL1st_AlO finds the "Al" that are connected to the "O" of the 1st WL in
+% the DL (i.e. the "O" in the DL1st or the indices in the ##LayerIndx)
+         for j = 1:length(DL1st{i})
+            DL1st_AlO{i} = [DL1st_AlO{i}; Indx.Al1(find(DistOAl1stWL(:,j)<=MinimaAlO(1)))];
+         end
+
         for j = 1:length(DL1st{i})
             DL1st{i} = [DL1st{i}; Indx.H(find(DistOH1stWL(:,j)<MinimaOH(1)))];
+            DL1st_molecule{i} = [DL1st_molecule{i}; DL1st{i}(j); Indx.H(find(DistOH1stWL(:,j)<MinimaOH(1)))]; %// arranged in O + its Hs groups
+            Qnet_DL1st_molecule{i} = [Qnet_DL1st_molecule{i}; Qnet(DL1st{i}(j))+sum(Qnet(Indx.H(find(DistOH1stWL(:,j)<MinimaOH(1)))))];
         end
-        
+
         for j = 1:length(DL2nd{i})
             DL2nd{i} = [DL2nd{i}; Indx.H(find(DistOH2ndWL(:,j)<MinimaOH(1)))];
+            DL2nd_molecule{i} = [DL2nd_molecule{i}; DL2nd{i}(j); Indx.H(find(DistOH2ndWL(:,j)<MinimaOH(1)))]; %// arranged in O + its Hs groups
+            Qnet_DL2nd_molecule{i} = [Qnet_DL2nd_molecule{i}; Qnet(DL2nd{i}(j))+ sum(Qnet(Indx.H(find(DistOH2ndWL(:,j)<MinimaOH(1)))))];
         end
         
         for j = 1:length(nonDL{i})
             nonDL{i} = [nonDL{i}; Indx.H(find(DistOHnonDL(:,j)<MinimaOH(1)))];
+            nonDL_molecule{i} = [nonDL_molecule{i}; nonDL{i}(j); Indx.H(find(DistOHnonDL(:,j)<MinimaOH(1)))]; %// arranged in O + its Hs groups
+            Qnet_nonDL_molecule{i} = [Qnet_nonDL_molecule{i}; Qnet(nonDL{i}(j))+ sum(Qnet(Indx.H(find(DistOHnonDL(:,j)<MinimaOH(1)))))];
         end
 % % DL1st_AlO finds the "Al" that are connected to the "O" of the 1st WL in
-% the DL (i.e. the "O" in the DL1st or the indices in the FirstLayerIndx)
-         for j = 1:length(FirstLayerIndx{i})
-            DL1st_AlO{i} = [DL1st_AlO{i}; Indx.Al1(find(DistOAl1stWL(:,j)<=MinimaAlO(1)))];
-        end
+% the DL (i.e. the "O" in the DL1st or the indices in the ##LayerIndx)
+%         for j = 1:length(FirstLayerIndx{i})
+%            DL1st_AlO{i} = [DL1st_AlO{i}; Indx.Al1(find(DistOAl1stWL(:,j)<=MinimaAlO(1)))];
+%        end
     end
 
 % % [On the above] to get the neighboring Al atoms to the ones in DL1st_AlO we do the
@@ -434,6 +479,27 @@ for i = 1:length(StepNum)
         DL1st_sum(i) = sum(Qnet(DL1st{Inter},i));
         DL2nd_sum(i) = sum(Qnet(DL2nd{Inter},i));
         nonDL_sum(i) = sum(Qnet(nonDL{Inter},i));
+
+        DL1st_mean(i) = mean(Qnet(DL1st{Inter},i));
+        DL2nd_mean(i) = mean(Qnet(DL2nd{Inter},i));
+        nonDL_mean(i) = mean(Qnet(nonDL{Inter},i));
+
+        DL1st_std(i) = std(Qnet(DL1st{Inter},i));
+        DL2nd_std(i) = std(Qnet(DL2nd{Inter},i));
+        nonDL_std(i) = std(Qnet(nonDL{Inter},i));
+
+        Qnet_DL1st_sum(i) = sum(Qnet_DL1st_molecule{Inter});
+        Qnet_DL2nd_sum(i) = sum(Qnet_DL2nd_molecule{Inter});
+        Qnet_nonDL_sum(i) = sum(Qnet_nonDL_molecule{Inter});
+
+        Qnet_DL1st_mean(i) = mean(Qnet_DL1st_molecule{Inter});
+        Qnet_DL2nd_mean(i) = mean(Qnet_DL2nd_molecule{Inter});
+        Qnet_nonDL_mean(i) = mean(Qnet_nonDL_molecule{Inter});
+
+        Qnet_DL1st_std(i) = std(Qnet_DL1st_molecule{Inter});
+        Qnet_DL2nd_std(i) = std(Qnet_DL2nd_molecule{Inter});
+        Qnet_nonDL_std(i) = std(Qnet_nonDL_molecule{Inter});
+
         XYZ_snap = zeros(size(XYZ,2), size(XYZ,3));
         XYZ_snap(:,:) = XYZ(Inter,:,:);
         writeSnaptoxyz(BaseFldr, system, StepNum(i), XYZ_snap, Atoms, [DL1st{Inter}; Indx.Al_All] , DoubleAnalType)
@@ -441,6 +507,8 @@ for i = 1:length(StepNum)
         DL1st_sum(i) = 0;
         DL2nd_sum(i) = 0;
         nonDL_sum(i) = 0;
+        % Qnet_DL1st_sum(i) =0;
+
     end
     
     for j = 1:length(AtomList)
@@ -470,19 +538,49 @@ temp2=0;
 temp3=0;
 
 for i = 1:length(DL1st)
-    temp=temp+numel(DL1st{i});
+    temp=temp+(numel(DL1st{i})/3); %//remove "/3" to get per atom
 end
 avenum_DL1st=temp/length(DL1st);
 
 for i = 1:length(DL2nd)
-    temp2=temp2+numel(DL2nd{i});
+    temp2=temp2+(numel(DL2nd{i})/3);
 end
 avenum_DL2nd=temp2/length(DL2nd);
 
 for i = 1:length(nonDL)
-    temp3=temp3+numel(nonDL{i});
+    temp3=temp3+(numel(nonDL{i})/3);
 end
 avenum_nonDL=temp3/length(nonDL);
+
+
+% Getting the  number of "O" in the different WLs (1st, 2nd, and
+% Bulk/nonDL, respectively) per StepNum_Traj
+for i = 1:length(DL1st)
+    num_DL1st{i}=round(numel(DL1st{i})/3);
+end
+
+for i = 1:length(DL2nd)
+    num_DL2nd{i}=round(numel(DL2nd{i})/3);
+end
+
+for i = 1:length(nonDL)
+    num_nonDL{i}=round(numel(nonDL{i})/3);
+end
+
+
+% Getting the  number of water molecules in the different WLs (1st, 2nd, and
+% Bulk/nonDL, respectively) per StepNum_Traj
+for i = 1:length(DL1st)
+    num_DL1st_molecule{i}=numel(Qnet_DL1st_molecule{i});
+end
+
+for i = 1:length(DL2nd)
+    num_DL2nd_molecule{i}=numel(Qnet_DL2nd_molecule{i});
+end
+
+for i = 1:length(nonDL)
+    num_nonDL_molecule{i}=numel(Qnet_nonDL_molecule{i});
+end
 
 % Number of Alb, Al1, Al2, and total Al
 total_Al=size(xyz.Al,2);
@@ -493,22 +591,38 @@ total_Al2=sum(ismember(Atoms,'Al2 ','rows'));
 % Number of H & O
 total_WLs=size(xyz.O,2)+size(xyz.H,2);
 
-[StepNum,sortIdx] = sort(StepNum,'ascend');
-SumCharge = SumCharge(:,sortIdx);
-SumChargeAls = SumChargeAls(:,sortIdx);
-MeanCharge = MeanCharge(:,sortIdx);
-StdCharge = StdCharge(:,sortIdx);
-DL1st_sum = DL1st_sum(sortIdx);
-DL2nd_sum = DL2nd_sum(sortIdx);
-nonDL_sum = nonDL_sum(sortIdx);
+% [StepNum,sortIdx] = sort(StepNum,'ascend');
+% SumCharge = SumCharge(:,sortIdx);
+% SumChargeAls = SumChargeAls(:,sortIdx);
+% MeanCharge = MeanCharge(:,sortIdx);
+% StdCharge = StdCharge(:,sortIdx);
+% DL1st_sum = DL1st_sum(sortIdx);
+% DL2nd_sum = DL2nd_sum(sortIdx);
+% nonDL_sum = nonDL_sum(sortIdx);
+% DL1st_mean = DL1st_mean(sortIdx);
+% DL2nd_mean = DL2nd_mean(sortIdx);
+% nonDL_mean = nonDL_mean(sortIdx);
+% DL1st_std = DL1st_std(sortIdx);
+% DL2nd_std = DL2nd_std(sortIdx);
+% nonDL_std = nonDL_std(sortIdx);
+% 
+% Qnet_DL1st_sum = Qnet_DL1st_sum(sortIdx);
+% Qnet_DL2nd_sum = Qnet_DL2nd_sum(sortIdx);
+% Qnet_nonDL_sum = Qnet_nonDL_sum(sortIdx);
+% Qnet_DL1st_mean = Qnet_DL1st_mean(sortIdx);
+% Qnet_DL2nd_mean = Qnet_DL2nd_mean(sortIdx);
+% Qnet_nonDL_mean = Qnet_nonDL_mean(sortIdx);
+% Qnet_DL1st_std = Qnet_DL1st_std(sortIdx);
+% Qnet_DL2nd_std = Qnet_DL2nd_std(sortIdx);
+% Qnet_nonDL_std = Qnet_nonDL_std(sortIdx);
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%% End of data collection, below are graphs and data %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 prompt1 = "Data collection is done, do you want to proceed? ('y'/'n'): ";
 End = input(prompt1);
 
-if End == 'n'
-    return
-end
+if End == 'y'
+    % return
+% end
 
 
 % prompt1 = "Do you want to analyze Al? ('y'/'n'): ";
@@ -620,7 +734,7 @@ C = [1 0 0; 1 1 0; 1 0 0; 0 0.5 0; 0 0 1; 218/255 165/255 32/255;219/255 166/255
 IonList = 1:length(AtomList);
 IonList(AlList) = [];
 IonSumCharge = sum(SumCharge(IonList,:));
-plot(StepNum/2000, -IonSumCharge, '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'm');
+plot(StepNum/2000, IonSumCharge, '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'm');
 plot([StepNum(1)/2000 StepNum(end)/2000], [mean(IonSumCharge(1,2:end)) mean(IonSumCharge(1,2:end))], '--', 'color', [0.7 0.7 0.7]);
 AveStr = ['Traj. Ave. = ' num2str(mean(IonSumCharge(1,2:end)), '%.2f') '\pm'  num2str(std(IonSumCharge(1,2:end)), '%.2f')];
 legend('Total Electrolyte',AveStr, 'interpreter', 'tex')
@@ -656,14 +770,14 @@ plot([StepNum(1)/2000 StepNum(end)/2000], [mean(DL1st_sum(DL1st_sum~=0)) mean(DL
 ylabel('Total Excess Charge (|e|)');
 legend('1st Water Layer')
 hold off
-% Per average number of "O"
+% Per number of "H2O_DL1st"
 figure
 box on
 hold on
 set(gca, 'colororder', [0 0 0]);
 xlabel('Time (ps)');
-plot(StepNum(DL1st_sum~=0)/2000, (DL1st_sum(DL1st_sum~=0)/avenum_DL1st), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'r');
-plot([StepNum(1)/2000 StepNum(end)/2000], [mean(DL1st_sum(DL1st_sum~=0)/avenum_DL1st) mean(DL1st_sum(DL1st_sum~=0)/avenum_DL1st)], '--', 'color', 'r');
+plot(StepNum(DL1st_sum~=0)/2000, (DL1st_sum(DL1st_sum~=0)./cell2mat(num_DL1st)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'r');
+plot([StepNum(1)/2000 StepNum(end)/2000], [mean(DL1st_sum(DL1st_sum~=0)./cell2mat(num_DL1st)) mean(DL1st_sum(DL1st_sum~=0)./cell2mat(num_DL1st))], '--', 'color', 'r');
 ylabel('Excess Charge (|e|) / Molecule');
 legend('1st Water Layer')
 hold off
@@ -681,15 +795,15 @@ plot([StepNum(1)/2000 StepNum(end)/2000], [mean(DL2nd_sum(DL2nd_sum~=0)) mean(DL
 ylabel('Total Excess Charge (|e|)');
 legend('2nd Water Layer')
 hold off
-% Per average number of "O"
+% Per average number of "H2O"
 figure
 box on
 hold on
 set(gca, 'colororder', [0 0 0]);
 ....
 xlabel('Time (ps)');
-plot(StepNum(DL2nd_sum~=0)/2000, (DL2nd_sum(DL2nd_sum~=0)/avenum_DL2nd), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'r');
-plot([StepNum(1)/2000 StepNum(end)/2000], [mean(DL2nd_sum(DL2nd_sum~=0)/avenum_DL2nd) mean(DL2nd_sum(DL2nd_sum~=0)/avenum_DL2nd)], '--', 'color', 'r');
+plot(StepNum(DL2nd_sum~=0)/2000, (DL2nd_sum(DL2nd_sum~=0)./cell2mat(num_DL2nd)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'r');
+plot([StepNum(1)/2000 StepNum(end)/2000], [mean(DL2nd_sum(DL2nd_sum~=0)./cell2mat(num_DL2nd)) mean(DL2nd_sum(DL2nd_sum~=0)./cell2mat(num_DL2nd))], '--', 'color', 'r');
 ylabel('Excess Charge (|e|) / Molecule');
 legend('2nd Water Layer')
 hold off
@@ -706,15 +820,15 @@ plot([StepNum(1)/2000 StepNum(end)/2000], [mean(nonDL_sum(nonDL_sum~=0)) mean(no
 ylabel('Total Excess Charge (|e|)');
 legend('Bulk Water')
 hold off
-% Per average number of "O"
+% Per average number of "H2O"
 figure
 box on
 hold on
 set(gca, 'colororder', [0 0 0]);
 ....
 xlabel('Time (ps)');
-plot(StepNum(nonDL_sum~=0)/2000, (nonDL_sum(nonDL_sum~=0)/avenum_nonDL), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'g');
-plot([StepNum(1)/2000 StepNum(end)/2000], [mean(nonDL_sum(nonDL_sum~=0)/avenum_nonDL) mean(nonDL_sum(nonDL_sum~=0)/avenum_nonDL)], '--', 'color', 'g');
+plot(StepNum(nonDL_sum~=0)/2000, (nonDL_sum(nonDL_sum~=0)./cell2mat(num_nonDL)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'g');
+plot([StepNum(1)/2000 StepNum(end)/2000], [mean(nonDL_sum(nonDL_sum~=0)./cell2mat(num_nonDL)) mean(nonDL_sum(nonDL_sum~=0)./cell2mat(num_nonDL))], '--', 'color', 'g');
 ylabel('Excess Charge (|e|) / Molecule');
 legend('Bulk Water')
 hold off
@@ -741,7 +855,25 @@ ylabel('Total Excess Charge (|e|)');
 legend('1st Water Layer', '<1st Water Layer>', '2nd Water Layer', '<2nd Water Layer>', 'interpreter', 'tex')
 hold off
 
-% Bader charge and charge density on 1st and 2nd layer of DL and nonDL
+%% Bader charge and charge density on 1st and 2nd layer of DL and nonDL
+%errorbar
+figure
+box on
+hold on
+set(gca, 'colororder', [0 0 0]);
+....
+xlabel('Time (ps)');
+errorbar(StepNum(Qnet_DL1st_mean~=0)/2000, (Qnet_DL1st_mean(Qnet_DL1st_mean~=0)), (Qnet_DL1st_std(Qnet_DL1st_std~=0)), '-o', 'color', 'r', 'markeredgecolor', 'k', 'markerfacecolor', 'r');
+
+errorbar(StepNum(Qnet_DL2nd_mean~=0)/2000, (Qnet_DL2nd_mean(Qnet_DL2nd_mean~=0)), (Qnet_DL2nd_std(Qnet_DL2nd_std~=0)), '-o', 'color', 'b', 'markeredgecolor', 'k', 'markerfacecolor', 'b');
+
+errorbar(StepNum(Qnet_nonDL_mean~=0)/2000, (Qnet_nonDL_mean(Qnet_nonDL_mean~=0)), (Qnet_nonDL_std(Qnet_nonDL_std~=0)), '-o', 'color', 'g', 'markeredgecolor', 'k', 'markerfacecolor', 'g');
+ylabel('<Excess Charge (|e|)> ');
+
+legend('1st Water Layer', '2nd Water Layer',  'Bulk Water', 'interpreter', 'tex')
+hold off
+
+%Plot
 figure
 box on
 hold on
@@ -761,6 +893,42 @@ ylabel('Total Excess Charge (|e|)');
 legend('1st Water Layer', '<1st Water Layer>', '2nd Water Layer', '<2nd Water Layer>', 'Bulk Water', '<Bulk Water>', 'interpreter', 'tex')
 hold off
 
+
+
+%% Bader charge and charge density on 1st DL and nonDL
+%errorbar
+figure
+box on
+hold on
+set(gca, 'colororder', [0 0 0]);
+....
+xlabel('Time (ps)');
+errorbar(StepNum(Qnet_DL1st_mean~=0)/2000, (Qnet_DL1st_mean(Qnet_DL1st_mean~=0)), (Qnet_DL1st_std(Qnet_DL1st_std~=0)), '-o', 'color', 'r', 'markeredgecolor', 'k', 'markerfacecolor', 'r');
+% errorbar([StepNum(1)/2000 StepNum(end)/2000], [mean(DL1st_mean(DL1st_mean~=0)) mean(DL1st_mean(DL1st_mean~=0))], '--', 'color', 'r');
+
+errorbar(StepNum(Qnet_nonDL_mean~=0)/2000, (Qnet_nonDL_mean(Qnet_nonDL_mean~=0)), (Qnet_nonDL_std(Qnet_nonDL_std~=0)), '-o', 'color', 'g', 'markeredgecolor', 'k', 'markerfacecolor', 'g');
+% errorbar([StepNum(1)/2000 StepNum(end)/2000], [mean(nonDL_mean(nonDL_mean~=0)) mean(nonDL_mean(nonDL_mean~=0))], '--', 'color', 'g');
+ylabel('<Excess Charge (|e|)> ');
+
+legend('1st Water Layer',  'Bulk Water', 'interpreter', 'tex')
+hold off
+
+%plot
+figure
+box on
+hold on
+set(gca, 'colororder', [0 0 0]);
+....
+xlabel('Time (ps)');
+plot(StepNum(Qnet_DL1st_mean~=0)/2000, (Qnet_DL1st_mean(Qnet_DL1st_mean~=0)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'r');
+plot([StepNum(1)/2000 StepNum(end)/2000], [mean(Qnet_DL1st_mean(Qnet_DL1st_mean~=0)) mean(Qnet_DL1st_mean(Qnet_DL1st_mean~=0))], '--', 'color', 'r');
+
+plot(StepNum(Qnet_nonDL_mean~=0)/2000, (Qnet_nonDL_mean(Qnet_nonDL_mean~=0)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'g');
+plot([StepNum(1)/2000 StepNum(end)/2000], [mean(Qnet_nonDL_mean(Qnet_nonDL_mean~=0)) mean(Qnet_nonDL_mean(Qnet_nonDL_mean~=0))], '--', 'color', 'g');
+ylabel('<Excess Charge (|e|)> ');
+
+legend('1st Water Layer', '<1st Water Layer>', 'Bulk Water', '<Bulk Water>', 'interpreter', 'tex')
+hold off
 
 %% %%%%%%%%%%%% ----- Combo ----- %%%%%%%%%%%%%%%%
 
@@ -789,12 +957,12 @@ hold on
 set(gca, 'colororder', [0 0 0]);
 ....
 xlabel('Time (ps)');
-plot(StepNum(DL1st_sum~=0)/2000, (DL1st_sum(DL1st_sum~=0)/avenum_DL1st), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'r');
-plot([StepNum(1)/2000 StepNum(end)/2000], [mean(DL1st_sum(DL1st_sum~=0))/avenum_DL1st mean(DL1st_sum(DL1st_sum~=0))/avenum_DL1st], '--', 'color', 'r');
+plot(StepNum(DL1st_sum~=0)/2000, (DL1st_sum(DL1st_sum~=0)./cell2mat(num_DL1st)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'r');
+plot([StepNum(1)/2000 StepNum(end)/2000], [mean(DL1st_sum(DL1st_sum~=0)./cell2mat(num_DL1st)) mean(DL1st_sum(DL1st_sum~=0)./cell2mat(num_DL1st))], '--', 'color', 'r');
 
 plot(StepNum/2000, totalAlsCharge/total_Al, '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'c');
 plot([StepNum(1)/2000 StepNum(end)/2000], [mean(totalAlsCharge)/total_Al mean(totalAlsCharge)/total_Al], '--', 'color', 'c');
-ylabel('Total Excess Charge (|e|)');
+ylabel('Total Excess Charge (|e|) per Molecule');
 
 legend('1st Water Layer', '<1st Water Layer>', 'Al Layers', '<Al Layers>', 'interpreter', 'tex')
 hold off
@@ -830,11 +998,11 @@ hold on
 set(gca, 'colororder', [0 0 0]);
 ....
 xlabel('Time (ps)');
-plot(StepNum(DL1st_sum~=0)/2000, (DL1st_sum(DL1st_sum~=0)/avenum_DL1st), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'r');
-plot([StepNum(1)/2000 StepNum(end)/2000], [mean(DL1st_sum(DL1st_sum~=0)/avenum_DL1st) mean(DL1st_sum(DL1st_sum~=0)/avenum_DL1st)], '--', 'color', 'r');
+plot(StepNum(DL1st_sum~=0)/2000, (DL1st_sum(DL1st_sum~=0)./cell2mat(num_DL1st)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'r');
+plot([StepNum(1)/2000 StepNum(end)/2000], [mean(DL1st_sum(DL1st_sum~=0)./cell2mat(num_DL1st)) mean(DL1st_sum(DL1st_sum~=0)./cell2mat(num_DL1st))], '--', 'color', 'r');
 
-plot(StepNum(DL2nd_sum~=0)/2000, (DL2nd_sum(DL2nd_sum~=0)/avenum_DL2nd), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'b');
-plot([StepNum(1)/2000 StepNum(end)/2000], [mean(DL2nd_sum(DL2nd_sum~=0)/avenum_DL2nd) mean(DL2nd_sum(DL2nd_sum~=0)/avenum_DL2nd)], '--', 'color', 'b');
+plot(StepNum(DL2nd_sum~=0)/2000, (DL2nd_sum(DL2nd_sum~=0)./cell2mat(num_DL2nd)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'b');
+plot([StepNum(1)/2000 StepNum(end)/2000], [mean(DL2nd_sum(DL2nd_sum~=0)./cell2mat(num_DL2nd)) mean(DL2nd_sum(DL2nd_sum~=0)./cell2mat(num_DL2nd))], '--', 'color', 'b');
 
 plot(StepNum/2000, totalAlsCharge/total_Al, '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'c');
 plot([StepNum(1)/2000 StepNum(end)/2000], [mean(totalAlsCharge)/total_Al mean(totalAlsCharge)/total_Al], '--', 'color', 'c');
@@ -939,26 +1107,51 @@ ylabel('Total Excess Charge (|e|)');
 legend('1st Water Layer', '<1st Water Layer>', '2nd Water Layer', '<2nd Water Layer>', 'Bulk Water', '<Bulk Water>', 'Al Layers', '<Al Layers>', 'interpreter', 'tex')
 hold off
 
-%Per atom
+%Per molecule
 figure
 box on
 hold on
 set(gca, 'colororder', [0 0 0]);
 ....
 xlabel('Time (ps)');
-plot(StepNum(DL1st_sum~=0)/2000, (DL1st_sum(DL1st_sum~=0)/avenum_DL1st), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'r');
-plot([StepNum(1)/2000 StepNum(end)/2000], [mean(DL1st_sum(DL1st_sum~=0)/avenum_DL1st) mean(DL1st_sum(DL1st_sum~=0)/avenum_DL1st)], '--', 'color', 'r');
+plot(StepNum(DL1st_sum~=0)/2000, (DL1st_sum(DL1st_sum~=0)./cell2mat(num_DL1st)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'r');
+plot([StepNum(1)/2000 StepNum(end)/2000], [mean(DL1st_sum(DL1st_sum~=0)./cell2mat(num_DL1st)) mean(DL1st_sum(DL1st_sum~=0)./cell2mat(num_DL1st))], '--', 'color', 'r');
 
-plot(StepNum(DL2nd_sum~=0)/2000, (DL2nd_sum(DL2nd_sum~=0)/avenum_DL2nd), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'b');
-plot([StepNum(1)/2000 StepNum(end)/2000], [mean(DL2nd_sum(DL2nd_sum~=0)/avenum_DL2nd) mean(DL2nd_sum(DL2nd_sum~=0)/avenum_DL2nd)], '--', 'color', 'b');
+plot(StepNum(DL2nd_sum~=0)/2000, (DL2nd_sum(DL2nd_sum~=0)./cell2mat(num_DL2nd)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'b');
+plot([StepNum(1)/2000 StepNum(end)/2000], [mean(DL2nd_sum(DL2nd_sum~=0)./cell2mat(num_DL2nd)) mean(DL2nd_sum(DL2nd_sum~=0)./cell2mat(num_DL2nd))], '--', 'color', 'b');
 
-plot(StepNum(nonDL_sum~=0)/2000, (nonDL_sum(nonDL_sum~=0)/avenum_nonDL), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'g');
-plot([StepNum(1)/2000 StepNum(end)/2000], [mean(nonDL_sum(nonDL_sum~=0)/avenum_nonDL) mean(nonDL_sum(nonDL_sum~=0)/avenum_nonDL)], '--', 'color', 'g');
+plot(StepNum(nonDL_sum~=0)/2000, (nonDL_sum(nonDL_sum~=0)./cell2mat(num_nonDL)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'g');
+plot([StepNum(1)/2000 StepNum(end)/2000], [mean(nonDL_sum(nonDL_sum~=0)./cell2mat(num_nonDL)) mean(nonDL_sum(nonDL_sum~=0)./cell2mat(num_nonDL))], '--', 'color', 'g');
 
 
 plot(StepNum/2000, totalAlsCharge/total_Al, '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'c');
 plot([StepNum(1)/2000 StepNum(end)/2000], [mean(totalAlsCharge)/total_Al mean(totalAlsCharge)/total_Al], '--', 'color', 'c');
-ylabel('Excess Charge (|e|) per Water or Al ');
+ylabel('Excess Charge (|e|) per atom ');
+
+legend('1st Water Layer', '<1st Water Layer>', '2nd Water Layer', '<2nd Water Layer>', 'Bulk Water', '<Bulk Water>', 'Al Layers', '<Al Layers>', 'interpreter', 'tex')
+hold off
+
+
+%Per molecule using water molecule data instead of all the layer 
+figure
+box on
+hold on
+set(gca, 'colororder', [0 0 0]);
+....
+xlabel('Time (ps)');
+plot(StepNum(DL1st_sum~=0)/2000, (DL1st_sum(DL1st_sum~=0)./cell2mat(num_DL1st)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'r');
+plot([StepNum(1)/2000 StepNum(end)/2000], [mean(DL1st_sum(DL1st_sum~=0)./cell2mat(num_DL1st)) mean(DL1st_sum(DL1st_sum~=0)./cell2mat(num_DL1st))], '--', 'color', 'r');
+
+plot(StepNum(DL2nd_sum~=0)/2000, (DL2nd_sum(DL2nd_sum~=0)./cell2mat(num_DL2nd)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'b');
+plot([StepNum(1)/2000 StepNum(end)/2000], [mean(DL2nd_sum(DL2nd_sum~=0)./cell2mat(num_DL2nd)) mean(DL2nd_sum(DL2nd_sum~=0)./cell2mat(num_DL2nd))], '--', 'color', 'b');
+
+plot(StepNum(nonDL_sum~=0)/2000, (nonDL_sum(nonDL_sum~=0)./cell2mat(num_nonDL)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'g');
+plot([StepNum(1)/2000 StepNum(end)/2000], [mean(nonDL_sum(nonDL_sum~=0)./cell2mat(num_nonDL)) mean(nonDL_sum(nonDL_sum~=0)./cell2mat(num_nonDL))], '--', 'color', 'g');
+
+
+plot(StepNum/2000, totalAlsCharge/total_Al, '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'c');
+plot([StepNum(1)/2000 StepNum(end)/2000], [mean(totalAlsCharge)/total_Al mean(totalAlsCharge)/total_Al], '--', 'color', 'c');
+ylabel('Excess Charge (|e|) per Water ');
 
 legend('1st Water Layer', '<1st Water Layer>', '2nd Water Layer', '<2nd Water Layer>', 'Bulk Water', '<Bulk Water>', 'Al Layers', '<Al Layers>', 'interpreter', 'tex')
 hold off
@@ -974,7 +1167,7 @@ xlabel('Time (ps)');
 plot(StepNum/2000, (totalWLsCharge), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'r');
 plot([StepNum(1)/2000 StepNum(end)/2000], [mean(totalWLsCharge) mean(totalWLsCharge)], '--', 'color', 'r');
 
-plot(StepNum/2000, -totalAlsCharge, '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'c');
+plot(StepNum/2000, totalAlsCharge, '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'c');
 plot([StepNum(1)/2000 StepNum(end)/2000], [mean(totalAlsCharge) mean(totalAlsCharge)], '--', 'color', 'c');
 ylabel('Total Excess Charge (|e|)');
 
@@ -998,6 +1191,7 @@ ylabel('Excess Charge (|e|) per Water or Al ');
 legend('Water', '<Water>', 'Al Layers', '<Al Layers>', 'interpreter', 'tex')
 hold off
 
+end
 %% %%%%%%%%%%%%%% Heat map(s) %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -1008,6 +1202,13 @@ hold off
 %Output: Heat map for atoms of interest per all snapshots
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Everything Below is working fine %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+prompt2 = "Do you want to view the various heat maps? ('y'/'n'): ";
+End = input(prompt2);
+
+if End == 'n'
+    return
+end
+
 
 AlNums =[];
 Al1=[];
@@ -1034,7 +1235,7 @@ AlDL1st= cat(1,AlNums,d_DL1st);
 
 % Creating a double that includes all the Al atoms + 1st&2nd Layer of water;
 
-d_DL2nd= DL2nd(1,11);
+d_DL2nd= DL2nd(1,1);
 %%%% Note: The atoms of the water are added from a single snapshot instead
 %%%% of an average (might need to add the average later) %%%%
 d_DL2nd = cell2mat(d_DL2nd);
@@ -1068,8 +1269,8 @@ nAl2Al1DL1st=cat(1,d_Al2DL1st,d_AlDL1st,d_DL1st);
 %% Average over all ACF snapshots %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Single molecule investigation %%
-S_MeanQnet = mean(Qnet(S_all_Single1WL,1:end),2);
-Bader3DCharge(XYZ_snap(S_all_Single1WL,:), ABC, S_MeanQnet);
+% S_MeanQnet = mean(Qnet(S_all_Single1WL,1:end),2);
+% Bader3DCharge(XYZ_snap(S_all_Single1WL,:), ABC, S_MeanQnet);
 
 %% Als ONLY %%
 MeanQnet = mean(Qnet(AlNums,1:end),2);
@@ -1133,7 +1334,7 @@ MeanQnet = mean(Qnet(AlDL,1:end),2);
 Bader3DCharge(XYZ_snap(AlDL,:), ABC, MeanQnet);
 
 %% Bulk Water %%
-d_nonDL=nonDL(1,11);
+d_nonDL=nonDL(1,1);
 d_nonDL=cell2mat(d_nonDL);
 MeanQnet = mean(Qnet(d_nonDL,1:end),2);
 Bader3DCharge(XYZ_snap(d_nonDL,:), ABC, MeanQnet);
