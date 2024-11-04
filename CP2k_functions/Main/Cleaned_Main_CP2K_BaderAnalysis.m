@@ -130,9 +130,14 @@ if strcmp(DoubleAnalType, 'MassDensity')
         % else
             DL1st{i} = [FirstLayerIndx{i}];
             DL2nd{i} = [SecondLayerIndx{i}];
-            nonDL{i} = setdiff(Indx.O, [DL1st{i}; DL2nd{i}]);
             DL1st_AlO{i} = [];
-            Oxide{i} = [OxideIndx{i}];
+
+            if END1 == 'y'
+                nonDL{i} = setdiff(Indx.O, [DL1st{i}; DL2nd{i}; OxideIndx{i}]);
+                Oxide{i} = [OxideIndx{i}];
+            else
+                nonDL{i} = setdiff(Indx.O, [DL1st{i}; DL2nd{i}]);
+            end
         % end
         % nonDL{i} = setdiff(Indx.O, [DL1st{i}; DL2nd{i}]);
         % DL1st_AlO{i} = [];

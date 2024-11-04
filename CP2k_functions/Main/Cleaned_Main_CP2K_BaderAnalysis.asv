@@ -110,7 +110,7 @@ if strcmp(DoubleAnalType, 'MassDensity')
     END1 = input(prompt);  
     if END1 == 'y'
         % [FirstLayerIndx, SecondLayerIndx, ThirdLayerIndx] = getWaterLayerIndicesPerSnap_new(Indx, XYZ, Dens_H, z);
-        [FirstLayerIndx, SecondLayerIndx] = Oxide_getWaterLayerIndicesPerSnap_new(Indx, XYZ, Dens_O, z, ABC);
+        [FirstLayerIndx, SecondLayerIndx, OxideIndx] = Oxide_getWaterLayerIndicesPerSnap_new(Indx, XYZ, Dens_O, z, ABC);
     else
         [FirstLayerIndx, SecondLayerIndx, ThirdLayerIndx] = getWaterLayerIndicesPerSnap_new(Indx, XYZ, Dens_O, z);
     end
@@ -128,11 +128,16 @@ if strcmp(DoubleAnalType, 'MassDensity')
         %     nonDL{i} = setdiff(Indx.O, [DL1st{i}; DL2nd{i}; Oxide{i}]);
         %     DL1st_AlO{i} = [];
         % else
-            DL1st_tot{i} = [FirstLayerIndx{i}];
+            DL1st{i} = [FirstLayerIndx{i}];
             DL2nd{i} = [SecondLayerIndx{i}];
-            nonDL{i} = setdiff(Indx.O, [DL1st_tot{i}; DL2nd{i}]);
             DL1st_AlO{i} = [];
-            Oxide{i} = [];
+
+            if END1 == 'y'
+                nonDL{i} = setdiff(Indx.O, [DL1st{i}; DL2nd{i}]);
+                Oxide{i} = [OxideIndx{i}];
+            else
+                nonDL{i} = setdiff(Indx.O, [DL1st{i}; DL2nd{i}]);
+            end
         % end
         % nonDL{i} = setdiff(Indx.O, [DL1st{i}; DL2nd{i}]);
         % DL1st_AlO{i} = [];
@@ -147,25 +152,21 @@ if strcmp(DoubleAnalType, 'MassDensity')
         
         XYZ_snap = zeros(size(XYZ,2), size(XYZ,3));
         XYZ_snap(:,:) = XYZ(i,:,:);
-        [~, DistOH1stWL] = GetAtomCorrelation(XYZ_snap, DL1st_tot{i}, Indx.H, ABC);
+        [~, DistOH1stWL] = GetAtomCorrelation(XYZ_snap, DL1st{i}, Indx.H, ABC);
         [~, DistOH2ndWL] = GetAtomCorrelation(XYZ_snap, DL2nd{i}, Indx.H, ABC);
         [~, DistOHnonDL] = GetAtomCorrelation(XYZ_snap, nonDL{i}, Indx.H, ABC);
-        [~, DistOAl1stWL] = GetAtomCorrelation(XYZ_snap, DL1st_tot{i}, Indx.Al1, ABC); %This is the distribution of 1WL "O" and all Al1
+        [~, DistOAl1stWL] = GetAtomCorrelation(XYZ_snap, DL1st{i}, Indx.Al1, ABC); %This is the distribution of 1WL "O" and all Al1
 
  % % DL1st_AlO finds the "Al" that are connected to the "O" of the 1st WL in
 % the DL (i.e. the "O" in the DL1st or the indices in the ##LayerIndx)
-         for j = 1:length(DL1st_tot{i})
+         for j = 1:length(DL1st{i})
             DL1st_AlO{i} = [DL1st_AlO{i}; Indx.Al1(find(DistOAl1stWL(:,j)<=MinimaAlO(1)))];
          end
 
         for j = 1:length(DL1st{i})
-            if not(isempty(Indx.H(find(DistOH1stWL(:,j)<MinimaOH(1)))))
-                DL1st{i} = [DL1st{i}(j); Indx.H(find(DistOH1stWL(:,j)<MinimaOH(1)))];
-                DL1st_molecule{i} = [DL1st_molecule{i}; DL1st{i}(j); Indx.H(find(DistOH1stWL(:,j)<MinimaOH(1)))]; %// arranged in O + its Hs groups
-                Qnet_DL1st_molecule{i} = [Qnet_DL1st_molecule{i}; Qnet(DL1st{i}(j))+sum(Qnet(Indx.H(find(DistOH1stWL(:,j)<MinimaOH(1)))))];
-            else
-                Oxide{i}=[Oxide{i}; DL1st{i}(j)];
-            end
+            DL1st{i} = [DL1st{i}; Indx.H(find(DistOH1stWL(:,j)<MinimaOH(1)))];
+            DL1st_molecule{i} = [DL1st_molecule{i}; DL1st{i}(j); Indx.H(find(DistOH1stWL(:,j)<MinimaOH(1)))]; %// arranged in O + its Hs groups
+            Qnet_DL1st_molecule{i} = [Qnet_DL1st_molecule{i}; Qnet(DL1st{i}(j))+sum(Qnet(Indx.H(find(DistOH1stWL(:,j)<MinimaOH(1)))))];
         end
 
         for j = 1:length(DL2nd{i})
@@ -1285,6 +1286,7 @@ Bader3DCharge(XYZ_snap(AlNums,:), ABC, MeanQnet);
 % XYZ_snap(:,:) = XYZ(1,:,:);
 % MeanQnet = mean(Qnet(PtNums,:),2);
 
+
 %% Al1 ONLY %%
 MeanQnet = mean(Qnet(Al1,1:end),2);
 Bader3DCharge(XYZ_snap(Al1,:), ABC, MeanQnet);
@@ -1297,17 +1299,48 @@ Bader3DCharge(XYZ_snap(Al2,:), ABC, MeanQnet);
 MeanQnet = mean(Qnet(Alb,1:end),2);
 Bader3DCharge(XYZ_snap(Alb,:), ABC, MeanQnet);
 
-%% Al1 affected by DL1st Water only %%
-MeanQnet = mean(Qnet(d_AlDL1st,1:end),2);
-Bader3DCharge(XYZ_snap(d_AlDL1st,:), ABC, MeanQnet);
 
-%% Al2 affected by DL1st Water only %%
-MeanQnet = mean(Qnet(d_Al2DL1st,1:end),2);
-Bader3DCharge(XYZ_snap(d_Al2DL1st,:), ABC, MeanQnet);
 
-%% Al1 + Al2 affected by DL1st Water only %%
-MeanQnet = mean(Qnet(nAl2Al1,1:end),2);
-Bader3DCharge(XYZ_snap(nAl2Al1,:), ABC, MeanQnet);
+if END1 == 'y'
+    %% Oxide ONLY %%
+    MeanQnet = mean(Qnet(Oxide{1},1:end),2);
+    Bader3DCharge(XYZ_snap(Oxide{1},:), ABC, MeanQnet);
+    
+    %% Al1 + Oxide ONLY %%
+    MeanQnet = mean(Qnet([Al1;Oxide{1}],1:end),2);
+    Bader3DCharge(XYZ_snap([Al1;Oxide{1}],:), ABC, MeanQnet);
+
+    %% DLs + Oxide ONLY %%
+    MeanQnet = mean(Qnet([d_DL1st; d_DL2nd; Oxide{1}],1:end),2);
+    Bader3DCharge(XYZ_snap([d_DL1st; d_DL2nd; Oxide{1}],:), ABC, MeanQnet);
+
+else
+    %% Al1 affected by DL1st Water only %%
+    MeanQnet = mean(Qnet(d_AlDL1st,1:end),2);
+    Bader3DCharge(XYZ_snap(d_AlDL1st,:), ABC, MeanQnet);
+    
+    %% Al2 affected by DL1st Water only %%
+    MeanQnet = mean(Qnet(d_Al2DL1st,1:end),2);
+    Bader3DCharge(XYZ_snap(d_Al2DL1st,:), ABC, MeanQnet);
+
+    %% Al1 + Al2 affected by DL1st Water only %%
+    MeanQnet = mean(Qnet(nAl2Al1,1:end),2);
+    Bader3DCharge(XYZ_snap(nAl2Al1,:), ABC, MeanQnet);
+
+    %% Al1 affected by DL1st Water + 1WL only %%
+    MeanQnet = mean(Qnet(nAl1DL1st,1:end),2);
+    Bader3DCharge(XYZ_snap(nAl1DL1st,:), ABC, MeanQnet); 
+    
+    %% Al2 affected by DL1st Water + 1WL only %%
+    MeanQnet = mean(Qnet(nAl2DL1st,1:end),2);
+    Bader3DCharge(XYZ_snap(nAl2DL1st,:), ABC, MeanQnet);
+    
+    %% Al1 + Al2 affected by DL1st Water + 1WL only %%
+    MeanQnet = mean(Qnet(nAl2Al1DL1st,1:end),2);
+    Bader3DCharge(XYZ_snap(nAl2Al1DL1st,:), ABC, MeanQnet);
+
+end
+
 
 %% DL1st ONLY %%
 MeanQnet = mean(Qnet(d_DL1st,1:end),2);
@@ -1316,19 +1349,6 @@ Bader3DCharge(XYZ_snap(d_DL1st,:), ABC, MeanQnet);
 %% DL2nd ONLY %%
 MeanQnet = mean(Qnet(d_DL2nd,1:end),2);
 Bader3DCharge(XYZ_snap(d_DL2nd,:), ABC, MeanQnet);
-
-
-%% Al1 affected by DL1st Water + 1WL only %%
-MeanQnet = mean(Qnet(nAl1DL1st,1:end),2);
-Bader3DCharge(XYZ_snap(nAl1DL1st,:), ABC, MeanQnet); 
-
-%% Al2 affected by DL1st Water + 1WL only %%
-MeanQnet = mean(Qnet(nAl2DL1st,1:end),2);
-Bader3DCharge(XYZ_snap(nAl2DL1st,:), ABC, MeanQnet);
-
-%% Al1 + Al2 affected by DL1st Water + 1WL only %%
-MeanQnet = mean(Qnet(nAl2Al1DL1st,1:end),2);
-Bader3DCharge(XYZ_snap(nAl2Al1DL1st,:), ABC, MeanQnet);
 
 %% Als + 1WL ONLY %%
 MeanQnet = mean(Qnet(AlDL1st,1:end),2);
