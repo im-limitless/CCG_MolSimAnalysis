@@ -1,4 +1,4 @@
-function [FirstLayerIndx, SecondLayerIndx, MinimaZ] = Oxide_getWaterLayerIndicesPerSnap_new(Indx, XYZ, Dens_O, z, ABC)
+function [FirstLayerIndx, SecondLayerIndx, OxideIndx, MinimaZ] = Oxide_getWaterLayerIndicesPerSnap_new(Indx, XYZ, Dens_O, z, ABC)
 
 GlobalMinima = LocateStationaryPoints(mean(Dens_O,2));
 Minima = zeros(size(Dens_O,1), size(Dens_O,2));
@@ -19,8 +19,9 @@ for i = 1:size(Dens_O,2)
     MinimaZ = MinimaZ(find(MinimaZ>Al_z_ULim & MinimaZ<Al_z_LLim));
     %% END %%
 
-    FirstLayerIndx{i} = [intersect(Indx.O,find(XYZ(i,:,3) <= MinimaZ(1))); intersect(Indx.O,find(XYZ(i,:,3) >= MinimaZ(end)))]; %\This includes both the Oxides and the 1WL
-    SecondLayerIndx{i} = [intersect(Indx.O, find(XYZ(i,:,3) > MinimaZ(1) & XYZ(i,:,3) <= MinimaZ(2))); intersect(Indx.O, find(XYZ(i,:,3) < MinimaZ(end) & XYZ(i,:,3) >= MinimaZ(end-1)))];
+    OxideIndx{i} = [intersect(Indx.O,find(XYZ(i,:,3) <= MinimaZ(1))); intersect(Indx.O,find(XYZ(i,:,3) >= MinimaZ(end)))]; %\This includes both the Oxides and the 1WL
+    FirstLayerIndx{i} = [intersect(Indx.O, find(XYZ(i,:,3) > MinimaZ(1) & XYZ(i,:,3) <= MinimaZ(2))); intersect(Indx.O, find(XYZ(i,:,3) < MinimaZ(end) & XYZ(i,:,3) >= MinimaZ(end-1)))];
+    SecondLayerIndx{i} = [intersect(Indx.O, find(XYZ(i,:,3) > MinimaZ(2) & XYZ(i,:,3) <= MinimaZ(3))); intersect(Indx.O, find(XYZ(i,:,3) < MinimaZ(end-1) & XYZ(i,:,3) >= MinimaZ(end-2)))]; %/This is added for the cases when we have Oxide on the surface then this becomes the second water layer !!
 end 
    
 return

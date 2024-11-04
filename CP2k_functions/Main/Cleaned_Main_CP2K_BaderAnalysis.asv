@@ -47,7 +47,9 @@ end
 
 % % parse coordinates of atoms along trajectory and wrap into cell
 [xyz, XYZ, ~, ~, ~, nAtoms, startConfig, nConfigs, StepNum_Traj] = ReadAndParsexyz_new(BaseFldr, system, Trajectory, ABC, [0 0 0]);
-XYZ = wrapXYZ(XYZ, ABC); %//what does this do ?
+XYZ = wrapXYZ(XYZ, ABC);
+
+
 
 % % compute radial functions for OH, OF and HF
 RadFunOH = cell(nConfigs,1);
@@ -107,8 +109,8 @@ if strcmp(DoubleAnalType, 'MassDensity')
     prompt = "Is this a OH or O_OH system? ('y'/'n'): ";
     END1 = input(prompt);  
     if END1 == 'y'
-        % [FirstLayerIndx, SecondLayerIndx] = getWaterLayerIndicesPerSnap_new(Indx, XYZ, Dens_H, z);
-        [FirstLayerIndx, SecondLayerIndx, ThirdLayerIndx] = getWaterLayerIndicesPerSnap_new(Indx, XYZ, Dens_H, z);
+        % [FirstLayerIndx, SecondLayerIndx, ThirdLayerIndx] = getWaterLayerIndicesPerSnap_new(Indx, XYZ, Dens_H, z);
+        [FirstLayerIndx, SecondLayerIndx] = Oxide_getWaterLayerIndicesPerSnap_new(Indx, XYZ, Dens_O, z, ABC);
     else
         [FirstLayerIndx, SecondLayerIndx, ThirdLayerIndx] = getWaterLayerIndicesPerSnap_new(Indx, XYZ, Dens_O, z);
     end
@@ -126,10 +128,11 @@ if strcmp(DoubleAnalType, 'MassDensity')
         %     nonDL{i} = setdiff(Indx.O, [DL1st{i}; DL2nd{i}; Oxide{i}]);
         %     DL1st_AlO{i} = [];
         % else
-            DL1st{i} = [FirstLayerIndx{i}];
+            DL1st_tot{i} = [FirstLayerIndx{i}];
             DL2nd{i} = [SecondLayerIndx{i}];
-            nonDL{i} = setdiff(Indx.O, [DL1st{i}; DL2nd{i}]);
+            nonDL{i} = setdiff(Indx.O, [DL1st_tot{i}; DL2nd{i}]);
             DL1st_AlO{i} = [];
+            Oxide{i} = [];
         % end
         % nonDL{i} = setdiff(Indx.O, [DL1st{i}; DL2nd{i}]);
         % DL1st_AlO{i} = [];
@@ -144,21 +147,25 @@ if strcmp(DoubleAnalType, 'MassDensity')
         
         XYZ_snap = zeros(size(XYZ,2), size(XYZ,3));
         XYZ_snap(:,:) = XYZ(i,:,:);
-        [~, DistOH1stWL] = GetAtomCorrelation(XYZ_snap, DL1st{i}, Indx.H, ABC);
+        [~, DistOH1stWL] = GetAtomCorrelation(XYZ_snap, DL1st_tot{i}, Indx.H, ABC);
         [~, DistOH2ndWL] = GetAtomCorrelation(XYZ_snap, DL2nd{i}, Indx.H, ABC);
         [~, DistOHnonDL] = GetAtomCorrelation(XYZ_snap, nonDL{i}, Indx.H, ABC);
-        [~, DistOAl1stWL] = GetAtomCorrelation(XYZ_snap, DL1st{i}, Indx.Al1, ABC); %This is the distribution of 1WL "O" and all Al1
+        [~, DistOAl1stWL] = GetAtomCorrelation(XYZ_snap, DL1st_tot{i}, Indx.Al1, ABC); %This is the distribution of 1WL "O" and all Al1
 
  % % DL1st_AlO finds the "Al" that are connected to the "O" of the 1st WL in
 % the DL (i.e. the "O" in the DL1st or the indices in the ##LayerIndx)
-         for j = 1:length(DL1st{i})
+         for j = 1:length(DL1st_tot{i})
             DL1st_AlO{i} = [DL1st_AlO{i}; Indx.Al1(find(DistOAl1stWL(:,j)<=MinimaAlO(1)))];
          end
 
         for j = 1:length(DL1st{i})
-            DL1st{i} = [DL1st{i}; Indx.H(find(DistOH1stWL(:,j)<MinimaOH(1)))];
-            DL1st_molecule{i} = [DL1st_molecule{i}; DL1st{i}(j); Indx.H(find(DistOH1stWL(:,j)<MinimaOH(1)))]; %// arranged in O + its Hs groups
-            Qnet_DL1st_molecule{i} = [Qnet_DL1st_molecule{i}; Qnet(DL1st{i}(j))+sum(Qnet(Indx.H(find(DistOH1stWL(:,j)<MinimaOH(1)))))];
+            if not(isempty(Indx.H(find(DistOH1stWL(:,j)<MinimaOH(1)))))
+                DL1st{i} = [DL1st{i}(j); Indx.H(find(DistOH1stWL(:,j)<MinimaOH(1)))];
+                DL1st_molecule{i} = [DL1st_molecule{i}; DL1st{i}(j); Indx.H(find(DistOH1stWL(:,j)<MinimaOH(1)))]; %// arranged in O + its Hs groups
+                Qnet_DL1st_molecule{i} = [Qnet_DL1st_molecule{i}; Qnet(DL1st{i}(j))+sum(Qnet(Indx.H(find(DistOH1stWL(:,j)<MinimaOH(1)))))];
+            else
+                Oxide{i}=[Oxide{i}; DL1st{i}(j)];
+            end
         end
 
         for j = 1:length(DL2nd{i})
@@ -589,38 +596,38 @@ total_Al2=sum(ismember(Atoms,'Al2 ','rows'));
 % Number of H & O
 total_WLs=size(xyz.O,2)+size(xyz.H,2);
 
-[StepNum,sortIdx] = sort(StepNum,'ascend');
-SumCharge = SumCharge(:,sortIdx);
-SumChargeAls = SumChargeAls(:,sortIdx);
-MeanCharge = MeanCharge(:,sortIdx);
-StdCharge = StdCharge(:,sortIdx);
-DL1st_sum = DL1st_sum(sortIdx);
-DL2nd_sum = DL2nd_sum(sortIdx);
-nonDL_sum = nonDL_sum(sortIdx);
-DL1st_mean = DL1st_mean(sortIdx);
-DL2nd_mean = DL2nd_mean(sortIdx);
-nonDL_mean = nonDL_mean(sortIdx);
-DL1st_std = DL1st_std(sortIdx);
-DL2nd_std = DL2nd_std(sortIdx);
-nonDL_std = nonDL_std(sortIdx);
-
-Qnet_DL1st_sum = Qnet_DL1st_sum(sortIdx);
-Qnet_DL2nd_sum = Qnet_DL2nd_sum(sortIdx);
-Qnet_nonDL_sum = Qnet_nonDL_sum(sortIdx);
-Qnet_DL1st_mean = Qnet_DL1st_mean(sortIdx);
-Qnet_DL2nd_mean = Qnet_DL2nd_mean(sortIdx);
-Qnet_nonDL_mean = Qnet_nonDL_mean(sortIdx);
-Qnet_DL1st_std = Qnet_DL1st_std(sortIdx);
-Qnet_DL2nd_std = Qnet_DL2nd_std(sortIdx);
-Qnet_nonDL_std = Qnet_nonDL_std(sortIdx);
+% [StepNum,sortIdx] = sort(StepNum,'ascend');
+% SumCharge = SumCharge(:,sortIdx);
+% SumChargeAls = SumChargeAls(:,sortIdx);
+% MeanCharge = MeanCharge(:,sortIdx);
+% StdCharge = StdCharge(:,sortIdx);
+% DL1st_sum = DL1st_sum(sortIdx);
+% DL2nd_sum = DL2nd_sum(sortIdx);
+% nonDL_sum = nonDL_sum(sortIdx);
+% DL1st_mean = DL1st_mean(sortIdx);
+% DL2nd_mean = DL2nd_mean(sortIdx);
+% nonDL_mean = nonDL_mean(sortIdx);
+% DL1st_std = DL1st_std(sortIdx);
+% DL2nd_std = DL2nd_std(sortIdx);
+% nonDL_std = nonDL_std(sortIdx);
+% 
+% Qnet_DL1st_sum = Qnet_DL1st_sum(sortIdx);
+% Qnet_DL2nd_sum = Qnet_DL2nd_sum(sortIdx);
+% Qnet_nonDL_sum = Qnet_nonDL_sum(sortIdx);
+% Qnet_DL1st_mean = Qnet_DL1st_mean(sortIdx);
+% Qnet_DL2nd_mean = Qnet_DL2nd_mean(sortIdx);
+% Qnet_nonDL_mean = Qnet_nonDL_mean(sortIdx);
+% Qnet_DL1st_std = Qnet_DL1st_std(sortIdx);
+% Qnet_DL2nd_std = Qnet_DL2nd_std(sortIdx);
+% Qnet_nonDL_std = Qnet_nonDL_std(sortIdx);
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%% End of data collection, below are graphs and data %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 prompt1 = "Data collection is done, do you want to proceed? ('y'/'n'): ";
 End = input(prompt1);
 
-if End == 'n'
-    return
-end
+if End == 'y'
+    % return
+% end
 
 
 % prompt1 = "Do you want to analyze Al? ('y'/'n'): ";
@@ -1189,6 +1196,7 @@ ylabel('Excess Charge (|e|) per Water or Al ');
 legend('Water', '<Water>', 'Al Layers', '<Al Layers>', 'interpreter', 'tex')
 hold off
 
+end
 %% %%%%%%%%%%%%%% Heat map(s) %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -1199,6 +1207,13 @@ hold off
 %Output: Heat map for atoms of interest per all snapshots
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Everything Below is working fine %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+prompt2 = "Do you want to view the various heat maps? ('y'/'n'): ";
+End = input(prompt2);
+
+if End == 'n'
+    return
+end
+
 
 AlNums =[];
 Al1=[];
@@ -1259,8 +1274,8 @@ nAl2Al1DL1st=cat(1,d_Al2DL1st,d_AlDL1st,d_DL1st);
 %% Average over all ACF snapshots %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Single molecule investigation %%
-S_MeanQnet = mean(Qnet(S_all_Single1WL,1:end),2);
-Bader3DCharge(XYZ_snap(S_all_Single1WL,:), ABC, S_MeanQnet);
+% S_MeanQnet = mean(Qnet(S_all_Single1WL,1:end),2);
+% Bader3DCharge(XYZ_snap(S_all_Single1WL,:), ABC, S_MeanQnet);
 
 %% Als ONLY %%
 MeanQnet = mean(Qnet(AlNums,1:end),2);

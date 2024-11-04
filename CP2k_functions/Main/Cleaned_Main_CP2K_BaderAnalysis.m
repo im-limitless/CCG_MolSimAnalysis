@@ -110,7 +110,7 @@ if strcmp(DoubleAnalType, 'MassDensity')
     END1 = input(prompt);  
     if END1 == 'y'
         % [FirstLayerIndx, SecondLayerIndx, ThirdLayerIndx] = getWaterLayerIndicesPerSnap_new(Indx, XYZ, Dens_H, z);
-        [FirstLayerIndx, SecondLayerIndx] = Oxide_getWaterLayerIndicesPerSnap_new(Indx, XYZ, Dens_O, z, ABC);
+        [FirstLayerIndx, SecondLayerIndx, OxideIndx] = Oxide_getWaterLayerIndicesPerSnap_new(Indx, XYZ, Dens_O, z, ABC);
     else
         [FirstLayerIndx, SecondLayerIndx, ThirdLayerIndx] = getWaterLayerIndicesPerSnap_new(Indx, XYZ, Dens_O, z);
     end
@@ -132,6 +132,7 @@ if strcmp(DoubleAnalType, 'MassDensity')
             DL2nd{i} = [SecondLayerIndx{i}];
             nonDL{i} = setdiff(Indx.O, [DL1st{i}; DL2nd{i}]);
             DL1st_AlO{i} = [];
+            Oxide{i} = [OxideIndx{i}];
         % end
         % nonDL{i} = setdiff(Indx.O, [DL1st{i}; DL2nd{i}]);
         % DL1st_AlO{i} = [];
@@ -1280,6 +1281,7 @@ Bader3DCharge(XYZ_snap(AlNums,:), ABC, MeanQnet);
 % XYZ_snap(:,:) = XYZ(1,:,:);
 % MeanQnet = mean(Qnet(PtNums,:),2);
 
+
 %% Al1 ONLY %%
 MeanQnet = mean(Qnet(Al1,1:end),2);
 Bader3DCharge(XYZ_snap(Al1,:), ABC, MeanQnet);
@@ -1292,17 +1294,48 @@ Bader3DCharge(XYZ_snap(Al2,:), ABC, MeanQnet);
 MeanQnet = mean(Qnet(Alb,1:end),2);
 Bader3DCharge(XYZ_snap(Alb,:), ABC, MeanQnet);
 
-%% Al1 affected by DL1st Water only %%
-MeanQnet = mean(Qnet(d_AlDL1st,1:end),2);
-Bader3DCharge(XYZ_snap(d_AlDL1st,:), ABC, MeanQnet);
 
-%% Al2 affected by DL1st Water only %%
-MeanQnet = mean(Qnet(d_Al2DL1st,1:end),2);
-Bader3DCharge(XYZ_snap(d_Al2DL1st,:), ABC, MeanQnet);
 
-%% Al1 + Al2 affected by DL1st Water only %%
-MeanQnet = mean(Qnet(nAl2Al1,1:end),2);
-Bader3DCharge(XYZ_snap(nAl2Al1,:), ABC, MeanQnet);
+if END1 == 'y'
+    %% Oxide ONLY %%
+    MeanQnet = mean(Qnet(Oxide{1},1:end),2);
+    Bader3DCharge(XYZ_snap(Oxide{1},:), ABC, MeanQnet);
+    
+    %% Al1 + Oxide ONLY %%
+    MeanQnet = mean(Qnet([Al1;Oxide{1}],1:end),2);
+    Bader3DCharge(XYZ_snap([Al1;Oxide{1}],:), ABC, MeanQnet);
+
+    %% DLs + Oxide ONLY %%
+    MeanQnet = mean(Qnet([d_DL1st; d_DL2nd; Oxide{1}],1:end),2);
+    Bader3DCharge(XYZ_snap([d_DL1st; d_DL2nd; Oxide{1}],:), ABC, MeanQnet);
+
+else
+    %% Al1 affected by DL1st Water only %%
+    MeanQnet = mean(Qnet(d_AlDL1st,1:end),2);
+    Bader3DCharge(XYZ_snap(d_AlDL1st,:), ABC, MeanQnet);
+    
+    %% Al2 affected by DL1st Water only %%
+    MeanQnet = mean(Qnet(d_Al2DL1st,1:end),2);
+    Bader3DCharge(XYZ_snap(d_Al2DL1st,:), ABC, MeanQnet);
+
+    %% Al1 + Al2 affected by DL1st Water only %%
+    MeanQnet = mean(Qnet(nAl2Al1,1:end),2);
+    Bader3DCharge(XYZ_snap(nAl2Al1,:), ABC, MeanQnet);
+
+    %% Al1 affected by DL1st Water + 1WL only %%
+    MeanQnet = mean(Qnet(nAl1DL1st,1:end),2);
+    Bader3DCharge(XYZ_snap(nAl1DL1st,:), ABC, MeanQnet); 
+    
+    %% Al2 affected by DL1st Water + 1WL only %%
+    MeanQnet = mean(Qnet(nAl2DL1st,1:end),2);
+    Bader3DCharge(XYZ_snap(nAl2DL1st,:), ABC, MeanQnet);
+    
+    %% Al1 + Al2 affected by DL1st Water + 1WL only %%
+    MeanQnet = mean(Qnet(nAl2Al1DL1st,1:end),2);
+    Bader3DCharge(XYZ_snap(nAl2Al1DL1st,:), ABC, MeanQnet);
+
+end
+
 
 %% DL1st ONLY %%
 MeanQnet = mean(Qnet(d_DL1st,1:end),2);
@@ -1311,19 +1344,6 @@ Bader3DCharge(XYZ_snap(d_DL1st,:), ABC, MeanQnet);
 %% DL2nd ONLY %%
 MeanQnet = mean(Qnet(d_DL2nd,1:end),2);
 Bader3DCharge(XYZ_snap(d_DL2nd,:), ABC, MeanQnet);
-
-
-%% Al1 affected by DL1st Water + 1WL only %%
-MeanQnet = mean(Qnet(nAl1DL1st,1:end),2);
-Bader3DCharge(XYZ_snap(nAl1DL1st,:), ABC, MeanQnet); 
-
-%% Al2 affected by DL1st Water + 1WL only %%
-MeanQnet = mean(Qnet(nAl2DL1st,1:end),2);
-Bader3DCharge(XYZ_snap(nAl2DL1st,:), ABC, MeanQnet);
-
-%% Al1 + Al2 affected by DL1st Water + 1WL only %%
-MeanQnet = mean(Qnet(nAl2Al1DL1st,1:end),2);
-Bader3DCharge(XYZ_snap(nAl2Al1DL1st,:), ABC, MeanQnet);
 
 %% Als + 1WL ONLY %%
 MeanQnet = mean(Qnet(AlDL1st,1:end),2);
