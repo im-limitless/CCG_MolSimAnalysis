@@ -3,9 +3,9 @@ close all;
 
 %% %%%%%%%%%%%%%% Data collections %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge_2/Phase_diagram_sys/';
-system = 'AlO_1.5ML';
-Trajectory = 'AlO_1.5ML_162000to175000_1000step.xyz';
+BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge_2/The_rest/';
+system = 'OH_0.2ML';
+Trajectory = 'OH_0.2ML_172000to220000_1000step.xyz';
 
 
 fldrname = [BaseFldr system '/Bader_Analysis/'];
@@ -106,7 +106,7 @@ if strcmp(DoubleAnalType, 'MassDensity')
     [Dens_O, Dens_H, TotDen, ~, z] = getDensityProfile(xyz, ABC);
     %change getwaterlayerIndices to the name of the new function (same name
     %but add persnap at the end) +  [same same minimaZ] = same
-    prompt = "Is this a OH or O_OH system? ('y'/'n'): ";
+    prompt = "Is this a OH, O or O_OH system? ('y'/'n'): ";
     END1 = input(prompt);  
     if END1 == 'y'
         % [FirstLayerIndx, SecondLayerIndx, ThirdLayerIndx] = getWaterLayerIndicesPerSnap_new(Indx, XYZ, Dens_H, z);
@@ -128,14 +128,16 @@ if strcmp(DoubleAnalType, 'MassDensity')
         %     nonDL{i} = setdiff(Indx.O, [DL1st{i}; DL2nd{i}; Oxide{i}]);
         %     DL1st_AlO{i} = [];
         % else
-            DL1st{i} = [FirstLayerIndx{i}];
-            DL2nd{i} = [SecondLayerIndx{i}];
-            DL1st_AlO{i} = [];
+        DL1st_AlO{i} = [];
 
             if END1 == 'y'
-                nonDL{i} = setdiff(Indx.O, [DL1st{i}; DL2nd{i}]);
+                DL1st{i} = [FirstLayerIndx{i}];
+                DL2nd{i} = [SecondLayerIndx{i}];
+                nonDL{i} = setdiff(Indx.O, [DL1st{i}; DL2nd{i}; OxideIndx{i}]);
                 Oxide{i} = [OxideIndx{i}];
             else
+                DL1st{i} = [FirstLayerIndx{i}];
+                DL2nd{i} = [SecondLayerIndx{i}];
                 nonDL{i} = setdiff(Indx.O, [DL1st{i}; DL2nd{i}]);
             end
         % end
@@ -156,6 +158,25 @@ if strcmp(DoubleAnalType, 'MassDensity')
         [~, DistOH2ndWL] = GetAtomCorrelation(XYZ_snap, DL2nd{i}, Indx.H, ABC);
         [~, DistOHnonDL] = GetAtomCorrelation(XYZ_snap, nonDL{i}, Indx.H, ABC);
         [~, DistOAl1stWL] = GetAtomCorrelation(XYZ_snap, DL1st{i}, Indx.Al1, ABC); %This is the distribution of 1WL "O" and all Al1
+
+        if END1 == 'y'
+            Oxide_molecule{i} = [];
+            Qnet_Oxide_molecule{i} = [];
+
+            [~, DistOxide] = GetAtomCorrelation(XYZ_snap, Oxide{i}, Indx.H, ABC);
+            for j = 1:length(Oxide{i})
+                Oxide{i} = [Oxide{i}; Indx.H(find(DistOxide(:,j)<MinimaOH(1)))];
+                % if not(isempty(Indx.H(find(DistOxide(:,j)<MinimaOH(1)))))
+                    % Oxide_molecule{i} = [Oxide_molecule{i}; Oxide{i}(j); Indx.H(find(DistOHnonDL(:,j)<MinimaOH(1)))]; %// arranged in O + its Hs groups
+                    % Qnet_Oxide_molecule{i} = [Qnet_Oxide_molecule{i}; Qnet(Oxide{i}(j))+ sum(Qnet(Indx.H(find(DistOHnonDL(:,j)<MinimaOH(1)))))];
+                % end
+            end
+
+            Oxide{i} = [unique(Oxide{i})]; %\ There are some atoms that are beign repeated ! (most likely H's)
+
+        else
+            [~, DistOH1stWL] = GetAtomCorrelation(XYZ_snap, DL1st{i}, Indx.H, ABC);
+        end
 
  % % DL1st_AlO finds the "Al" that are connected to the "O" of the 1st WL in
 % the DL (i.e. the "O" in the DL1st or the indices in the ##LayerIndx)
@@ -494,6 +515,12 @@ for i = 1:length(StepNum)
         DL2nd_std(i) = std(Qnet(DL2nd{Inter},i));
         nonDL_std(i) = std(Qnet(nonDL{Inter},i));
 
+        if END1 == 'y'
+            Oxide_sum(i) = sum(Qnet(Oxide{Inter},i));
+            Oxide_mean(i) = mean(Qnet(Oxide{Inter},i));
+            Oxide_std(i) = std(Qnet(Oxide{Inter},i));
+        end
+
         Qnet_DL1st_sum(i) = sum(Qnet_DL1st_molecule{Inter});
         Qnet_DL2nd_sum(i) = sum(Qnet_DL2nd_molecule{Inter});
         Qnet_nonDL_sum(i) = sum(Qnet_nonDL_molecule{Inter});
@@ -597,30 +624,30 @@ total_Al2=sum(ismember(Atoms,'Al2 ','rows'));
 % Number of H & O
 total_WLs=size(xyz.O,2)+size(xyz.H,2);
 
-% [StepNum,sortIdx] = sort(StepNum,'ascend');
-% SumCharge = SumCharge(:,sortIdx);
-% SumChargeAls = SumChargeAls(:,sortIdx);
-% MeanCharge = MeanCharge(:,sortIdx);
-% StdCharge = StdCharge(:,sortIdx);
-% DL1st_sum = DL1st_sum(sortIdx);
-% DL2nd_sum = DL2nd_sum(sortIdx);
-% nonDL_sum = nonDL_sum(sortIdx);
-% DL1st_mean = DL1st_mean(sortIdx);
-% DL2nd_mean = DL2nd_mean(sortIdx);
-% nonDL_mean = nonDL_mean(sortIdx);
-% DL1st_std = DL1st_std(sortIdx);
-% DL2nd_std = DL2nd_std(sortIdx);
-% nonDL_std = nonDL_std(sortIdx);
-% 
-% Qnet_DL1st_sum = Qnet_DL1st_sum(sortIdx);
-% Qnet_DL2nd_sum = Qnet_DL2nd_sum(sortIdx);
-% Qnet_nonDL_sum = Qnet_nonDL_sum(sortIdx);
-% Qnet_DL1st_mean = Qnet_DL1st_mean(sortIdx);
-% Qnet_DL2nd_mean = Qnet_DL2nd_mean(sortIdx);
-% Qnet_nonDL_mean = Qnet_nonDL_mean(sortIdx);
-% Qnet_DL1st_std = Qnet_DL1st_std(sortIdx);
-% Qnet_DL2nd_std = Qnet_DL2nd_std(sortIdx);
-% Qnet_nonDL_std = Qnet_nonDL_std(sortIdx);
+[StepNum,sortIdx] = sort(StepNum,'ascend');
+SumCharge = SumCharge(:,sortIdx);
+SumChargeAls = SumChargeAls(:,sortIdx);
+MeanCharge = MeanCharge(:,sortIdx);
+StdCharge = StdCharge(:,sortIdx);
+DL1st_sum = DL1st_sum(sortIdx);
+DL2nd_sum = DL2nd_sum(sortIdx);
+nonDL_sum = nonDL_sum(sortIdx);
+DL1st_mean = DL1st_mean(sortIdx);
+DL2nd_mean = DL2nd_mean(sortIdx);
+nonDL_mean = nonDL_mean(sortIdx);
+DL1st_std = DL1st_std(sortIdx);
+DL2nd_std = DL2nd_std(sortIdx);
+nonDL_std = nonDL_std(sortIdx);
+
+Qnet_DL1st_sum = Qnet_DL1st_sum(sortIdx);
+Qnet_DL2nd_sum = Qnet_DL2nd_sum(sortIdx);
+Qnet_nonDL_sum = Qnet_nonDL_sum(sortIdx);
+Qnet_DL1st_mean = Qnet_DL1st_mean(sortIdx);
+Qnet_DL2nd_mean = Qnet_DL2nd_mean(sortIdx);
+Qnet_nonDL_mean = Qnet_nonDL_mean(sortIdx);
+Qnet_DL1st_std = Qnet_DL1st_std(sortIdx);
+Qnet_DL2nd_std = Qnet_DL2nd_std(sortIdx);
+Qnet_nonDL_std = Qnet_nonDL_std(sortIdx);
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%% End of data collection, below are graphs and data %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 prompt1 = "Data collection is done, do you want to proceed? ('y'/'n'): ";
@@ -1037,6 +1064,11 @@ plot([StepNum(1)/2000 StepNum(end)/2000], [mean(DL2nd_sum(DL2nd_sum~=0)) mean(DL
 
 plot(StepNum(nonDL_sum~=0)/2000, (nonDL_sum(nonDL_sum~=0)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'g');
 plot([StepNum(1)/2000 StepNum(end)/2000], [mean(nonDL_sum(nonDL_sum~=0)) mean(nonDL_sum(nonDL_sum~=0))], '--', 'color', 'g');
+
+if END1 == 'y'
+    plot(StepNum(Oxide_sum~=0)/2000, (Oxide_sum(Oxide_sum~=0)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'k');
+    plot([StepNum(1)/2000 StepNum(end)/2000], [mean(Oxide_sum(Oxide_sum~=0)) mean(Oxide_sum(Oxide_sum~=0))], '--', 'color', 'k');
+end
 ylabel('Total Excess Charge (|e|)');
 
 % legend('1st Water Layer', '<1st Water Layer>', '2nd Water Layer', '<2nd Water Layer>', 'Bulk Water', '<Bulk Water>', 'interpreter', 'tex')
@@ -1082,8 +1114,12 @@ end
 % elseif length(AlList) == 5
     % legend(AtomList(AlList(1),:), AtomList(AlList(2),:), AtomList(AlList(3),:), AtomList(AlList(4),:), AtomList(AlList(5),:), 'interpreter', 'tex')
 % end
-legend('1st Water Layer', '<1st Water Layer>', '2nd Water Layer', '<2nd Water Layer>', 'Bulk Water', '<Bulk Water>',AtomList(AlList(1),:), AtomList(AlList(2),:), AtomList(AlList(3),:), 'interpreter', 'tex')
 
+if END1 == 'y'
+    legend('1st Water Layer', '<1st Water Layer>', '2nd Water Layer', '<2nd Water Layer>', 'Bulk Water', '<Bulk Water>', 'Oxide', '<Oxide>', AtomList(AlList(1),:), AtomList(AlList(2),:), AtomList(AlList(3),:), 'interpreter', 'tex')
+else
+    legend('1st Water Layer', '<1st Water Layer>', '2nd Water Layer', '<2nd Water Layer>', 'Bulk Water', '<Bulk Water>',AtomList(AlList(1),:), AtomList(AlList(2),:), AtomList(AlList(3),:), 'interpreter', 'tex')
+end
 hold off
 
 
@@ -1131,7 +1167,7 @@ plot([StepNum(1)/2000 StepNum(end)/2000], [mean(nonDL_sum(nonDL_sum~=0)./cell2ma
 
 
 plot(StepNum/2000, totalAlsCharge/total_Al, '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'c');
-plot([StepNum(1)/2000 StepNum(end)/2000], [mean(totalAlsCharge)/total_Al mean(totalAlsCharge)/total_Al], '--', 'color', 'c');
+plot([StepNum(1)/2000 StepNum(end)/2000], [mean(totalAlsCharge/total_Al) mean(totalAlsCharge/total_Al)], '--', 'color', 'c');
 ylabel('Excess Charge (|e|) per atom ');
 
 legend('1st Water Layer', '<1st Water Layer>', '2nd Water Layer', '<2nd Water Layer>', 'Bulk Water', '<Bulk Water>', 'Al Layers', '<Al Layers>', 'interpreter', 'tex')
@@ -1156,10 +1192,18 @@ plot([StepNum(1)/2000 StepNum(end)/2000], [mean(nonDL_sum(nonDL_sum~=0)./cell2ma
 
 
 plot(StepNum/2000, totalAlsCharge/total_Al, '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'c');
-plot([StepNum(1)/2000 StepNum(end)/2000], [mean(totalAlsCharge)/total_Al mean(totalAlsCharge)/total_Al], '--', 'color', 'c');
-ylabel('Excess Charge (|e|) per Water ');
+plot([StepNum(1)/2000 StepNum(end)/2000], [mean(totalAlsCharge/total_Al) mean(totalAlsCharge/total_Al)], '--', 'color', 'c');
+ylabel('Excess Charge (|e|) per Water/Al (Note: Oxide is per atom');
 
-legend('1st Water Layer', '<1st Water Layer>', '2nd Water Layer', '<2nd Water Layer>', 'Bulk Water', '<Bulk Water>', 'Al Layers', '<Al Layers>', 'interpreter', 'tex')
+if END1 == 'y'
+    plot(StepNum(Oxide_mean~=0)/2000, (Oxide_mean(Oxide_mean~=0)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'k');
+    plot([StepNum(1)/2000 StepNum(end)/2000], [mean(Oxide_mean(Oxide_mean~=0)) mean(Oxide_mean(Oxide_mean~=0))], '--', 'color', 'k');
+
+    legend('1st Water Layer', '<1st Water Layer>', '2nd Water Layer', '<2nd Water Layer>', 'Bulk Water', '<Bulk Water>', 'Al Layers', '<Al Layers>', 'Oxide Layer', '<Oxide Layer>', 'interpreter', 'tex')
+
+else
+    legend('1st Water Layer', '<1st Water Layer>', '2nd Water Layer', '<2nd Water Layer>', 'Bulk Water', '<Bulk Water>', 'Al Layers', '<Al Layers>', 'interpreter', 'tex')
+end
 hold off
 
 %% Charge per all Al types + all WLs %%
