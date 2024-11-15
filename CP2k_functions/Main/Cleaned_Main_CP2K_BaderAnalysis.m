@@ -3,9 +3,9 @@ close all;
 
 %% %%%%%%%%%%%%%% Data collections %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge_2/Phase_diagram_sys/';
-system = 'AlO_1ML_OH';
-Trajectory = 'AlO_1ML_OH_148000to160000_1000step.xyz';
+BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge_2/The_rest/';
+system = 'OH_0.2ML';
+Trajectory = 'OH_0.2ML_172000to220000_1000step.xyz';
 
 
 fldrname = [BaseFldr system '/Bader_Analysis/'];
@@ -172,8 +172,10 @@ if strcmp(DoubleAnalType, 'MassDensity')
             DL1st_molecule{i} = [DL1st_molecule{i}; DL1st{i}(j); Indx.H(find(DistOH1stWL(:,j)<MinimaOH(1)))]; %// arranged in O + its Hs groups
             Qnet_DL1st_molecule{i} = [Qnet_DL1st_molecule{i}; Qnet(DL1st{i}(j))+sum(Qnet(Indx.H(find(DistOH1stWL(:,j)<MinimaOH(1)))))];
         end
-
-        DL1st{i} = [DL1st{i}; Oxide_molecule{i}]; %\Adding this to 1st WL
+        
+        if END1 == 'y'
+            DL1st{i} = [DL1st{i}; Oxide_molecule{i}]; %\Adding this to 1st WL
+        end
         DL1st{i} = [unique(DL1st{i})]; %\ There are some atoms that are beign repeated ! (most likely H's)
 
 
@@ -191,12 +193,18 @@ if strcmp(DoubleAnalType, 'MassDensity')
         end
         nonDL{i} = [unique(nonDL{i})]; %\ There are some atoms that are beign repeated ! (most likely H's)
         
-        %% adding Bulk H2 molecules 
-        nonDL{i} = [nonDL{i}; setdiff(Indx.H,[DL1st{i}; DL2nd{i}; nonDL{i}; Oxide{i}])]; 
-        %\CHECK on non OH_0.2ML sys; for OH_0.2ML there are H2 molecules in the bulk that are missing, this takes care of it but not sure if this is the same in all other systems plz check!
-        %% END
-
+        %% adding Bulk H2 molecules and finding shared atoms (if any)
+        if END1 == 'y'
+            Potential_H2{i}=[setdiff(Indx.H,[DL1st{i}; DL2nd{i}; nonDL{i}; Oxide{i}])];
+            nonDL{i} = [nonDL{i}; setdiff(Indx.H,[DL1st{i}; DL2nd{i}; nonDL{i}; Oxide{i}])]; %\CHECK on non OH_0.2ML sys; for OH_0.2ML there are H2 molecules in the bulk that are missing, this takes care of it but not sure if this is the same in all other systems plz check!
         Shared_atoms{i} = [Shared_atoms{i}; intersect(Oxide_O{i},DL1st{i}); intersect(DL2nd{i},DL1st{i}); intersect(DL2nd{i},nonDL{i})];
+        else 
+            Potential_H2{i}=[setdiff(Indx.H,[DL1st{i}; DL2nd{i}; nonDL{i}])];
+            nonDL{i} = [nonDL{i}; setdiff(Indx.H,[DL1st{i}; DL2nd{i}; nonDL{i}])]; %\CHECK on non OH_0.2ML sys; for OH_0.2ML there are H2 molecules in the bulk that are missing, this takes care of it but not sure if this is the same in all other systems plz check!
+            Shared_atoms{i} = [Shared_atoms{i}; intersect(DL2nd{i},DL1st{i}); intersect(DL2nd{i},nonDL{i})];
+        end
+        %% END
+        
     end
 
 
@@ -611,6 +619,8 @@ total_Al=size(xyz.Al,2);
 total_Alb=sum(ismember(Atoms,'Alb ','rows'));
 total_Al1=sum(ismember(Atoms,'Al1 ','rows'));
 total_Al2=sum(ismember(Atoms,'Al2 ','rows'));
+total_Als=[total_Al1;total_Al2;total_Alb];
+
 
 % Number of H & O
 total_WLs=size(xyz.O,2)+size(xyz.H,2);
@@ -1089,6 +1099,83 @@ else
 end
 hold off
 
+%Per molecule
+figure
+box on
+hold on
+set(gca, 'colororder', [0 0 0]);
+....
+xlabel('Time (ps)');
+plot(StepNum(DL1st_sum~=0)/2000, (DL1st_sum(DL1st_sum~=0)./cell2mat(num_DL1st)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'r');
+% plot(StepNum(DL1st_sum~=0)/2000, (DL1st_sum(DL1st_sum~=0)./cell2mat(num_DL1st)), '-o', 'color', [.5,.5,.5], 'markeredgecolor', [.5,.5,.5], 'markerfacecolor', [.5,.5,.5]);
+plot([StepNum(1)/2000 StepNum(end)/2000], [mean(DL1st_sum(DL1st_sum~=0)./cell2mat(num_DL1st)) mean(DL1st_sum(DL1st_sum~=0)./cell2mat(num_DL1st))], '--', 'color', 'r');
+% plot([StepNum(1)/2000 StepNum(end)/2000], [mean(DL1st_sum(DL1st_sum~=0)./cell2mat(num_DL1st)) mean(DL1st_sum(DL1st_sum~=0)./cell2mat(num_DL1st))], '--', 'color', [.5,.5,.5]);
+
+plot(StepNum(DL2nd_sum~=0)/2000, (DL2nd_sum(DL2nd_sum~=0)./cell2mat(num_DL2nd)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'b');
+% plot(StepNum(DL2nd_sum~=0)/2000, (DL2nd_sum(DL2nd_sum~=0)./cell2mat(num_DL2nd)), '-o', 'color', [.8,.8,.8], 'markeredgecolor', [.8,.8,.8], 'markerfacecolor', [.8,.8,.8]);
+plot([StepNum(1)/2000 StepNum(end)/2000], [mean(DL2nd_sum(DL2nd_sum~=0)./cell2mat(num_DL2nd)) mean(DL2nd_sum(DL2nd_sum~=0)./cell2mat(num_DL2nd))], '--', 'color', 'b');
+% plot([StepNum(1)/2000 StepNum(end)/2000], [mean(DL2nd_sum(DL2nd_sum~=0)./cell2mat(num_DL2nd)) mean(DL2nd_sum(DL2nd_sum~=0)./cell2mat(num_DL2nd))], '--', 'color', [.8,.8,.8]);
+
+plot(StepNum(nonDL_sum~=0)/2000, (nonDL_sum(nonDL_sum~=0)./cell2mat(num_nonDL)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'g');
+% plot(StepNum(nonDL_sum~=0)/2000, (nonDL_sum(nonDL_sum~=0)./cell2mat(num_nonDL)), '-o', 'color', [.8,.8,.8], 'markeredgecolor', [.8,.8,.8], 'markerfacecolor', [.8,.8,.8]);
+plot([StepNum(1)/2000 StepNum(end)/2000], [mean(nonDL_sum(nonDL_sum~=0)./cell2mat(num_nonDL)) mean(nonDL_sum(nonDL_sum~=0)./cell2mat(num_nonDL))], '--', 'color', 'g');
+% plot([StepNum(1)/2000 StepNum(end)/2000], [mean(nonDL_sum(nonDL_sum~=0)./cell2mat(num_nonDL)) mean(nonDL_sum(nonDL_sum~=0)./cell2mat(num_nonDL))], '--', 'color', [.8,.8,.8]);
+
+if END1 == 'y'
+    plot(StepNum(Oxide_mean~=0)/2000, (Oxide_mean(Oxide_mean~=0)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'k');
+    plot([StepNum(1)/2000 StepNum(end)/2000], [mean(Oxide_mean(Oxide_mean~=0)) mean(Oxide_mean(Oxide_mean~=0))], '--', 'color', 'k');
+end
+
+
+C = [218/255 165/255 32/255; 0.25 0.25 0.25; 0 0.5 0; 0 0 1; 139/255 0 139/255];
+AlC = [];
+for i = 1:length(AlList)
+    if contains(AtomList(AlList(i), :), 'Al1')
+        AlC = C(1,:);
+        % AlC=[0 0.4470 0.7410];
+    elseif contains(AtomList(AlList(i), :), 'Al12')
+        AlC = C(2,:);
+    elseif contains(AtomList(AlList(i), :), 'Al2')
+        AlC = C(3,:);
+        % AlC=[0.3010 0.7450 0.9330];
+    elseif contains(AtomList(AlList(i), :), 'Al22')
+        AlC = C(4,:);
+    elseif contains(AtomList(AlList(i), :), 'Alb')
+        AlC = C(5,:);
+        % AlC = [.8,.8,.8];
+    end
+    plot(StepNum/2000, SumCharge(AlList(i),:)/total_Als(i), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', AlC);
+    % plot(StepNum/2000, SumCharge(AlList(i),:)/total_Als(i), '-o', 'color', AlC, 'markeredgecolor', AlC, 'markerfacecolor', AlC);
+end
+
+for i = 1:length(AlList)
+    if contains(AtomList(AlList(i), :), 'Al1')
+        AlC = C(1,:);
+        % AlC=[0 0.4470 0.7410];
+    elseif contains(AtomList(AlList(i), :), 'Al12')
+        AlC = C(2,:);
+    elseif contains(AtomList(AlList(i), :), 'Al2')
+        AlC = C(3,:);
+        % AlC=[0.3010 0.7450 0.9330];
+    elseif contains(AtomList(AlList(i), :), 'Al22')
+        AlC = C(4,:);
+    elseif contains(AtomList(AlList(i), :), 'Alb')
+        AlC = C(5,:);
+        % AlC = [.8,.8,.8];
+    end
+    plot([StepNum(1)/2000 StepNum(end)/2000], [mean(SumCharge(AlList(i),:)/total_Als(i)) mean(SumCharge(AlList(i),:)/total_Als(i))], '--', 'color', AlC);
+end
+
+
+if END1 == 'y'
+    % ylabel('Excess Charge (|e|) per Water/Al (Note: Oxide_O is per atom)');
+    ylabel('Excess Charge (|e|) per Water/Atom');
+    legend('1st Water Layer', '<1st Water Layer>', '2nd Water Layer', '<2nd Water Layer>', 'Bulk Water', '<Bulk Water>', 'Oxide_O', '<Oxide_O>', AtomList(AlList(1),:), AtomList(AlList(2),:), AtomList(AlList(3),:), 'interpreter', 'tex')
+else
+    ylabel('Excess Charge (|e|) per Water/Al');
+    legend('1st Water Layer', '<1st Water Layer>', '2nd Water Layer', '<2nd Water Layer>', 'Bulk Water', '<Bulk Water>',AtomList(AlList(1),:), AtomList(AlList(2),:), AtomList(AlList(3),:), 'interpreter', 'tex')
+end
+hold off
 
 
 %% Charge per all Al types + 1&2 DL + Bulk %%
@@ -1160,15 +1247,17 @@ plot([StepNum(1)/2000 StepNum(end)/2000], [mean(nonDL_sum(nonDL_sum~=0)./cell2ma
 
 plot(StepNum/2000, totalAlsCharge/total_Al, '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'c');
 plot([StepNum(1)/2000 StepNum(end)/2000], [mean(totalAlsCharge/total_Al) mean(totalAlsCharge/total_Al)], '--', 'color', 'c');
-ylabel('Excess Charge (|e|) per Water/Al (Note: Oxide_O is per atom');
+
 
 if END1 == 'y'
     plot(StepNum(Oxide_mean~=0)/2000, (Oxide_mean(Oxide_mean~=0)), '-o', 'color', 'k', 'markeredgecolor', 'k', 'markerfacecolor', 'k');
     plot([StepNum(1)/2000 StepNum(end)/2000], [mean(Oxide_mean(Oxide_mean~=0)) mean(Oxide_mean(Oxide_mean~=0))], '--', 'color', 'k');
-
+    
+    ylabel('Excess Charge (|e|) per Water/Al (Note: Oxide_O is per atom)');
     legend('1st Water Layer', '<1st Water Layer>', '2nd Water Layer', '<2nd Water Layer>', 'Bulk Water', '<Bulk Water>', 'Al Layers', '<Al Layers>', 'Oxide_O Layer', '<Oxide_O Layer>', 'interpreter', 'tex')
 
 else
+    ylabel('Excess Charge (|e|) per Water/Al');
     legend('1st Water Layer', '<1st Water Layer>', '2nd Water Layer', '<2nd Water Layer>', 'Bulk Water', '<Bulk Water>', 'Al Layers', '<Al Layers>', 'interpreter', 'tex')
 end
 hold off
@@ -1319,6 +1408,10 @@ if END1 == 'y'
     %% DLs + Oxide ONLY %%
     MeanQnet = mean(Qnet([d_DL1st; d_DL2nd; Oxide_O{1}],1:end),2);
     Bader3DCharge(XYZ_snap([d_DL1st; d_DL2nd; Oxide_O{1}],:), ABC, MeanQnet);
+
+    %% Als+ DLs + Oxide ONLY %%
+    MeanQnet = mean(Qnet([Alb; Al1; Al2; d_DL1st; d_DL2nd; Oxide_O{1}],1:end),2);
+    Bader3DCharge(XYZ_snap([Alb; Al1; Al2; d_DL1st; d_DL2nd; Oxide_O{1}],:), ABC, MeanQnet);
 
 else
     %% Al1 affected by DL1st Water only %%
