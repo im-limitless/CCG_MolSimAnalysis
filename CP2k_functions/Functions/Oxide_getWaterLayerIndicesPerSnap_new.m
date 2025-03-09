@@ -3,11 +3,15 @@ function [FirstLayerIndx, SecondLayerIndx, OxideIndx, MinimaZ] = Oxide_getWaterL
 GlobalMinima = LocateStationaryPoints(mean(Dens_O,2));
 Minima = zeros(size(Dens_O,1), size(Dens_O,2));
 
+temp_Al_z_ULim=[]; %collect Al_z_Ulim over time stamps 
+
 for i = 1:size(Dens_O,2)
     
     %% This section is to find the extent of Al1 at both interfaces %%
     Al_z_ULim_Indices = intersect(Indx.Al_All,find(XYZ(i,:,3)<=(ABC(3)/2)));
     Al_z_ULim = max(XYZ(i,Al_z_ULim_Indices,3));
+
+    temp_Al_z_ULim=[temp_Al_z_ULim; Al_z_ULim];
 
     Al_z_LLim_Indices = intersect(Indx.Al_All,find(XYZ(i,:,3)>=(ABC(3)/2)));
     Al_z_LLim = min(XYZ(i,Al_z_LLim_Indices,3));

@@ -3,9 +3,9 @@ close all;
 
 %% %%%%%%%%%%%%%% Data collections %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge_2/Phase_diagram_sys/';
-system = 'Al_water';
-Trajectory = 'Al_water_153000to163000_1000step.xyz';
+BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge_2/The_rest/';
+system = 'AlO_0.16ML';
+Trajectory = 'AlO_0.16ML_OH_107000to152000_1000step.xyz';
 
 
 fldrname = [BaseFldr system '/Bader_Analysis/'];
@@ -67,12 +67,14 @@ for snap = startConfig:nConfigs
     [VecOH, DistOH] = GetAtomCorrelation(XYZ_snap, Indx.O, Indx.H, ABC);
     [VecAl1_Al1, DistAl1_Al1{snap}] = GetAtomCorrelation(XYZ_snap, [Indx.Al1], Indx.Al1, ABC); 
     [VecAl1_Al2, DistAl1_Al2{snap}] = GetAtomCorrelation(XYZ_snap, [Indx.Al1], Indx.Al2, ABC);
+    [VecAl2_Al1, DistAl2_Al1{snap}] = GetAtomCorrelation(XYZ_snap, [Indx.Al2], Indx.Al1, ABC);
     [VecAl2_Alb, DistAl2_Alb{snap}] = GetAtomCorrelation(XYZ_snap, [Indx.Al2], Indx.Alb, ABC);
     
     RadFunOH{snap} = reshape(DistOH, [numel(DistOH), 1]);
     RadFunAlO{snap} = reshape(DistAlO{snap}, [numel(DistAlO{snap}), 1]);
     RadFunAl1_Al1{snap} = reshape(DistAl1_Al1{snap}, [numel(DistAl1_Al1{snap}), 1]);
     RadFunAl1_Al2{snap} = reshape(DistAl1_Al2{snap}, [numel(DistAl1_Al2{snap}), 1]);
+    RadFunAl2_Al1{snap} = reshape(DistAl2_Al1{snap}, [numel(DistAl2_Al1{snap}), 1]);
     RadFunAl2_Alb{snap} = reshape(DistAl2_Alb{snap}, [numel(DistAl2_Alb{snap}), 1]);
 
 end
@@ -82,6 +84,7 @@ MinimaAlO = RadialDistribution(RadFunAlO, ABC, ['Al'; 'O '], 1);
 MinimaAl1_Al1 = RadialDistribution(RadFunAl1_Al1, ABC, ['Al1'; 'Al1'], 1);
 MinimaAl1_Al2 = RadialDistribution(RadFunAl1_Al2, ABC, ['Al1'; 'Al2'], 1);
 MinimaAl2_Alb = RadialDistribution(RadFunAl2_Alb, ABC, ['Al2'; 'Alb'], 1);
+MinimaAl2_Al1 = RadialDistribution(RadFunAl2_Al1, ABC, ['Al2'; 'Al1'], 1);
 
 
 if strcmp(DoubleAnalType, 'MassDensity')
@@ -193,15 +196,18 @@ if strcmp(DoubleAnalType, 'MassDensity')
         end
         nonDL{i} = [unique(nonDL{i})]; %\ There are some atoms that are beign repeated ! (most likely H's)
         
-        %% adding Bulk H2 molecules
+        %% adding Bulk H2 molecules and finding shared atoms (if any)
         if END1 == 'y'
             Potential_H2{i}=[setdiff(Indx.H,[DL1st{i}; DL2nd{i}; nonDL{i}; Oxide{i}])];
-
-        nonDL{i} = [nonDL{i}; setdiff(Indx.H,[DL1st{i}; DL2nd{i}; nonDL{i}; Oxide{i}])]; 
-        %\CHECK on non OH_0.2ML sys; for OH_0.2ML there are H2 molecules in the bulk that are missing, this takes care of it but not sure if this is the same in all other systems plz check!
+            nonDL{i} = [nonDL{i}; setdiff(Indx.H,[DL1st{i}; DL2nd{i}; nonDL{i}; Oxide{i}])]; %\CHECK on non OH_0.2ML sys; for OH_0.2ML there are H2 molecules in the bulk that are missing, this takes care of it but not sure if this is the same in all other systems plz check!
+            Shared_atoms{i} = [Shared_atoms{i}; intersect(Oxide_O{i},DL1st{i}); intersect(DL2nd{i},DL1st{i}); intersect(DL2nd{i},nonDL{i})];
+        else 
+            Potential_H2{i}=[setdiff(Indx.H,[DL1st{i}; DL2nd{i}; nonDL{i}])];
+            nonDL{i} = [nonDL{i}; setdiff(Indx.H,[DL1st{i}; DL2nd{i}; nonDL{i}])]; %\CHECK on non OH_0.2ML sys; for OH_0.2ML there are H2 molecules in the bulk that are missing, this takes care of it but not sure if this is the same in all other systems plz check!
+            Shared_atoms{i} = [Shared_atoms{i}; intersect(DL2nd{i},DL1st{i}); intersect(DL2nd{i},nonDL{i})];
+        end
         %% END
-
-        Shared_atoms{i} = [Shared_atoms{i}; intersect(Oxide_O{i},DL1st{i}); intersect(DL2nd{i},DL1st{i}); intersect(DL2nd{i},nonDL{i})];
+        
     end
 
 
@@ -309,8 +315,23 @@ S_DL1st_AlO = [Indx.Al1(find(S_DistOAl1stWL(:,:)<=MinimaAlO(1)))]; %The Al1 bond
 [~, S_Dist_n_Al2_OAl1stWL] = GetAtomCorrelation(XYZ_snap, S_DL1st_AlO, Indx.Al2, ABC); %This is the distribution of the Al1 bonded to 1WL "O" and all Al2
 
 
-S_DL1st_nAlO = [Indx.Al1(find(S_Dist_n_OAl1stWL(:,:)<=MinimaAl1_Al1(1)))]; %This captures all Al1 bonded to 1WL and its Al1 neighbours
-S_DL1st_Al2_nAlO = [Indx.Al2(find(S_Dist_n_Al2_OAl1stWL(:,:)<=MinimaAl1_Al2(1)))]; %This captures all Al2 neighbours to Al1 bonded to 1WL
+if size(S_Dist_n_OAl1stWL,2)>1
+    for k=1:size(S_Dist_n_OAl1stWL,2)
+        S_DL1st_nAlO = [S_DL1st_nAlO; Indx.Al1(find(S_Dist_n_OAl1stWL(:,k)<=MinimaAl1_Al1(1)))]; %This captures all Al1 bonded to 1WL and its Al1 neighbours
+    end
+else
+    S_DL1st_nAlO = [Indx.Al1(find(S_Dist_n_OAl1stWL(:,:)<=MinimaAl1_Al1(1)))]; %This captures all Al1 bonded to 1WL and its Al1 neighbours
+end
+
+if size(S_Dist_n_Al2_OAl1stWL,2)>1
+    for k2=1:size(S_Dist_n_Al2_OAl1stWL,2)
+        S_DL1st_Al2_nAlO = [S_DL1st_Al2_nAlO; Indx.Al2(find(S_Dist_n_Al2_OAl1stWL(:,k2)<=MinimaAl1_Al2(1)))]; %This captures all Al2 neighbours to Al1 bonded to 1WL
+    end
+else
+    S_DL1st_Al2_nAlO = [Indx.Al2(find(S_Dist_n_Al2_OAl1stWL(:,:)<=MinimaAl1_Al2(1)))]; %This captures all Al2 neighbours to Al1 bonded to 1WL
+end
+
+
 
 [~, S_Dist_n_Alb_OAl1stWL] = GetAtomCorrelation(XYZ_snap, S_DL1st_Al2_nAlO, Indx.Alb, ABC); %This is the distribution of the Al2 nearest neighbours to 1WL "O" and all Alb
 for j = 1:length(S_DL1st_Al2_nAlO)
@@ -420,7 +441,11 @@ hold off
 %nonDL H2O
 S_DL1st{i} = [FirstLayerIndx{i}];
 S_DL2nd{i} = [SecondLayerIndx{i}];
-S_nonDL{i} = setdiff(Indx.O, [S_DL1st{i}; S_DL2nd{i}]);
+if END1 == 'y'
+    S_nonDL{i} = setdiff(Indx.O, [DL1st{i}; DL2nd{i}; OxideIndx{i}]);
+else
+    S_nonDL{i} = setdiff(Indx.O, [S_DL1st{i}; S_DL2nd{i}]);
+end
 [~, S_DistOHnonDL] = GetAtomCorrelation(XYZ_snap, S_nonDL{i}, Indx.H, ABC);
 Single_nonDL = [S_nonDL{i}(1,:); Indx.H(find(S_DistOHnonDL(:,1)<MinimaOH(1)))];
 
@@ -622,7 +647,7 @@ total_Als=[total_Al1;total_Al2;total_Alb];
 % Number of H & O
 total_WLs=size(xyz.O,2)+size(xyz.H,2);
 
-[StepNum,sortIdx] = sort(StepNum,'ascend');
+[StepNum,sortIdx] = sort(StepNum_Traj,'ascend');
 SumCharge = SumCharge(:,sortIdx);
 SumChargeAls = SumChargeAls(:,sortIdx);
 MeanCharge = MeanCharge(:,sortIdx);
@@ -1316,10 +1341,10 @@ Al1=[];
 Al2=[];
 Alb=[];
 for i = 1:length(AlList)
-    AlNums = [AlNums; Indx.(Indxfns{AlList(i)})];
-    Al1=[Al1; Indx.(Indxfns{AlList(1)})];
-    Al2=[Al2; Indx.(Indxfns{AlList(2)})];
-    Alb=[Alb; Indx.(Indxfns{AlList(3)})];
+    AlNums = [Indx.(Indxfns{AlList(i)})];
+    Al1=[Indx.(Indxfns{AlList(1)})];
+    Al2=[Indx.(Indxfns{AlList(2)})];
+    Alb=[Indx.(Indxfns{AlList(3)})];
 end
 
 % Creating a double that includes all the Al atoms + 1st Layer of water;

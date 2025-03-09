@@ -5,8 +5,9 @@ PathSep = setOSpathSep;
 %% Home
 % BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge/5lyr_systems/Al_AlO/Al_water/Fix_volume/BOMD/Temperature_fix/';
 BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge_2/The_rest/';
-system = 'OH_0.2ML';
-Trajectory = 'OH_0.2ML_172000to220000_1000step.xyz';
+% BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge/5lyr_systems/Al_AlO/';
+system = 'AlO_0.5ML_OH';
+Trajectory = 'AlO_0.5ML_OH_99000to140000_1000step.xyz';
 
 % % Call function to find ABC vectors from .inp file
 ABC = getABCvectors(BaseFldr, system);

@@ -43,7 +43,7 @@ for snap = startConfig:nConfigs
 %     [VecOH, DistOH] = GetAtomCorrelation(XYZ_snap, [AtomIndx.O; AtomIndx.OtU; AtomIndx.OtL], AtomIndx.H, ABC);
 %     [VecFH, DistFH] = GetAtomCorrelation(XYZ_snap, Indx.F, Indx.H, ABC);
 %     [VecFO, DistFO] = GetAtomCorrelation(XYZ_snap, Indx.F, Indx.O, ABC);
-%     [VecHH, DistHH] = GetAtomCorrelation(XYZ_snap, Indx.H, Indx.H, ABC);
+    [VecHH, DistHH] = GetAtomCorrelation(XYZ_snap, Indx.H, Indx.H, ABC);
     [VecOO, DistOO] = GetAtomCorrelation(XYZ_snap, AtomIndx.O, AtomIndx.O, ABC);
     [VecAlO, DistAlO] = GetAtomCorrelation(XYZ_snap, AtomIndx.Al1, AtomIndx.O, ABC);
 %     [VecPtO, DistPtO] = GetAtomCorrelation(XYZ_snap, AtomIndx.Pts, Indx.O, ABC);
@@ -54,7 +54,7 @@ for snap = startConfig:nConfigs
     RadFunOH{snap} = reshape(DistOH, [numel(DistOH), 1]);
 %     RadFunFH{snap} = reshape(DistFH, [numel(DistFH), 1]);
 %     RadFunFO{snap} = reshape(DistFO, [numel(DistFO), 1]);
-%     RadFunHH{snap} = reshape(DistHH, [numel(DistHH), 1]);
+    RadFunHH{snap} = reshape(DistHH, [numel(DistHH), 1]);
     RadFunOO{snap} = reshape(DistOO, [numel(DistOO), 1]);
     RadFunAlO{snap} = reshape(DistAlO, [numel(DistAlO), 1]);
 %     RadFunPtO{snap} = reshape(DistPtO{snap}, [numel(DistPtO{snap}), 1]);
@@ -70,7 +70,7 @@ end
 RadialDistribution_new(RadFunOH, ABC, ['O'; 'H'], 1);
 % RadialDistribution(RadFunFH, ABC, ['H'; 'F'], 1);
 % RadialDistribution(RadFunFO, ABC, ['O'; 'F'], 1);
-% RadialDistribution(RadFunHH, ABC, ['H'; 'H'], 1);
+RadialDistribution_new(RadFunHH, ABC, ['H'; 'H'], 1);
 RadialDistribution_new(RadFunOO, ABC, ['O'; 'O'], 1);
 RadialDistribution_new(RadFunAlO, ABC, ['Al'; 'O '], 1);  
 % MinimaPtSO = RadialDistribution(RadFunPtSO, ABC, ['Pts'; 'O  '],1);
