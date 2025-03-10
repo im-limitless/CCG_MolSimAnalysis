@@ -24,8 +24,6 @@ H3O_Coverage = zeros(nConfigs, 1);
 O_Coverage = zeros(nConfigs, 1);
 
 
-
-
 for i = 1:nConfigs
 
     OH_indicies{i} = [];
@@ -45,56 +43,20 @@ for i = 1:nConfigs
 
     [~, DistOH] = GetAtomCorrelation(XYZ_snap, Indx.H, Indx.O(C), ABC);
     [rOH,cOH] = find(DistOH < 1.28);
-    % [GR, GC] = groupcounts(rOH); %Bug, this double counts. We want to find the repetitions of each unique j where j=rOH(i)
-    % OH_Coverage(i) = sum(GR == 1);
-    % H2O_Coverage(i) = sum(GR == 2); 
-    % H3O_Coverage(i) = sum(GR == 3);
-
-    OH=[];
-    H2O=[];
-    H3O=[];
-
-    for j =1:length(rOH)
-        if size(find(rOH==rOH(j)),1)==1
-            OH=[OH,find(rOH==rOH(j))];
-
-        elseif size(find(rOH==rOH(j)),1)==2
-            H2O=[H2O,find(rOH==rOH(j))];
-
-        elseif size(find(rOH==rOH(j)),1)==3
-            H3O=[H3O,find(rOH==rOH(j))];
-        
-        end
-                
-    end
-
-    % OH_unique=OH;
-    H2O_unique=unique(H2O(1,:))';
-
-    if not(isempty(H3O))
-        H3O_unique=unique(H3O(1,:))';
-        H3O_Coverage(i) = length(unique(H3O(1,:)));
-        H3O_indicies{i}=Indx.O(C(rOH(H3O_unique))); %save the indicies for H3Os 
-    else
-        H3O_Coverage(i) = 0;
-    end
+    [GR, GC] = groupcounts(rOH); %Bug, this double counts. We want to find the repetitions of each unique j where j=rOH(i)
+    OH_Coverage(i) = sum(GR == 1);
+    H2O_Coverage(i) = sum(GR == 2); 
+    H3O_Coverage(i) = sum(GR == 3);
 
 
-     if not(isempty(OH))
-        OH_unique=unique(OH(1,:))';
-        OH_Coverage(i) = length(unique(OH(1,:)));
-        OH_indicies{i}=Indx.O(C(rOH(OH_unique))); %save the indicies for OHs 
-    else
-        H3O_Coverage(i) = 0;
-     end
-
-    % OH_Coverage(i) =length(unique(OH(1,:)));
-    H2O_Coverage(i) = length(unique(H2O(1,:))); 
     
-    %save the indicies for H2O
-    % OH_indicies{i}=Indx.O(C(rOH(OH_unique)));
-    H2O_indicies{i}=Indx.O(C(rOH(H2O_unique)));
     
+    %save the indicies for OH, H2O, H3Os 
+    OH_indicies{i}=Indx.O(C(rOH(GC(find(GR==1)))));
+    H2O_indicies{i}=Indx.O(C(rOH(GC(find(GR==2)))));
+    H3O_indicies{i}=Indx.O(C(rOH(GC(find(GR==3)))));
+    
+  
 
 
     %Counting the adsorbed O with no H's

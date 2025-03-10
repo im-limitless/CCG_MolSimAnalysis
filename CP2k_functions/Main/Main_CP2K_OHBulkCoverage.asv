@@ -6,8 +6,8 @@ PathSep = setOSpathSep;
 % BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge/5lyr_systems/Al_AlO/Al_water/Fix_volume/BOMD/Temperature_fix/';
 BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge_2/The_rest/';
 % BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge/5lyr_systems/Al_AlO/';
-system = 'OH_0.16ML';
-Trajectory = 'AlO_1ML_OH_148000to160000_1000step.xyz';
+system = 'OH_0.2ML';
+Trajectory = 'OH_0.2ML_172000to220000_1000step.xyz';
 
 % % Call function to find ABC vectors from .inp file
 ABC = getABCvectors(BaseFldr, system);
@@ -31,71 +31,70 @@ for i = 1:nConfigs
 
     % get the distances between pairs of atoms
     [~, DistAlO] = GetAtomCorrelation(XYZ_snap, Indx.Al1, Indx.O, ABC);
-    [r,c] = find(DistAlO < 2.85); % Rashid to fix this "2" by looking at RDF minimum - r = row aka O atom number, c = column aka Al1 atom number
+    [r,c] = find(DistAlO < 2.5); % Rashid to fix this "2" by looking at RDF minimum - r = row aka O atom number, c = column aka Al1 atom number
 
-    [~, DistOH] = GetAtomCorrelation(XYZ_snap, Indx.H, setdiff(Indx.O,Indx.O(r)), ABC);
+    [C,~]=unique(r); %How many O close to Al1
+    [num,~]=size(C);
+    rlen=(1:length(DistAlO(:,1)))';
+    O_Bulk=setdiff(rlen,C);
+    
+
+    % [~, DistOH] = GetAtomCorrelation(XYZ_snap, Indx.H, setdiff(Indx.O,Indx.O(C)), ABC);
+    [~, DistOH] = GetAtomCorrelation(XYZ_snap, Indx.H, Indx.O(O_Bulk), ABC);
 %     [~, DistOH] = GetAtomCorrelation(XYZ_snap, Indx.H, Indx.O, ABC);
     [rOH,cOH] = find(DistOH < 1.28);
-    [GR, GC] = groupcounts(rOH);
-    O_Coverage(i) = sum(GR == 0);
-    OH_Coverage(i) = sum(GR == 1);
-    H2O_Coverage(i) = sum(GR == 2);
+
+    OH=[];
+    H2O=[];
+    H3O=[];
+
+    for j =1:length(rOH)
+        if size(find(rOH==rOH(j)),1)==1
+            OH=[OH,find(rOH==rOH(j))];
+
+        elseif size(find(rOH==rOH(j)),1)==2
+            H2O=[H2O,find(rOH==rOH(j))];
+
+        elseif size(find(rOH==rOH(j)),1)==3
+            H3O=[H3O,find(rOH==rOH(j))];
+        
+        end
+                
+    end
+
+    % OH_unique=OH;
+    H2O_unique=unique(H2O(1,:))';
+
+    if not(isempty(H3O))
+        H3O_unique=unique(H3O(1,:))';
+        H3O_Coverage(i) = length(unique(H3O(1,:)));
+        H3O_indicies{i}=Indx.O(O_Bulk(rOH(H3O_unique))); %save the indicies for H3Os 
+    else
+        H3O_Coverage(i) = 0;
+    end
+
+
+     if not(isempty(OH))
+        OH_unique=unique(OH(1,:))';
+        OH_Coverage(i) = length(unique(OH(1,:)));
+        OH_indicies{i}=Indx.O(C(rOH(OH_unique))); %save the indicies for OHs 
+    else
+        H3O_Coverage(i) = 0;
+     end
+
+    % OH_Coverage(i) =length(unique(OH(1,:)));
+    H2O_Coverage(i) = length(unique(H2O(1,:))); 
     
-    [gH3O, cH3O]= groupcounts(cOH);
-    H3O_Coverage(i) = sum(GR == 3)-sum(gH3O==2); %Potential bug, we are picking up any shared H atom shared between two O atoms that might not be H3O and it might be a H shuttling between OH and H2O!
-%One idea is to loop over the shared oxygens and then identify any OH
-%molecules and if there are any then they would be excluded from the
-%subtraction somehow, i.e. we want to only remove shared O between two
-%H2O's and nothing else, those are the suspected double countings.
-   
+    %save the indicies for H2O
+    % OH_indicies{i}=Indx.O(C(rOH(OH_unique)));
+    H2O_indicies{i}=Indx.O(C(rOH(H2O_unique)));
     
-%     Indx.O(cOH(GC(GR==1))) 
+
+
+    %Counting the adsorbed O with no H's
+    rlen=(1:length(C))';
+    O_indxr=setdiff(rlen,rOH);
 end
-
-%----- This is ugly but works, fix it at some point -----
-
-
-for i = 1:nConfigs
-
-O_OH_vmd_indx{i} = zeros(nConfigs, 1);
-H_OH_vmd_indx{i} = zeros(nConfigs, 1);
-O_H3O_vmd_indx{i} = zeros(nConfigs, 1);
-
-
-XYZ_snap = zeros(size(XYZ,2), size(XYZ,3));
-XYZ_snap(:,:) = XYZ(i,:,:);
-% get the distances between pairs of atoms
-[~, DistAlO] = GetAtomCorrelation(XYZ_snap, Indx.Al1, Indx.O, ABC);
-[r,c] = find(DistAlO < 2.85); % Rashid to fix this "2" by looking at RDF minimum - r = row aka O atom number, c = column aka Al1 atom number
-[~, DistOH] = GetAtomCorrelation(XYZ_snap, Indx.H, Indx.O, ABC);
-%     [~, DistOH] = GetAtomCorrelation(XYZ_snap, Indx.H, Indx.O, ABC);
-[rOH,cOH] = find(DistOH < 1.28);
-[GR, GC] = groupcounts(rOH);
-
-disp(['config: '  num2str(i) ' of ' num2str(nConfigs)])
-%----OH--condition
-cond_OH=GC(GR==1);
-% cond_OH=cOH(GC(GR==1));
-% OH_Mat_indx=Indx.O(cOH(GC(GR==1)));
-OH_O_Mat_indx{i}=Indx.O(cond_OH);
-OH_H_Mat_indx{i}=Indx.H(cOH(ismember(rOH,cond_OH)));
-OH_O_vmd_indx{i}=OH_O_Mat_indx{i}-1;
-OH_H_vmd_indx{i}=OH_H_Mat_indx{i}-1;
-% O_OH_vmd_indx(i)=OH_O_vmd_indx;
-% H_OH_vmd_indx(i)=OH_H_vmd_indx;
-
-
-%----H3O--condition
-cond_H3O=GC(GR==3);
-% cond_H3O=cOH(GC(GR==3));
-% H3O_Mat_indx=Indx.O(cOH(GC(GR==3)));
-H3O_O_Mat_indx{i}=Indx.O(cond_H3O);
-H3O_H_Mat_indx{i}=Indx.H(cOH(ismember(rOH,cond_H3O)));
-H3O_O_vmd_indx{i}=H3O_O_Mat_indx{i}-1;
-H3O_H_vmd_indx{i}=H3O_H_Mat_indx{i}-1;
-% O_H3O_vmd_indx(i)=H3O_O_vmd_indx;
-end
-
 %-------------------------------------------------------
 
 Total_Coverage = OH_Coverage+H2O_Coverage+H3O_Coverage;
