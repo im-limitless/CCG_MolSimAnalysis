@@ -1,6 +1,10 @@
 clear all;  clc;
 close all;
 
+%NOTE:
+% Search for dollar sign ($) for experimental parts of the script which are potential
+% fail points as they were not tested on all systems. 
+
 %% %%%%%%%%%%%%%% Data collections %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge_2/The_rest/';
@@ -103,7 +107,11 @@ if strcmp(DoubleAnalType, 'MassDensity')
         [FirstLayerIndx, SecondLayerIndx, ThirdLayerIndx] = getWaterLayerIndicesPerSnap_new(Indx, XYZ, Dens_O, z);
     end
   
-    
+    OH_Coverage = zeros(nConfigs, 1);
+    H2O_Coverage = zeros(nConfigs, 1);
+    H3O_Coverage = zeros(nConfigs, 1);
+    O_Coverage = zeros(nConfigs, 1);
+
     for i = startConfig:nConfigs
        
         DL1st_AlO{i} = [];
@@ -207,7 +215,88 @@ if strcmp(DoubleAnalType, 'MassDensity')
             Shared_atoms{i} = [Shared_atoms{i}; intersect(DL2nd{i},DL1st{i}); intersect(DL2nd{i},nonDL{i})];
         end
         %% END
+
+        %% Surface species analysis (This was not tested on all systems so if there is an error comments this out) $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+        OH_indicies{i} = [];
+        H2O_indicies{i} = [];
+        H3O_indicies{i} = [];
+        O_indicies{i} = [];
+    
+        XYZ_snap = zeros(size(XYZ,2), size(XYZ,3));
+        XYZ_snap(:,:) = XYZ(i,:,:);
+    
+        % get the distances between pairs of atoms
+        [~, DistAlO] = GetAtomCorrelation(XYZ_snap, Indx.Al1, Indx.O, ABC);
+        [r,c] = find(DistAlO < 2.5); % Rashid to fix this "2" by looking at RDF minimum - r = row aka O atom number, c = column aka Al1 atom number
+    
+        [C,~]=unique(r); %How many O close to Al1
+        [num,~]=size(C);
+    
+        [~, DistOH] = GetAtomCorrelation(XYZ_snap, Indx.H, Indx.O(C), ABC);
+        [rOH,cOH] = find(DistOH < 1.28);
+        % [GR, GC] = groupcounts(rOH); %Bug, this double counts. We want to find the repetitions of each unique j where j=rOH(i)
+        % OH_Coverage(i) = sum(GR == 1);
+        % H2O_Coverage(i) = sum(GR == 2); 
+        % H3O_Coverage(i) = sum(GR == 3);
+    
+        OH=[];
+        H2O=[];
+        H3O=[];
+    
+        for j =1:length(rOH)
+            if size(find(rOH==rOH(j)),1)==1
+                OH=[OH,find(rOH==rOH(j))];
+    
+            elseif size(find(rOH==rOH(j)),1)==2
+                H2O=[H2O,find(rOH==rOH(j))];
+    
+            elseif size(find(rOH==rOH(j)),1)==3
+                H3O=[H3O,find(rOH==rOH(j))];
+            
+            end
+                    
+        end
+    
+
+        OH_molecules{i}=[];
+        Qnet_OH_molecules{i}=[];
+        H3O_molecules{i}=[];
+        Qnet_H3O_molecules{i}=[];
+
+
+        % OH_unique=OH;
+        H2O_unique=unique(H2O(1,:))';
+    
+        if not(isempty(H3O))
+            H3O_unique=unique(H3O(1,:))';
+            H3O_Coverage(i) = length(unique(H3O(1,:)));
+            H3O_indicies{i}=Indx.O(C(rOH(H3O_unique))); %save the indicies for H3Os 
+
+            [~, DistH3Osurf] = GetAtomCorrelation(XYZ_snap, H3O_indicies{i}, Indx.H, ABC);
+            for k =1:length(OH_indicies{i})
+                H3O_molecules{i}=[H3O_molecules{i};H3O_indicies{i}(k);Indx.H(find(DistH3Osurf(:,k)<MinimaOH(1)))];
+                Qnet_H3O_molecules{i}=[Qnet_H3O_molecules{i};Qnet(H3O_indicies{i}(k))+Qnet(Indx.H(find(DistH3Osurf(:,k)<MinimaOH(1))))];
+            end
+        else
+            H3O_Coverage(i) = 0;
+        end
+    
+    
+         if not(isempty(OH))
+            OH_unique=unique(OH(1,:))';
+            OH_Coverage(i) = length(unique(OH(1,:)));
+            OH_indicies{i}=Indx.O(C(rOH(OH_unique))); %save the indicies for OHs 
+
+            [~, DistOHsurf] = GetAtomCorrelation(XYZ_snap, OH_indicies{i}, Indx.H, ABC);
+            for k =1:length(OH_indicies{i})
+                OH_molecules{i}=[OH_molecules{i};OH_indicies{i}(k);Indx.H(find(DistOHsurf(:,k)<MinimaOH(1)))];
+                Qnet_OH_molecules{i}=[Qnet_OH_molecules{i};Qnet(OH_indicies{i}(k))+Qnet(Indx.H(find(DistOHsurf(:,k)<MinimaOH(1))))];
+            end
+        else
+            H3O_Coverage(i) = 0;
+         end
         
+        %% End  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
     end
 
 
