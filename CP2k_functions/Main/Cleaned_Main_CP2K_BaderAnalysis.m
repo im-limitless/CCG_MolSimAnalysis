@@ -7,9 +7,9 @@ close all;
 
 %% %%%%%%%%%%%%%% Data collections %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge_2/The_rest/';
-system = 'OH_0.2ML';
-Trajectory = 'OH_0.2ML_172000to220000_1000step.xyz';
+BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge_2/Phase_diagram_sys/';
+system = 'AlO_0.33ML_OH';
+Trajectory = 'AlO_0.33ML_OH_254000to297000_1000step.xyz';
 
 
 fldrname = [BaseFldr system '/Bader_Analysis/'];
@@ -257,7 +257,8 @@ if strcmp(DoubleAnalType, 'MassDensity')
                     
         end
     
-
+        
+        
         OH_molecules{i}=[];
         Qnet_OH_molecules{i}=[];
         H3O_molecules{i}=[];
@@ -295,6 +296,11 @@ if strcmp(DoubleAnalType, 'MassDensity')
         else
             H3O_Coverage(i) = 0;
          end
+
+        H2O_Coverage(i) = length(unique(H2O(1,:))); 
+    
+        %save the indicies for H2O
+        H2O_indicies{i}=Indx.O(C(rOH(H2O_unique)));
         
         %% End  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
     end
