@@ -1,9 +1,9 @@
 clear all;
 close all;
 
-BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge_2/The_rest/';
-system = 'AlO_0.33ML_OH';
-Trajectory = 'AlO_0.33ML_OH_254000to297000_1000step.xyz';
+BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge_2/Al2O3/';
+system = 'alpha_Al2O3';
+Trajectory = 'alpha_Al2O3.xyz';
 
 % % get the names of atoms from original xyz input file
 [~, ~, AtomIndx, ~, ~, ~, ~] = getAtomInfoFromInput(BaseFldr, system);
@@ -26,7 +26,8 @@ RadFunPtSO = cell(nConfigs,1);
 RadFunAlO = cell(nConfigs,1);
 % DistPtO = cell(1,nConfigs);
 
-
+ prompt = "Do you have H atoms? ('y'/'n'): ";
+    END = input(prompt);  
 % for snap = startConfig:startConfig
 for snap = startConfig:nConfigs
 %     disp(['Processing snapshot ' num2str(StepNum(snap)) ' - ' num2str(100*(snap/nConfigs)) ' % complete']);
@@ -38,7 +39,8 @@ for snap = startConfig:nConfigs
 % % %    [VecOH, DistOH] = GetAtomCorrelation(XYZ_snap, AtomIndx.Omid, AtomIndx.H, ABC);
 % % %    [VecOO, DistOO] = GetAtomCorrelation(XYZ_snap, AtomIndx.Omid, AtomIndx.O, ABC);
 
-    
+  if END =='y'
+     
     [VecOH, DistOH] = GetAtomCorrelation(XYZ_snap, AtomIndx.O, AtomIndx.H, ABC);
 %     [VecOH, DistOH] = GetAtomCorrelation(XYZ_snap, [AtomIndx.O; AtomIndx.OtU; AtomIndx.OtL], AtomIndx.H, ABC);
 %     [VecFH, DistFH] = GetAtomCorrelation(XYZ_snap, Indx.F, Indx.H, ABC);

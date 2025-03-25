@@ -1,9 +1,9 @@
 clear all;
 close all;
 
-BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge_2/Phase_diagram_sys/';
-system = 'AlO_1.5ML';
-Trajectory = 'AlO_1.5ML_162000to175000_1000step.xyz';
+BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge_2/Al2O3/';
+system = 'alpha_Al2O3_COD';
+Trajectory = 'alpha_Al2O3_COD.xyz';
 
 % % get the names of atoms from original xyz input file
 [~, ~, AtomIndx, ~, ~, ~, ~] = getAtomInfoFromInput(BaseFldr, system);
@@ -26,7 +26,8 @@ RadFunPtSO = cell(nConfigs,1);
 RadFunAlO = cell(nConfigs,1);
 % DistPtO = cell(1,nConfigs);
 
-
+ prompt = "Do you have H atoms? ('y'/'n'): ";
+    END = input(prompt);  
 % for snap = startConfig:startConfig
 for snap = startConfig:nConfigs
 %     disp(['Processing snapshot ' num2str(StepNum(snap)) ' - ' num2str(100*(snap/nConfigs)) ' % complete']);
@@ -38,7 +39,8 @@ for snap = startConfig:nConfigs
 % % %    [VecOH, DistOH] = GetAtomCorrelation(XYZ_snap, AtomIndx.Omid, AtomIndx.H, ABC);
 % % %    [VecOO, DistOO] = GetAtomCorrelation(XYZ_snap, AtomIndx.Omid, AtomIndx.O, ABC);
 
-    
+  if END =='y'
+     
     [VecOH, DistOH] = GetAtomCorrelation(XYZ_snap, AtomIndx.O, AtomIndx.H, ABC);
 %     [VecOH, DistOH] = GetAtomCorrelation(XYZ_snap, [AtomIndx.O; AtomIndx.OtU; AtomIndx.OtL], AtomIndx.H, ABC);
 %     [VecFH, DistFH] = GetAtomCorrelation(XYZ_snap, Indx.F, Indx.H, ABC);
@@ -50,6 +52,7 @@ for snap = startConfig:nConfigs
 
 % [VecPt, DistPt] = GetAtomCorrelation(XYZ_snap, AtomIndx.Pts, [AtomIndx.Pts; AtomIndx.Ptss], ABC);
 %     RadFunOH{snap} = reshape(DistPt, [numel(DistPt), 1]);
+  
 %     
     RadFunOH{snap} = reshape(DistOH, [numel(DistOH), 1]);
 %     RadFunFH{snap} = reshape(DistFH, [numel(DistFH), 1]);
@@ -65,22 +68,37 @@ for snap = startConfig:nConfigs
 %         [VecPtEO, DistPtEO] = GetAtomCorrelation(XYZ_snap, AtomIndx.PtE, Indx.O, ABC);
 %         RadFunPtEO{snap} = reshape(DistPtEO, [numel(DistPtEO), 1]);
 %         [r1all{snap}, ~] = find(DistPtEO <= MinimaPtEO(1)+0.1);
+
+  else
+     
+    [VecOO, DistOO] = GetAtomCorrelation(XYZ_snap, AtomIndx.O, AtomIndx.O, ABC);
+    [VecAlO, DistAlO] = GetAtomCorrelation(XYZ_snap, AtomIndx.Al1, AtomIndx.O, ABC);
+    
+    RadFunOO{snap} = reshape(DistOO, [numel(DistOO), 1]);
+    RadFunAlO{snap} = reshape(DistAlO, [numel(DistAlO), 1]);
+  end
+
 end
 
-RadialDistribution_new(RadFunOH, ABC, ['O'; 'H'], 1);
-% RadialDistribution(RadFunFH, ABC, ['H'; 'F'], 1);
-% RadialDistribution(RadFunFO, ABC, ['O'; 'F'], 1);
-RadialDistribution_new(RadFunHH, ABC, ['H'; 'H'], 1);
-RadialDistribution_new(RadFunOO, ABC, ['O'; 'O'], 1);
-RadialDistribution_new(RadFunAlO, ABC, ['Al'; 'O '], 1);  
-% MinimaPtSO = RadialDistribution(RadFunPtSO, ABC, ['Pts'; 'O  '],1);
-% [r1stflat, ~] = find(DistPtSO <= MinimaPtSO(1));
-% 
-% MinimaPtEO = RadialDistribution(RadFunPtEO, ABC, ['PtE'; 'O  '],1);
-% [r1st, ~] = find(DistPtEO <= MinimaPtEO(1));
-% 
-% 
-% [~, DistOH1stWL] = GetAtomCorrelation(XYZ_snap, AtomIndx.O(r1st), Indx.H, ABC);
+if END =='y'
+    RadialDistribution_new(RadFunOH, ABC, ['O'; 'H'], 1);
+    % RadialDistribution(RadFunFH, ABC, ['H'; 'F'], 1);
+    % RadialDistribution(RadFunFO, ABC, ['O'; 'F'], 1);
+    RadialDistribution_new(RadFunHH, ABC, ['H'; 'H'], 1);
+    RadialDistribution_new(RadFunOO, ABC, ['O'; 'O'], 1);
+    RadialDistribution_new(RadFunAlO, ABC, ['Al'; 'O '], 1);  
+    % MinimaPtSO = RadialDistribution(RadFunPtSO, ABC, ['Pts'; 'O  '],1);
+    % [r1stflat, ~] = find(DistPtSO <= MinimaPtSO(1));
+    % 
+    % MinimaPtEO = RadialDistribution(RadFunPtEO, ABC, ['PtE'; 'O  '],1);
+    % [r1st, ~] = find(DistPtEO <= MinimaPtEO(1));
+    % 
+    % 
+    % [~, DistOH1stWL] = GetAtomCorrelation(XYZ_snap, AtomIndx.O(r1st), Indx.H, ABC);
+else
+     RadialDistribution_new(RadFunOO, ABC, ['O'; 'O'], 1);
+     RadialDistribution_new(RadFunAlO, ABC, ['Al'; 'O '], 1);
+end
  
  return
 

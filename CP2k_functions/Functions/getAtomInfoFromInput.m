@@ -75,7 +75,8 @@ else
 end
 
 idx=[];
-for ii = 1:length(AtomList)
+% for ii = 1:length(AtomList) %this will only give the largest dimension 
+for ii = 1:size(AtomList,1) %this will give the 'rows' which is the number of elements, this is what we want
     if any(strcmp(KindList, AtomList(ii,:)))
         idx = [idx; find(strcmp(KindList, AtomList(ii,:)))];
     end
