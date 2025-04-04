@@ -8,8 +8,8 @@ close all;
 %% %%%%%%%%%%%%%% Data collections %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge_2/Phase_diagram_sys/';
-system = 'AlO_0.33ML_OH';
-Trajectory = 'AlO_0.33ML_OH_254000to297000_1000step.xyz';
+system = 'AlO_water_1ML';
+Trajectory = 'AlO_water_1ML_131000to184000_1000step.xyz';
 
 
 fldrname = [BaseFldr system '/Bader_Analysis/'];
@@ -264,6 +264,9 @@ if strcmp(DoubleAnalType, 'MassDensity')
         H3O_molecules{i}=[];
         Qnet_H3O_molecules{i}=[];
 
+        H2O_molecules{i}=[];
+        Qnet_H2O_molecules{i}=[];
+
 
         % OH_unique=OH;
         H2O_unique=unique(H2O(1,:))';
@@ -276,7 +279,7 @@ if strcmp(DoubleAnalType, 'MassDensity')
             [~, DistH3Osurf] = GetAtomCorrelation(XYZ_snap, H3O_indicies{i}, Indx.H, ABC);
             for k =1:length(OH_indicies{i})
                 H3O_molecules{i}=[H3O_molecules{i};H3O_indicies{i}(k);Indx.H(find(DistH3Osurf(:,k)<MinimaOH(1)))];
-                Qnet_H3O_molecules{i}=[Qnet_H3O_molecules{i};Qnet(H3O_indicies{i}(k))+Qnet(Indx.H(find(DistH3Osurf(:,k)<MinimaOH(1))))];
+                Qnet_H3O_molecules{i}=[Qnet_H3O_molecules{i};Qnet(H3O_indicies{i}(k))+sum(Qnet(Indx.H(find(DistH3Osurf(:,k)<MinimaOH(1)))))]; % Using sum(Qnet...) because we should/will find more than one H
             end
         else
             H3O_Coverage(i) = 0;
@@ -291,7 +294,7 @@ if strcmp(DoubleAnalType, 'MassDensity')
             [~, DistOHsurf] = GetAtomCorrelation(XYZ_snap, OH_indicies{i}, Indx.H, ABC);
             for k =1:length(OH_indicies{i})
                 OH_molecules{i}=[OH_molecules{i};OH_indicies{i}(k);Indx.H(find(DistOHsurf(:,k)<MinimaOH(1)))];
-                Qnet_OH_molecules{i}=[Qnet_OH_molecules{i};Qnet(OH_indicies{i}(k))+Qnet(Indx.H(find(DistOHsurf(:,k)<MinimaOH(1))))];
+                Qnet_OH_molecules{i}=[Qnet_OH_molecules{i};Qnet(OH_indicies{i}(k))+Qnet(Indx.H(find(DistOHsurf(:,k)<MinimaOH(1))))]; % NOT using sum(Qnet...) because we should/will find one H
             end
         else
             H3O_Coverage(i) = 0;
@@ -301,6 +304,13 @@ if strcmp(DoubleAnalType, 'MassDensity')
     
         %save the indicies for H2O
         H2O_indicies{i}=Indx.O(C(rOH(H2O_unique)));
+        
+        [~, DistH2Osurf] = GetAtomCorrelation(XYZ_snap, H2O_indicies{i}, Indx.H, ABC);
+        for k =1:length(H2O_indicies{i})
+            H2O_molecules{i}=[H2O_molecules{i};H2O_indicies{i}(k);Indx.H(find(DistH2Osurf(:,k)<MinimaOH(1)))];
+            Qnet_H2O_molecules{i}=[Qnet_H2O_molecules{i};Qnet(H2O_indicies{i}(k))+sum(Qnet(Indx.H(find(DistH2Osurf(:,k)<MinimaOH(1)))))]; % Using sum(Qnet...) because we should/will find more than one H
+        end
+
         
         %% End  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
     end
@@ -1499,7 +1509,7 @@ end
 MeanQnet = mean(Qnet(AlNums,1:end),2);
 Bader3DCharge(XYZ_snap(AlNums,:), ABC, MeanQnet);
 
-%% Al1 ONLY %%
+%% Al1 ONLY %%MeanQnet = mean(Qnet(Al1,1:end),2);
 MeanQnet = mean(Qnet(Al1,1:end),2);
 Bader3DCharge(XYZ_snap(Al1,:), ABC, MeanQnet);
 
