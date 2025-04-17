@@ -1,9 +1,9 @@
 clear all;
 close all;
 
-BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge_2/Phase_diagram_Sys/';
-system = 'AlO_1.5ML';
-Trajectory = 'AlO_1.5ML_162000to175000_1000step.xyz';
+BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge_2/Al2O3/';
+system = 'alpha_Al2O3_COD';
+Trajectory = 'alpha_Al2O3_COD.xyz';
 
 % % get the names of atoms from original xyz input file
 [~, ~, AtomIndx, ~, ~, ~, ~] = getAtomInfoFromInput(BaseFldr, system);

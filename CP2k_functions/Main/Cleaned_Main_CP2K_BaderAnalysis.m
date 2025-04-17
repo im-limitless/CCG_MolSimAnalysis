@@ -9,7 +9,7 @@ close all;
 
 BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge_2/Phase_diagram_sys/';
 system = 'AlO_water_1ML';
-Trajectory = 'AlO_water_1ML_131000to184000_1000step.xyz';
+Trajectory = 'AlO_water_1ML_109000to184000_1000step.xyz';
 
 
 fldrname = [BaseFldr system '/Bader_Analysis/'];

@@ -18,7 +18,8 @@ for i = 1:size(Dens_O,2)
     %% END %%
 
     %% Set the minimaz according to the Al1 limits found above %%
-    Minima(:, i) = LocateStationaryPoints(Dens_O(:,i));
+    Minima(:, i) = LocateStationaryPoints(sgolayfilt(Dens_O(:,i),2,3)); %using Savitzky-Golay filtering
+    % Minima(:, i) = LocateStationaryPoints(Dens_O(:,i)); %no filtering
     MinimaZ = z(find(Minima(:,i)));
     MinimaZ = MinimaZ(find(MinimaZ>Al_z_ULim & MinimaZ<Al_z_LLim));
     %% END %%

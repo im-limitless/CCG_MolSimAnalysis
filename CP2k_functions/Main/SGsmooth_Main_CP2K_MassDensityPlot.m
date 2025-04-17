@@ -76,36 +76,99 @@ plot([z((bins/2)-round(3/(zmax/(bins-1))/2)) z((bins/2)-round(3/(zmax/(bins-1))/
 plot([z((bins/2)+round(3/(zmax/(bins-1))/2)) z((bins/2)+round(3/(zmax/(bins-1))/2))], [0 2500], ':', 'color', [0.6 0.6 0.6])
 hold off
 
-figure
-hold on
-set(gcf, 'position', [377         423        1123         420]);
-xlabel('z (Ang)');
-ylabel('Density (kgm^{-3})');
-set(gca, 'xlim', [0 ABC(3)], 'ylim', [0 2500]);
-% plot(z, smooth(sum(TotDen,2)/(nConfigs-startConfig+1),3), 'linewidth', 1.5, 'color', 'k')
-% plot(z, smooth(sum(Dens_H,2)/(nConfigs-startConfig+1),3), 'linewidth', 1.5, 'color', 'b')
-% plot(z, smooth(sum(Dens_O,2)/(nConfigs-startConfig+1),3), 'linewidth', 1.5, 'color', 'r')
-% % plot(z, sum(Dens_F,2)/(nConfigs-startConfig+1), 'linewidth', 1.5, 'color', [34 177 76]/255)
-% % plot(z, smooth(sum(Dens_Na,2)/(nConfigs-startConfig+1)), 'linewidth', 1.5, 'color', [128 0 128]/255)
-% % plot(z, smooth(sum(Dens_Cl,2)/(nConfigs-startConfig+1)), 'linewidth', 1.5, 'color', [34 177 76]/255)
-%% no smoothing 
-plot(z, sum(TotDen,2)/(nConfigs-startConfig+1), 'linewidth', 1.5, 'color', 'k')
-plot(z, sum(Dens_H,2)/(nConfigs-startConfig+1), 'linewidth', 1.5, 'color', 'b')
-plot(z, sum(Dens_O,2)/(nConfigs-startConfig+1), 'linewidth', 1.5, 'color', 'r')
+% figure
+% hold on
+% set(gcf, 'position', [377         423        1123         420]);
+% xlabel('z (Ang)');
+% ylabel('Density (kgm^{-3})');
+% set(gca, 'xlim', [0 ABC(3)], 'ylim', [0 2500]);
 
-%% Savitzky-Golay filtering (smoothing)
+%% no smoothing
+% plot(z, sum(TotDen,2)/(nConfigs-startConfig+1), 'linewidth', 1.5, 'color', 'k')
+% plot(z, sum(Dens_H,2)/(nConfigs-startConfig+1), 'linewidth', 1.5, 'color', 'b')
+% plot(z, sum(Dens_O,2)/(nConfigs-startConfig+1), 'linewidth', 1.5, 'color', 'r')
+
+% %% Savitzky-Golay filtering (smoothing)
 % plot(z, sgolayfilt(sum(TotDen,2)/(nConfigs-startConfig+1),2,3), 'linewidth', 1.5, 'color', 'k')
 % plot(z, sgolayfilt(sum(Dens_H,2)/(nConfigs-startConfig+1),2,3), 'linewidth', 1.5, 'color', 'b')
 % plot(z, sgolayfilt(sum(Dens_O,2)/(nConfigs-startConfig+1),2,3), 'linewidth', 1.5, 'color', 'r')
+% 
+% % plot(z, sum(Dens_F,2)/(nConfigs-startConfig+1), 'linewidth', 1.5, 'color', [34 177 76]/255)
+% plot([z(1) z(end)], [mean(AveDen) mean(AveDen)], ':', 'color', [0.6 0.6 0.6])
+% plot([z((bins/2)-round(5/(zmax/(bins-1))/2)) z((bins/2)-round(5/(zmax/(bins-1))/2))], [0 2500], ':', 'color', [0.6 0.6 0.6]) % there might be a bug here since zmax isn't max(z)? 
+% plot([z((bins/2)+round(5/(zmax/(bins-1))/2)) z((bins/2)+round(5/(zmax/(bins-1))/2))], [0 2500], ':', 'color', [0.6 0.6 0.6])
+% % legend('Water+Ions', 'H', 'O', 'F', 'Ave. Bulk Density', 'location', 'northeast');
+% legend('Water', 'H', 'O', 'Ave. Bulk Density', 'location', 'northeast');
+% % legend('Water+Ions', 'H', 'O', 'Na', 'Cl', 'Ave. Bulk Density', 'location', 'northeast');
+% hold off
 
-% plot(z, sum(Dens_F,2)/(nConfigs-startConfig+1), 'linewidth', 1.5, 'color', [34 177 76]/255)
-plot([z(1) z(end)], [mean(AveDen) mean(AveDen)], ':', 'color', [0.6 0.6 0.6])
-plot([z((bins/2)-round(5/(zmax/(bins-1))/2)) z((bins/2)-round(5/(zmax/(bins-1))/2))], [0 2500], ':', 'color', [0.6 0.6 0.6]) % there might be a bug here since zmax isn't max(z)? 
-plot([z((bins/2)+round(5/(zmax/(bins-1))/2)) z((bins/2)+round(5/(zmax/(bins-1))/2))], [0 2500], ':', 'color', [0.6 0.6 0.6])
-% legend('Water+Ions', 'H', 'O', 'F', 'Ave. Bulk Density', 'location', 'northeast');
-legend('Water', 'H', 'O', 'Ave. Bulk Density', 'location', 'northeast');
-% legend('Water+Ions', 'H', 'O', 'Na', 'Cl', 'Ave. Bulk Density', 'location', 'northeast');
-hold off
+% Sort the data by Z
+[Z_sorted, sort_idx] = sort(z);
+TotDen_sorted = TotDen(sort_idx);
+
+% Define segments with their Z ranges and filter parameters
+segments = [
+    struct('Z_start', 0,  'Z_end', 10, 'order', 2, 'frameLength', 3);
+    struct('Z_start', 10, 'Z_end', 30, 'order', 3, 'frameLength', 19);
+    struct('Z_start', 30, 'Z_end', 50, 'order', 2, 'frameLength', 3);
+];
+
+% Initialize arrays for combining results
+filtered_density = zeros(size(TotDen_sorted));
+count = zeros(size(TotDen_sorted));
+
+% Process each segment
+for i = 1:length(segments)
+    seg = segments(i);
+    
+    % Indices within the current Z range
+    in_range = Z_sorted >= seg.Z_start & Z_sorted <= seg.Z_end;
+    indices = find(in_range);
+    if isempty(indices), continue; end
+    
+    % Segment start and end indices
+    idx1 = indices(1);
+    idx2 = indices(end);
+    
+    % Buffer based on frame length
+    buffer = (seg.frameLength - 1)/2;
+    idx1_ext = max(1, idx1 - buffer);
+    idx2_ext = min(length(Z_sorted), idx2 + buffer);
+    
+    % Extract extended segment
+    Z_ext = Z_sorted(idx1_ext:idx2_ext);
+    TotDen_ext = TotDen_sorted(idx1_ext:idx2_ext);
+    
+    % Apply Savitzky-Golay filter
+    filtered_ext = sgolayfilt(TotDen_ext, seg.order, seg.frameLength);
+    
+    % Trim to original segment
+    start_offset = idx1 - idx1_ext;
+    filtered_segment = filtered_ext(1 + start_offset : end - (idx2_ext - idx2));
+    
+    % Accumulate results
+    filtered_density(idx1:idx2) = filtered_density(idx1:idx2) + filtered_segment;
+    count(idx1:idx2) = count(idx1:idx2) + 1;
+end
+
+% Average overlapping regions and handle uncovered areas
+filtered_density = filtered_density ./ count;
+filtered_density(count == 0) = TotDen_sorted(count == 0); % Use original where no filter applied
+
+% Restore original order
+[~, unsort_idx] = sort(sort_idx);
+filtered_density_unsorted = filtered_density(unsort_idx);
+
+% Plot results
+figure;
+plot(z, TotDen, 'k', z, filtered_density_unsorted, 'r-');
+legend('Original Data', 'Filtered Data');
+xlabel('Z');
+ylabel('Density');
+title('Savitzky-Golay Filter Applied to Different Z Ranges');
+
+
+
 
 %% uncomment to save a jpg of the mass density
 % if exist([BaseFldr 'MassDensityProfiles'],'dir')
