@@ -8,8 +8,8 @@ close all;
 %% %%%%%%%%%%%%%% Data collections %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge_2/Phase_diagram_sys/';
-system = 'AlO_water_1ML';
-Trajectory = 'AlO_water_1ML_109000to184000_1000step.xyz';
+system = 'Al_water';
+Trajectory = 'Al_water_153000to163000_1000step.xyz';
 
 
 fldrname = [BaseFldr system '/Bader_Analysis/'];
@@ -468,7 +468,7 @@ for h=1:length(S_Single1WL_2ndWL_MeanQnet)
     S_MeanQnet(length(S_Single1WL_MeanQnet)+h)=sum(mean(Qnet(S_DLSingle1WL_2ndWL,i),2));
 end
 %% %%%%%%%%%%%%%%%%%% End Ave Bader per water %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Bader3DCharge(XYZ_snap(S_all_Single1WL,:), ABC, S_MeanQnet);  
+Bader3DCharge_fixV2(XYZ_snap(S_all_Single1WL,:), ABC, S_MeanQnet);  
 
 for ii=1:length(ACFfiles)
     Sum_S_Q{n} = [Sum_S_Q{n}; sum(mean(Qnet(S_all_Single1WL,ii),2))]; %Collects the total charge of all accross all ACF files/sampled snapshots
@@ -491,7 +491,7 @@ end
 Collect_S_all_Single1WL=[Collect_S_all_Single1WL; Indx.Al_All];
 MeanQnet_Als= mean(Qnet(Indx.Al_All,i),2);
 Collect_S_MeanQnet=[Collect_S_MeanQnet;MeanQnet_Als];
-Bader3DCharge(XYZ_snap(Collect_S_all_Single1WL,:), ABC, Collect_S_MeanQnet);
+Bader3DCharge_fixV2(XYZ_snap(Collect_S_all_Single1WL,:), ABC, Collect_S_MeanQnet);
 %%%%%%%%%%%%%%%% End Collected Single 1st WLs and all Als %%%%%%%%%%%%%%%%
 
 
@@ -1446,7 +1446,7 @@ Al1=[];
 Al2=[];
 Alb=[];
 for i = 1:length(AlList)
-    AlNums = [Indx.(Indxfns{AlList(i)})];
+    AlNums = [AlNums;Indx.(Indxfns{AlList(i)})];
     Al1=[Indx.(Indxfns{AlList(1)})];
     Al2=[Indx.(Indxfns{AlList(2)})];
     Alb=[Indx.(Indxfns{AlList(3)})];
@@ -1499,121 +1499,178 @@ nAl2Al1DL1st=cat(1,d_Al2DL1st,d_AlDL1st,d_DL1st);
 
 %% Average over all ACF snapshots %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%NOTE: Bader3DCharge_fixV# are: %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% (V1): fixed the coloring and reserved color gradients for -ve and +ve
+% charges.
+%
+% (V2): Allows for the inclusion of "ghost atoms (greyed)" where you could
+%highlight the required atoms and either include or not the rest.
+%
+% (V3_8): video capabilities, interactive/Playback/Saves video. 
+%
+% Every version includes all the capabilities of its predecessors with some
+% slight differences.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 %% Single molecule investigation %%
 if END =='y'
     S_MeanQnet = mean(Qnet(S_all_Single1WL,1:end),2);
-    Bader3DCharge(XYZ_snap(S_all_Single1WL,:), ABC, S_MeanQnet);
+    Bader3DCharge_fixV3_8(XYZ_snap(S_all_Single1WL,:), ABC, S_MeanQnet);
 end
 
 %% Als ONLY %%
 MeanQnet = mean(Qnet(AlNums,1:end),2);
-Bader3DCharge(XYZ_snap(AlNums,:), ABC, MeanQnet);
+Bader3DCharge_fixV2(XYZ_snap(AlNums,:), ABC, MeanQnet);
 
 %% Al1 ONLY %%MeanQnet = mean(Qnet(Al1,1:end),2);
 MeanQnet = mean(Qnet(Al1,1:end),2);
-Bader3DCharge(XYZ_snap(Al1,:), ABC, MeanQnet);
+Bader3DCharge_fixV2(XYZ_snap(Al1,:), ABC, MeanQnet);
 
 %% Al2 ONLY %%
 MeanQnet = mean(Qnet(Al2,1:end),2);
-Bader3DCharge(XYZ_snap(Al2,:), ABC, MeanQnet);
+Bader3DCharge_fixV2(XYZ_snap(Al2,:), ABC, MeanQnet);
 
 %% Alb ONLY %%
 MeanQnet = mean(Qnet(Alb,1:end),2);
-Bader3DCharge(XYZ_snap(Alb,:), ABC, MeanQnet);
+Bader3DCharge_fixV2(XYZ_snap(Alb,:), ABC, MeanQnet);
 
 
 
 if END1 == 'y'
     %% Oxide ONLY %%
     MeanQnet = mean(Qnet(Oxide_O{1},1:end),2);
-    Bader3DCharge(XYZ_snap(Oxide_O{1},:), ABC, MeanQnet);
+    Bader3DCharge_fixV2(XYZ_snap(Oxide_O{1},:), ABC, MeanQnet);
     
     %% Al1 + Oxide ONLY %%
     MeanQnet = mean(Qnet([Al1;Oxide_O{1}],1:end),2);
-    Bader3DCharge(XYZ_snap([Al1;Oxide_O{1}],:), ABC, MeanQnet);
+    Bader3DCharge_fixV2(XYZ_snap([Al1;Oxide_O{1}],:), ABC, MeanQnet);
 
     %% DLs + Oxide ONLY %%
     MeanQnet = mean(Qnet([d_DL1st; d_DL2nd; Oxide_O{1}],1:end),2);
-    Bader3DCharge(XYZ_snap([d_DL1st; d_DL2nd; Oxide_O{1}],:), ABC, MeanQnet);
+    Bader3DCharge_fixV2(XYZ_snap([d_DL1st; d_DL2nd; Oxide_O{1}],:), ABC, MeanQnet);
 
     %% Als+ DLs + Oxide ONLY %%
     MeanQnet = mean(Qnet([Alb; Al1; Al2; d_DL1st; d_DL2nd; Oxide_O{1}],1:end),2);
-    Bader3DCharge(XYZ_snap([Alb; Al1; Al2; d_DL1st; d_DL2nd; Oxide_O{1}],:), ABC, MeanQnet);
+    Bader3DCharge_fixV2(XYZ_snap([Alb; Al1; Al2; d_DL1st; d_DL2nd; Oxide_O{1}],:), ABC, MeanQnet);
 
 else
     %% Al1 affected by DL1st Water only %%
     MeanQnet = mean(Qnet(d_AlDL1st,1:end),2);
-    Bader3DCharge(XYZ_snap(d_AlDL1st,:), ABC, MeanQnet);
+    Bader3DCharge_fixV2(XYZ_snap(d_AlDL1st,:), ABC, MeanQnet);
     
     %% Al2 affected by DL1st Water only %%
     MeanQnet = mean(Qnet(d_Al2DL1st,1:end),2);
-    Bader3DCharge(XYZ_snap(d_Al2DL1st,:), ABC, MeanQnet);
+    Bader3DCharge_fixV2(XYZ_snap(d_Al2DL1st,:), ABC, MeanQnet);
 
     %% Al1 + Al2 affected by DL1st Water only %%
     MeanQnet = mean(Qnet(nAl2Al1,1:end),2);
-    Bader3DCharge(XYZ_snap(nAl2Al1,:), ABC, MeanQnet);
+    Bader3DCharge_fixV2(XYZ_snap(nAl2Al1,:), ABC, MeanQnet);
 
     %% Al1 affected by DL1st Water + 1WL only %%
     MeanQnet = mean(Qnet(nAl1DL1st,1:end),2);
-    Bader3DCharge(XYZ_snap(nAl1DL1st,:), ABC, MeanQnet); 
+    Bader3DCharge_fixV2(XYZ_snap(nAl1DL1st,:), ABC, MeanQnet); 
     
     %% Al2 affected by DL1st Water + 1WL only %%
     MeanQnet = mean(Qnet(nAl2DL1st,1:end),2);
-    Bader3DCharge(XYZ_snap(nAl2DL1st,:), ABC, MeanQnet);
+    Bader3DCharge_fixV2(XYZ_snap(nAl2DL1st,:), ABC, MeanQnet);
     
     %% Al1 + Al2 affected by DL1st Water + 1WL only %%
     MeanQnet = mean(Qnet(nAl2Al1DL1st,1:end),2);
-    Bader3DCharge(XYZ_snap(nAl2Al1DL1st,:), ABC, MeanQnet);
+    Bader3DCharge_fixV2(XYZ_snap(nAl2Al1DL1st,:), ABC, MeanQnet);
+    % Bader3DCharge_fixV1(XYZ_snap(nAl2Al1DL1st,:), ABC, MeanQnet);
 
 end
 
 
 %% DL1st ONLY %%
 MeanQnet = mean(Qnet(d_DL1st,1:end),2);
-Bader3DCharge(XYZ_snap(d_DL1st,:), ABC, MeanQnet);
+Bader3DCharge_fixV2(XYZ_snap(d_DL1st,:), ABC, MeanQnet);
 
 %% DL2nd ONLY %%
 MeanQnet = mean(Qnet(d_DL2nd,1:end),2);
-Bader3DCharge(XYZ_snap(d_DL2nd,:), ABC, MeanQnet);
+Bader3DCharge_fixV2(XYZ_snap(d_DL2nd,:), ABC, MeanQnet);
 
 %% Als + 1WL ONLY %%
 MeanQnet = mean(Qnet(AlDL1st,1:end),2);
-Bader3DCharge(XYZ_snap(AlDL1st,:), ABC, MeanQnet);
+Bader3DCharge_fixV2(XYZ_snap(AlDL1st,:), ABC, MeanQnet);
 
 %% Als + DL %%
 MeanQnet = mean(Qnet(AlDL,1:end),2);
-Bader3DCharge(XYZ_snap(AlDL,:), ABC, MeanQnet);
+Bader3DCharge_fixV2(XYZ_snap(AlDL,:), ABC, MeanQnet);
+% Bader3DCharge_fixV1(XYZ_snap(AlDL,:), ABC, MeanQnet);
 
 %% Bulk Water %%
 d_nonDL=nonDL(1,1);
 d_nonDL=cell2mat(d_nonDL);
 MeanQnet = mean(Qnet(d_nonDL,1:end),2);
-Bader3DCharge(XYZ_snap(d_nonDL,:), ABC, MeanQnet);
+Bader3DCharge_fixV2(XYZ_snap(d_nonDL,:), ABC, MeanQnet);
 
 %% ALL %%
 MeanQnet = mean(Qnet(:,1:end),2);
-Bader3DCharge(XYZ_snap(:,:), ABC, MeanQnet);
+Bader3DCharge_fixV2(XYZ_snap(:,:), ABC, MeanQnet);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Last snapshot (ALs) (change it base on the system at hand)
-Bader3DCharge(XYZ_snap(AlNums,:), ABC, Qnet(AlNums,11));
+Bader3DCharge_fixV2(XYZ_snap(AlNums,:), ABC, Qnet(AlNums,snap));
 % light
 
 %% Last snapshot (Al+DL_1st) (change it base on the system at hand)
-Bader3DCharge(XYZ_snap(d_DL1st,:), ABC, Qnet(d_DL1st,snap));
+Bader3DCharge_fixV2(XYZ_snap(d_DL1st,:), ABC, Qnet(d_DL1st,snap));
 % light
-Bader3DCharge(XYZ_snap(AlDL1st,:), ABC, Qnet(AlDL1st,snap));
+Bader3DCharge_fixV2(XYZ_snap(AlDL1st,:), ABC, Qnet(AlDL1st,snap));
 % light
 
 %% Last snapshot (Al+DL_2nd) (change it base on the system at hand)
-Bader3DCharge(XYZ_snap(d_DL2nd,:), ABC, Qnet(d_DL2nd,snap));
+Bader3DCharge_fixV2(XYZ_snap(d_DL2nd,:), ABC, Qnet(d_DL2nd,snap));
 % light
-Bader3DCharge(XYZ_snap(AlDL2nd,:), ABC, Qnet(AlDL2nd,snap));
+Bader3DCharge_fixV2(XYZ_snap(AlDL2nd,:), ABC, Qnet(AlDL2nd,snap));
 % light
 
 %% Last snapshot (Al+DL) (change it base on the system at hand)
-Bader3DCharge(XYZ_snap(AlDL,:), ABC, Qnet(AlDL,snap));
+Bader3DCharge_fixV2(XYZ_snap(AlDL,:), ABC, Qnet(AlDL,snap));
 % light
+
+%% test plot all but heatmap some %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+MeanQnet = mean(Qnet(AlDL,1:end),2);
+% Bader3DCharge(XYZ_snap(AlDL,:), ABC, MeanQnet);
+Bader3DCharge_fixV2(XYZ_snap(AlDL,:), ABC, MeanQnet); %only shows the Alb and DL
+Bader3DCharge_fixV2(XYZ_snap, ABC, mean(Qnet,2),AlDL); %shows the same but with the rest of the atoms greyed out
+
+%video capability
+Bader3DCharge_fixV3(XYZ_snap, ABC, mean(Qnet,2),AlDL);
+% With 3D array input (Nframes × Natoms × 3)
+Bader3DCharge_fixV3_5(XYZ, ABC, Qnet, AlDL,...
+    'SaveVideo', true,...
+    'OutputFileName', [BaseFldr system '/charge_animation.mp4'],...
+    'FrameRate', 30);
+
+Bader3DCharge_fixV3_6(XYZ, ABC, Qnet, AlDL,...
+    'SaveVideo', true,...
+    'OutputFileName', [BaseFldr system '/charge_animation.mp4'],...
+    'FrameRate', 30, 'VideoView', [45 30]);
+
+
+Bader3DCharge_fixV3_7(XYZ, ABC, Qnet, AlDL,'ViewAxis', 'Y');
+
+
+%V3_8; DON'T use 'PlayVideo' option as it has a bug 
+Bader3DCharge_fixV3_8_5(XYZ, ABC, Qnet, AlDL,'ViewAxis', 'Y', 'LoopVideo', true);
+Bader3DCharge_fixV3_8_5(XYZ, ABC, Qnet, AlDL,...
+    'SaveVideo', true,...
+    'OutputFileName', [BaseFldr system '/charge_animation.mp4'],...
+    'FrameRate', 30, 'VideoView', [45 30]);
+
+
+Bader3DCharge_fixV3_8_5(XYZ, ABC, Qnet, DL2nd,'ViewAxis', 'Y', 'LoopVideo', true);
+
+% %V3_9 not working
+% % Bader3DCharge_fixV3_9(XYZ, ABC, Qnet, AlDL,'ViewAxis', 'Y','PlayVideo', true, 'LoopVideo', true);
+% % Bader3DCharge_fixV3_9(XYZ, ABC, Qnet, AlDL,'ViewAxis', 'Y','Interactive', true);
+
+
+
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Everything up is working fine %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
