@@ -19,6 +19,8 @@ function Bader3DCharge_fixV3_8_6(TrajXYZ, TrajABC, TrajQmc, varargin)
 %                                   Each set can be:
 %                                   - Numeric vector (static for all frames)
 %                                   - Cell array of vectors (per-frame indices)
+%   'ExcludedIndices', []        - Indices of atoms to exclude (static or per-frame)
+
 
 % Input parsing
 p = inputParser;
@@ -35,6 +37,7 @@ addParameter(p, 'Interactive', true);
 addParameter(p, 'ViewAxis', 'X', @(x) ismember(x,{'X','Y'}));
 addParameter(p, 'VideoView', [], @isnumeric);
 addParameter(p, 'LoopVideo', false, @islogical);
+addParameter(p, 'ExcludedIndices', [], @(x) isempty(x) || isvector(x) || (iscell(x) && all(cellfun(@isvector, x))));
 parse(p, TrajXYZ, TrajABC, TrajQmc, varargin{:});
 
 params = p.Results;
@@ -45,6 +48,26 @@ AdditionalSets = params.AdditionalSelectionSets;
 [TrajXYZ, TrajABC, TrajQmc] = convert_to_cells(TrajXYZ, TrajABC, TrajQmc);
 numFrames = numel(TrajXYZ);
 Natoms = size(TrajXYZ{1}, 1);
+
+
+ExcludedIndices = params.ExcludedIndices;
+processedExcluded = cell(numFrames, 1);
+if isempty(ExcludedIndices)
+    processedExcluded(:) = {[]};
+else
+    if iscell(ExcludedIndices)
+        if numel(ExcludedIndices) == 1
+            processedExcluded = repmat(ExcludedIndices(1), numFrames, 1);
+        elseif numel(ExcludedIndices) == numFrames
+            processedExcluded = ExcludedIndices(:);
+        else
+            error('ExcludedIndices has %d elements (expected 1 or %d)', numel(ExcludedIndices), numFrames);
+        end
+    else
+        processedExcluded = repmat({ExcludedIndices(:)}, numFrames, 1);
+    end
+end
+
 
 % Process all selection sets =============================================
 allSets = [{SelectedIndices}, AdditionalSets];
@@ -75,19 +98,23 @@ end
 
 % Combine indices from all sets per frame
 CombinedIndices = cell(numFrames, 1);
+% In the section where CombinedIndices is computed:
 for f = 1:numFrames
     frameIndices = [];
     for sIdx = 1:numel(processedSets)
-        if ~isempty(processedSets{sIdx}{f})
-            frameIndices = union(frameIndices, processedSets{sIdx}{f}(:));
-        end
+        frameIndices = union(frameIndices, processedSets{sIdx}{f});
     end
     
     % Default to all atoms if no selections
-    if isempty(frameIndices) && ~isempty(validSets)
+    if isempty(frameIndices)
         frameIndices = (1:Natoms)';
     end
-    CombinedIndices{f} = frameIndices;
+    
+   % Apply exclusion
+    excluded = processedExcluded{f};
+    frameIndices = setdiff(frameIndices, excluded);
+    
+    CombinedIndices{f} = frameIndices; % This now contains only visible atoms
 end
 
 % Initialize figure and axes (unchanged)
@@ -333,16 +360,30 @@ function [hAtoms, hVectors] = updatePlot(ax, XYZ, ABC, Qmc, xs, ys, zs, Radius, 
 
 delete(findobj(ax,'Type','text','Tag','FrameText'));
 
-[cmap, minQ, maxQ] = createColormap(Qmc(CombinedIndices));
+if ~isempty(CombinedIndices)
+    [cmap, minQ, maxQ] = createColormap(Qmc(CombinedIndices));
+else
+    cmap = [0.7 0.7 0.7];
+    minQ = 0;
+    maxQ = 1;
+end
 colormap(ax, cmap);
 caxis(ax, [minQ, maxQ]);
 
-if isempty(hAtoms) || ~isvalid(hAtoms(1))
-    hAtoms = createAtoms(ax, XYZ, xs, ys, zs, Radius, Qmc, CombinedIndices, cmap, minQ, maxQ);
+% Handle case where all atoms are excluded
+if isempty(CombinedIndices)
+    if ~isempty(hAtoms)
+        set(hAtoms, 'Visible', 'off');
+    end
 else
-    updateAtoms(hAtoms, XYZ, xs, ys, zs, Radius, Qmc, CombinedIndices, cmap, minQ, maxQ);
+    if isempty(hAtoms) || ~isvalid(hAtoms(1))
+        hAtoms = createAtoms(ax, XYZ, xs, ys, zs, Radius, Qmc, CombinedIndices, cmap, minQ, maxQ);
+    else
+        updateAtoms(hAtoms, XYZ, xs, ys, zs, Radius, Qmc, CombinedIndices, cmap, minQ, maxQ);
+    end
 end
 
+% Rest of the function remains unchanged
 Vec = diag(ABC);
 if isempty(hVectors) || ~isvalid(hVectors(1))
     hVectors = createVectors(ax, Vec);
@@ -355,12 +396,11 @@ text(ax, 0.05, 0.95, 0.9, sprintf('Frame: %d/%d', currentFrame, numFrames),...
 end
 
 function hAtoms = createAtoms(ax, XYZ, xs, ys, zs, Radius, Qmc, CombinedIndices, cmap, minQ, maxQ)
-hAtoms = gobjects(size(XYZ,1), 1);
+hAtoms = gobjects(size(XYZ,1), 1); % Preallocate but handle visibility
+
 for i = 1:size(XYZ,1)
-    color = [0.7 0.7 0.7];
-    alpha = 0.3;
-    
     if ismember(i, CombinedIndices)
+        % Compute color for included atoms
         if maxQ ~= minQ
             cidx = round((Qmc(i) - minQ)/(maxQ - minQ) * (size(cmap,1)-1)) + 1;
         else
@@ -368,6 +408,12 @@ for i = 1:size(XYZ,1)
         end
         color = cmap(cidx,:);
         alpha = 1;
+        visible = 'on';
+    else
+        % Excluded atoms: hide completely
+        visible = 'off';
+        color = [0 0 0]; % Arbitrary color (not shown)
+        alpha = 1; % Irrelevant
     end
     
     xAt = xs*Radius + XYZ(i,1);
@@ -377,15 +423,15 @@ for i = 1:size(XYZ,1)
     hAtoms(i) = surf(ax, xAt, yAt, zAt,...
         'FaceColor', color,...
         'EdgeColor', 'none',...
-        'FaceAlpha', alpha);
+        'FaceAlpha', alpha,...
+        'Visible', visible); % Key change: control visibility
 end
 end
 
 function updateAtoms(hAtoms, XYZ, xs, ys, zs, Radius, Qmc, CombinedIndices, cmap, minQ, maxQ)
 for i = 1:size(XYZ,1)
-    color = [0.7 0.7 0.7];
-    alpha = 0.3;
     if ismember(i, CombinedIndices)
+        % Update visible atoms
         if maxQ ~= minQ
             cidx = round((Qmc(i) - minQ)/(maxQ - minQ) * (size(cmap,1)-1)) + 1;
         else
@@ -393,12 +439,25 @@ for i = 1:size(XYZ,1)
         end
         color = cmap(cidx,:);
         alpha = 1;
+        visible = 'on';
+    else
+        % Hide excluded atoms
+        visible = 'off';
+        color = [0 0 0]; % Irrelevant
+        alpha = 1; % Irrelevant
     end
+    
     xAt = xs*Radius + XYZ(i,1);
     yAt = ys*Radius + XYZ(i,2);
     zAt = zs*Radius + XYZ(i,3);
-    set(hAtoms(i), 'XData', xAt, 'YData', yAt, 'ZData', zAt,...
-        'FaceColor', color, 'FaceAlpha', alpha);
+    
+    set(hAtoms(i),...
+        'XData', xAt,...
+        'YData', yAt,...
+        'ZData', zAt,...
+        'FaceColor', color,...
+        'FaceAlpha', alpha,...
+        'Visible', visible); % Key change: update visibility
 end
 end
 

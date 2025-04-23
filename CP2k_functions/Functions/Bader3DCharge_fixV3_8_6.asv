@@ -11,6 +11,20 @@ function Bader3DCharge_fixV3_8_6(TrajXYZ, TrajABC, TrajQmc, varargin)
 %   'ViewAxis',       'X'        - Main axis facing viewer ('X' or 'Y')
 %   'VideoView',      []         - Custom view angles for video [azimuth,elevation]
 
+% Bader3DCharge(TrajXYZ, TrajABC, TrajQmc, SelectedIndices, ...)
+% Plots 3D charge distribution with multiple selection sets
+%
+% New Parameters:
+%   'AdditionalSelectionSets', {} - Cell array of additional index sets
+%                                   Each set can be:
+%                                   - Numeric vector (static for all frames)
+%                                   - Cell array of vectors (per-frame indices)
+% Bader3DCharge(TrajXYZ, TrajABC, TrajQmc, SelectedIndices, ...)
+% Plots 3D charge distribution with multiple selection sets and deselection
+%
+% Parameters:
+%   'AdditionalSelectionSets', {} - Cell array of additional index sets
+%   'ExcludedIndices', []        - Indices of atoms to exclude (static or per-frame)
 
 % Input parsing
 p = inputParser;
@@ -18,6 +32,7 @@ addRequired(p, 'TrajXYZ', @(x) isnumeric(x) || iscell(x));
 addRequired(p, 'TrajABC', @(x) isnumeric(x) || iscell(x));
 addRequired(p, 'TrajQmc', @(x) isnumeric(x) || iscell(x));
 addOptional(p, 'SelectedIndices', [], @(x) isempty(x) || isvector(x) || (iscell(x) && all(cellfun(@isvector, x))));
+addParameter(p, 'AdditionalSelectionSets', {}, @iscell);
 addParameter(p, 'PlayVideo', false);
 addParameter(p, 'SaveVideo', false);
 addParameter(p, 'FrameRate', 24);
@@ -26,50 +41,57 @@ addParameter(p, 'Interactive', true);
 addParameter(p, 'ViewAxis', 'X', @(x) ismember(x,{'X','Y'}));
 addParameter(p, 'VideoView', [], @isnumeric);
 addParameter(p, 'LoopVideo', false, @islogical);
-addParameter(p, 'AdditionalSelectionSets', {}, @(x) iscell(x)); % New parameter
 parse(p, TrajXYZ, TrajABC, TrajQmc, varargin{:});
-
 
 params = p.Results;
 SelectedIndices = params.SelectedIndices;
-AdditionalSets = params.AdditionalSelectionSets; % Get additional sets
+AdditionalSets = params.AdditionalSelectionSets;
 
-
-% Convert inputs to cell arrays
+% Convert trajectory inputs to cells
 [TrajXYZ, TrajABC, TrajQmc] = convert_to_cells(TrajXYZ, TrajABC, TrajQmc);
 numFrames = numel(TrajXYZ);
 Natoms = size(TrajXYZ{1}, 1);
 
-% Process all selection sets into per-frame indices ================
-allSets = [{SelectedIndices}, AdditionalSets]; % Combine original + additional
+% Process all selection sets =============================================
+allSets = [{SelectedIndices}, AdditionalSets];
+validSets = allSets(~cellfun(@isempty, allSets));
 
-% Preprocess each selection set
-processedSets = cell(numel(allSets), 1);
-for sIdx = 1:numel(allSets)
-    currSet = allSets{sIdx};
+% Convert each set to per-frame cell array
+processedSets = cell(numel(validSets), 1);
+for sIdx = 1:numel(validSets)
+    currSet = validSets{sIdx};
     
-    if isempty(currSet)
-        % Default to all atoms if empty
-        processedSets{sIdx} = repmat({(1:Natoms)'}, numFrames, 1);
-    elseif iscell(currSet)
-        % Validate per-frame cell array
-        if numel(currSet) ~= numFrames
-            error('Selection set %d has %d frames. Expected %d.', sIdx, numel(currSet), numFrames);
+    if iscell(currSet)
+        % Validate cell array format
+        if numel(currSet) == 1
+            % Single cell - repeat for all frames
+            processedSets{sIdx} = repmat(currSet(1), numFrames, 1);
+        elseif numel(currSet) == numFrames
+            % Already per-frame format
+            processedSets{sIdx} = currSet(:);
+        else
+            error('Selection set %d has %d elements (expected 1 or %d)',...
+                  sIdx, numel(currSet), numFrames);
         end
-        % Ensure column vectors
-        processedSets{sIdx} = cellfun(@(x) x(:), currSet, 'UniformOutput', false);
     else
-        % Static indices - repeat for all frames
+        % Numeric vector - expand to all frames
         processedSets{sIdx} = repmat({currSet(:)}, numFrames, 1);
     end
 end
 
-% Combine indices from all sets per frame ==========================
+% Combine indices from all sets per frame
 CombinedIndices = cell(numFrames, 1);
 for f = 1:numFrames
     frameIndices = [];
     for sIdx = 1:numel(processedSets)
-        frameIndices = union(frameIndices, processedSets{sIdx}{f});
+        if ~isempty(processedSets{sIdx}{f})
+            frameIndices = union(frameIndices, processedSets{sIdx}{f}(:));
+        end
+    end
+    
+    % Default to all atoms if no selections are provided or selections are empty
+    if isempty(frameIndices)
+        frameIndices = (1:Natoms)'; % Always select all atoms when empty
     end
     CombinedIndices{f} = frameIndices;
 end
@@ -142,7 +164,7 @@ hVectors = [];
 
 % Initial plot
 [hAtoms, hVectors] = updatePlot(ax, TrajXYZ{1}, TrajABC{1}, TrajQmc{1},...
-    xs, ys, zs, Radius, SelectedIndices{1}, currentFrame, numFrames, hAtoms, hVectors);
+    xs, ys, zs, Radius, CombinedIndices{1}, currentFrame, numFrames, hAtoms, hVectors);
 
 % Update all calls to updatePlot to use CombinedIndices
 % Example in video export:
@@ -229,7 +251,7 @@ end
             currentFrame = numFrames;
             updatePlot(ax, TrajXYZ{currentFrame},...
                 TrajABC{currentFrame}, TrajQmc{currentFrame},...
-                xs, ys, zs, Radius, SelectedIndices{currentFrame}, currentFrame, numFrames, hAtoms, hVectors);
+                xs, ys, zs, Radius, CombinedIndices{currentFrame}, currentFrame, numFrames, hAtoms, hVectors);
         end
     end
 
@@ -239,7 +261,7 @@ end
             currentFrame = frame;
             [hAtoms, hVectors] = updatePlot(ax, TrajXYZ{currentFrame},...
                 TrajABC{currentFrame}, TrajQmc{currentFrame},...
-                xs, ys, zs, Radius, SelectedIndices{currentFrame}, currentFrame, numFrames, hAtoms, hVectors);
+                xs, ys, zs, Radius, CombinedIndices{currentFrame}, currentFrame, numFrames, hAtoms, hVectors);
         end
     end
 
@@ -253,7 +275,7 @@ end
                 
                 [hAtoms, hVectors] = updatePlot(ax, TrajXYZ{frame},...
                     TrajABC{frame}, TrajQmc{frame},...
-                    xs, ys, zs, Radius, SelectedIndices{frame}, frame, numFrames, hAtoms, hVectors);
+                    xs, ys, zs, Radius, CombinedIndices{frame}, frame, numFrames, hAtoms, hVectors);
                 
                 if params.Interactive
                     set(findobj(fig,'Tag','frameSlider'), 'Value', frame);
@@ -312,19 +334,19 @@ assert(numel(TrajABC) == numFrames, 'ABC frame count mismatch');
 assert(numel(TrajQmc) == numFrames, 'Qmc frame count mismatch');
 end
 
-function [hAtoms, hVectors] = updatePlot(ax, XYZ, ABC, Qmc, xs, ys, zs, Radius, SelectedIndices, currentFrame, numFrames, hAtoms, hVectors)
+function [hAtoms, hVectors] = updatePlot(ax, XYZ, ABC, Qmc, xs, ys, zs, Radius, CombinedIndices, currentFrame, numFrames, hAtoms, hVectors)
 % Update plot elements
 
 delete(findobj(ax,'Type','text','Tag','FrameText'));
 
-[cmap, minQ, maxQ] = createColormap(Qmc(SelectedIndices));
+[cmap, minQ, maxQ] = createColormap(Qmc(CombinedIndices));
 colormap(ax, cmap);
 caxis(ax, [minQ, maxQ]);
 
 if isempty(hAtoms) || ~isvalid(hAtoms(1))
-    hAtoms = createAtoms(ax, XYZ, xs, ys, zs, Radius, Qmc, SelectedIndices, cmap, minQ, maxQ);
+    hAtoms = createAtoms(ax, XYZ, xs, ys, zs, Radius, Qmc, CombinedIndices, cmap, minQ, maxQ);
 else
-    updateAtoms(hAtoms, XYZ, xs, ys, zs, Radius, Qmc, SelectedIndices, cmap, minQ, maxQ);
+    updateAtoms(hAtoms, XYZ, xs, ys, zs, Radius, Qmc, CombinedIndices, cmap, minQ, maxQ);
 end
 
 Vec = diag(ABC);
@@ -338,13 +360,13 @@ text(ax, 0.05, 0.95, 0.9, sprintf('Frame: %d/%d', currentFrame, numFrames),...
     'Units','normalized', 'Tag','FrameText');
 end
 
-function hAtoms = createAtoms(ax, XYZ, xs, ys, zs, Radius, Qmc, SelectedIndices, cmap, minQ, maxQ)
+function hAtoms = createAtoms(ax, XYZ, xs, ys, zs, Radius, Qmc, CombinedIndices, cmap, minQ, maxQ)
 hAtoms = gobjects(size(XYZ,1), 1);
 for i = 1:size(XYZ,1)
     color = [0.7 0.7 0.7];
     alpha = 0.3;
     
-    if ismember(i, SelectedIndices)
+    if ismember(i, CombinedIndices)
         if maxQ ~= minQ
             cidx = round((Qmc(i) - minQ)/(maxQ - minQ) * (size(cmap,1)-1)) + 1;
         else
@@ -365,11 +387,11 @@ for i = 1:size(XYZ,1)
 end
 end
 
-function updateAtoms(hAtoms, XYZ, xs, ys, zs, Radius, Qmc, SelectedIndices, cmap, minQ, maxQ)
+function updateAtoms(hAtoms, XYZ, xs, ys, zs, Radius, Qmc, CombinedIndices, cmap, minQ, maxQ)
 for i = 1:size(XYZ,1)
     color = [0.7 0.7 0.7];
     alpha = 0.3;
-    if ismember(i, SelectedIndices)
+    if ismember(i, CombinedIndices)
         if maxQ ~= minQ
             cidx = round((Qmc(i) - minQ)/(maxQ - minQ) * (size(cmap,1)-1)) + 1;
         else

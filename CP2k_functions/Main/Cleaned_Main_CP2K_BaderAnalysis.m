@@ -8,8 +8,8 @@ close all;
 %% %%%%%%%%%%%%%% Data collections %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge_2/Phase_diagram_sys/';
-system = 'Al_water';
-Trajectory = 'Al_water_153000to163000_1000step.xyz';
+system = 'AlO_1ML_OH';
+Trajectory = 'AlO_1ML_OH_148000to160000_1000step.xyz';
 
 
 fldrname = [BaseFldr system '/Bader_Analysis/'];
@@ -1655,14 +1655,17 @@ Bader3DCharge_fixV3_7(XYZ, ABC, Qnet, AlDL,'ViewAxis', 'Y');
 
 
 %V3_8; DON'T use 'PlayVideo' option as it has a bug 
-Bader3DCharge_fixV3_8_5(XYZ, ABC, Qnet, AlDL,'ViewAxis', 'Y', 'LoopVideo', true);
-Bader3DCharge_fixV3_8_5(XYZ, ABC, Qnet, AlDL,...
+Bader3DCharge_fixV3_8_6(XYZ, ABC, Qnet,  DL2nd, 'AdditionalSelectionSets', {Al1 Al2 Alb Oxide_O DL1st},'ViewAxis', 'Y', 'LoopVideo', true);
+Bader3DCharge_fixV3_8_6(XYZ, ABC, Qnet,  DL2nd, 'AdditionalSelectionSets', {Al1 Al2 Oxide_O DL1st},...
     'SaveVideo', true,...
-    'OutputFileName', [BaseFldr system '/charge_animation.mp4'],...
-    'FrameRate', 30, 'VideoView', [45 30]);
+    'OutputFileName', [BaseFldr system '/AlO_1ML_OH_charge_animation.mp4'],...
+    'FrameRate', 60, 'VideoView', [45 30]);
 
 
-Bader3DCharge_fixV3_8_6(XYZ, ABC, Qnet, DL2nd, 'AdditionalSelectionSets', {Al1 Al2 Alb DL1st} , 'ViewAxis', 'Y', 'LoopVideo', true);
+Bader3DCharge_fixV3_8_6(XYZ(:,Al1,:), ABC, Qnet(Al1,:) , [] , 'ViewAxis', 'Y', 'LoopVideo', true); %only show specific atoms 
+
+Bader3DCharge_fixV3_8_6(XYZ, ABC, Qnet ,[], 'ExcludedIndices', nonDL, 'ViewAxis', 'Y', 'LoopVideo', true); %Exclude Bulk water but show the rest
+
 
 % %V3_9 not working
 % % Bader3DCharge_fixV3_9(XYZ, ABC, Qnet, AlDL,'ViewAxis', 'Y','PlayVideo', true, 'LoopVideo', true);
