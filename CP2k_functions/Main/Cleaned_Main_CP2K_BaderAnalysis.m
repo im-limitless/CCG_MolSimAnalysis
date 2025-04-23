@@ -1662,7 +1662,7 @@ Bader3DCharge_fixV3_8_5(XYZ, ABC, Qnet, AlDL,...
     'FrameRate', 30, 'VideoView', [45 30]);
 
 
-Bader3DCharge_fixV3_8_5(XYZ, ABC, Qnet, DL2nd,'ViewAxis', 'Y', 'LoopVideo', true);
+Bader3DCharge_fixV3_8_6(XYZ, ABC, Qnet, DL2nd, 'AdditionalSelectionSets', {Al1 Al2 Alb DL1st} , 'ViewAxis', 'Y', 'LoopVideo', true);
 
 % %V3_9 not working
 % % Bader3DCharge_fixV3_9(XYZ, ABC, Qnet, AlDL,'ViewAxis', 'Y','PlayVideo', true, 'LoopVideo', true);
