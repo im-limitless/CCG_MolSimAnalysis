@@ -8,8 +8,8 @@ close all;
 %% %%%%%%%%%%%%%% Data collections %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge_2/Phase_diagram_sys/';
-system = 'AlO_1ML_OH';
-Trajectory = 'AlO_1ML_OH_148000to160000_1000step.xyz';
+system = 'AlO_0.33ML_OH';
+Trajectory = 'AlO_0.33ML_OH_254000to297000_1000step.xyz';
 
 
 fldrname = [BaseFldr system '/Bader_Analysis/'];
@@ -662,7 +662,7 @@ for i = 1:length(StepNum)
 
         XYZ_snap = zeros(size(XYZ,2), size(XYZ,3));
         XYZ_snap(:,:) = XYZ(Inter,:,:);
-        writeSnaptoxyz(BaseFldr, system, StepNum(i), XYZ_snap, Atoms, [DL1st{Inter}; Indx.Al_All] , DoubleAnalType)
+        % writeSnaptoxyz(BaseFldr, system, StepNum(i), XYZ_snap, Atoms, [DL1st{Inter}; Indx.Al_All] , DoubleAnalType) % Writes each snap as an xyz (uncomment if needed)
     else % redundant?
         DL1st_sum(i) = 0;
         DL2nd_sum(i) = 0;
@@ -1631,50 +1631,53 @@ Bader3DCharge_fixV2(XYZ_snap(AlDL2nd,:), ABC, Qnet(AlDL2nd,snap));
 Bader3DCharge_fixV2(XYZ_snap(AlDL,:), ABC, Qnet(AlDL,snap));
 % light
 
+
+test='true'; %to skip the section while running 
+if test=='false'
 %% test plot all but heatmap some %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-MeanQnet = mean(Qnet(AlDL,1:end),2);
-% Bader3DCharge(XYZ_snap(AlDL,:), ABC, MeanQnet);
-Bader3DCharge_fixV2(XYZ_snap(AlDL,:), ABC, MeanQnet); %only shows the Alb and DL
-Bader3DCharge_fixV2(XYZ_snap, ABC, mean(Qnet,2),AlDL); %shows the same but with the rest of the atoms greyed out
-
-%video capability
-Bader3DCharge_fixV3(XYZ_snap, ABC, mean(Qnet,2),AlDL);
-% With 3D array input (Nframes × Natoms × 3)
-Bader3DCharge_fixV3_5(XYZ, ABC, Qnet, AlDL,...
-    'SaveVideo', true,...
-    'OutputFileName', [BaseFldr system '/charge_animation.mp4'],...
-    'FrameRate', 30);
-
-Bader3DCharge_fixV3_6(XYZ, ABC, Qnet, AlDL,...
-    'SaveVideo', true,...
-    'OutputFileName', [BaseFldr system '/charge_animation.mp4'],...
-    'FrameRate', 30, 'VideoView', [45 30]);
-
-
-Bader3DCharge_fixV3_7(XYZ, ABC, Qnet, AlDL,'ViewAxis', 'Y');
-
-
-%V3_8; DON'T use 'PlayVideo' option as it has a bug 
-Bader3DCharge_fixV3_8_6(XYZ, ABC, Qnet,  DL2nd, 'AdditionalSelectionSets', {Al1 Al2 Alb Oxide_O DL1st},'ViewAxis', 'Y', 'LoopVideo', true);
-Bader3DCharge_fixV3_8_6(XYZ, ABC, Qnet,  DL2nd, 'AdditionalSelectionSets', {Al1 Al2 Oxide_O DL1st},...
-    'SaveVideo', true,...
-    'OutputFileName', [BaseFldr system '/AlO_1ML_OH_charge_animation.mp4'],...
-    'FrameRate', 60, 'VideoView', [45 30]);
-
-
-Bader3DCharge_fixV3_8_6(XYZ(:,Al1,:), ABC, Qnet(Al1,:) , [] , 'ViewAxis', 'Y', 'LoopVideo', true); %only show specific atoms 
-
-Bader3DCharge_fixV3_8_6(XYZ, ABC, Qnet ,[], 'ExcludedIndices', nonDL, 'ViewAxis', 'Y', 'LoopVideo', true); %Exclude Bulk water but show the rest
-
-
-% %V3_9 not working
-% % Bader3DCharge_fixV3_9(XYZ, ABC, Qnet, AlDL,'ViewAxis', 'Y','PlayVideo', true, 'LoopVideo', true);
-% % Bader3DCharge_fixV3_9(XYZ, ABC, Qnet, AlDL,'ViewAxis', 'Y','Interactive', true);
+    MeanQnet = mean(Qnet(AlDL,1:end),2);
+    % Bader3DCharge(XYZ_snap(AlDL,:), ABC, MeanQnet);
+    Bader3DCharge_fixV2(XYZ_snap(AlDL,:), ABC, MeanQnet); %only shows the Alb and DL
+    Bader3DCharge_fixV2(XYZ_snap, ABC, mean(Qnet,2),AlDL); %shows the same but with the rest of the atoms greyed out
+    
+    %video capability
+    Bader3DCharge_fixV3(XYZ_snap, ABC, mean(Qnet,2),AlDL);
+    % With 3D array input (Nframes × Natoms × 3)
+    Bader3DCharge_fixV3_5(XYZ, ABC, Qnet, AlDL,...
+        'SaveVideo', true,...
+        'OutputFileName', [BaseFldr system '/charge_animation.mp4'],...
+        'FrameRate', 30);
+    
+    Bader3DCharge_fixV3_6(XYZ, ABC, Qnet, AlDL,...
+        'SaveVideo', true,...
+        'OutputFileName', [BaseFldr system '/charge_animation.mp4'],...
+        'FrameRate', 30, 'VideoView', [45 30]);
+    
+    
+    Bader3DCharge_fixV3_7(XYZ, ABC, Qnet, AlDL,'ViewAxis', 'Y');
+    
+    
+    %V3_8; DON'T use 'PlayVideo' option as it has a bug 
+    Bader3DCharge_fixV3_8_6(XYZ, ABC, Qnet,  DL2nd, 'AdditionalSelectionSets', {Al1 Al2 Alb Oxide_O DL1st},'ViewAxis', 'Y', 'LoopVideo', true);
+    Bader3DCharge_fixV3_8_6(XYZ, ABC, Qnet,  DL2nd, 'AdditionalSelectionSets', {Al1 Al2 Oxide_O DL1st},...
+        'SaveVideo', true,...
+        'OutputFileName', [BaseFldr system '/AlO_1ML_OH_charge_animation.mp4'],...
+        'FrameRate', 60, 'VideoView', [45 30]);
+    
+    
+    Bader3DCharge_fixV3_8_6(XYZ(:,Al1,:), ABC, Qnet(Al1,:) , [] , 'ViewAxis', 'Y', 'LoopVideo', true); %only show specific atoms 
+    
+    Bader3DCharge_fixV3_8_6(XYZ, ABC, Qnet ,[], 'ExcludedIndices', nonDL, 'ViewAxis', 'Y', 'LoopVideo', true); %Exclude Bulk water but show the rest
+    
+    
+    % %V3_9 not working
+    % % Bader3DCharge_fixV3_9(XYZ, ABC, Qnet, AlDL,'ViewAxis', 'Y','PlayVideo', true, 'LoopVideo', true);
+    % % Bader3DCharge_fixV3_9(XYZ, ABC, Qnet, AlDL,'ViewAxis', 'Y','Interactive', true);
 
 
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Everything up is working fine %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
