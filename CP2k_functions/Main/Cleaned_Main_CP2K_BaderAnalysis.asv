@@ -1670,27 +1670,27 @@ if test=='false'
     Bader3DCharge_fixV3_8_6(XYZ, ABC, Qnet ,[], 'ExcludedIndices', nonDL, 'ViewAxis', 'Y', 'LoopVideo', true); %Exclude Bulk water but show the rest
     %%V3_8_6 only hides the unselected atoms
 
-    %%% V3_8_7: For the unselected atoms, unless user used 'EcludedIndices'
+    %%% V3_8_7 and _7B(FontSize): For the unselected atoms, unless user used 'EcludedIndices'
     %%% they will be shown greyed out, otherwise the Excluded..' will
     %%% completely hide them.
-    Bader3DCharge_fixV3_8_7(XYZ, ABC, Qnet,  DL2nd, 'AdditionalSelectionSets', {Al1 Al2 Alb Oxide_O DL1st},'ViewAxis', 'Y', 'LoopVideo', true);
+    Bader3DCharge_fixV3_8_7B(XYZ, ABC, Qnet,  DL2nd, 'AdditionalSelectionSets', {Al1 Al2 Alb Oxide_O DL1st},'ViewAxis', 'Y', 'LoopVideo', true);
     
-    %Grey and Hidden atoms
-    Bader3DCharge_fixV3_8_7(XYZ, ABC, Qnet,  DL2nd, 'AdditionalSelectionSets', {Al1 Al2 Alb Oxide_O DL1st},...
+    %Grey and Hidden atoms (you can add the grid back,uncomment in v3_7_8B)
+    Bader3DCharge_fixV3_8_7B(XYZ, ABC, Qnet,  DL2nd, 'AdditionalSelectionSets', {Al1 Al2 Alb Oxide_O DL1st},...
         'SaveVideo', true,...
-        'OutputFileName', [BaseFldr system '/AlO_1ML_OH_charge_animation_v3_8_7_Grey.mp4'],...
+        'OutputFileName', [BaseFldr system '/AlO_1ML_OH_charge_animation_v3_8_7B_Grey.mp4'],...
         'FrameRate', 60, 'VideoView', [45 30]); %Grey
 
-    Bader3DCharge_fixV3_8_7(XYZ, ABC, Qnet,  DL2nd, 'AdditionalSelectionSets', {Al1 Al2 Alb Oxide_O DL1st},...
+    Bader3DCharge_fixV3_8_7B(XYZ, ABC, Qnet,  DL2nd, 'AdditionalSelectionSets', {Al1 Al2 Alb Oxide_O DL1st},...
         'ExcludedIndices', nonDL,...
         'SaveVideo', true,...
-        'OutputFileName', [BaseFldr system '/AlO_1ML_OH_charge_animation_v3_8_7_Hidden.mp4'],...
+        'OutputFileName', [BaseFldr system '/AlO_1ML_OH_charge_animation_v3_8_7B_Hidden.mp4'],...
         'FrameRate', 60, 'VideoView', [45 30]); %Hidden
     
     
-    Bader3DCharge_fixV3_8_7(XYZ(:,Al1,:), ABC, Qnet(Al1,:) , [] , 'ViewAxis', 'Y', 'LoopVideo', true); %only show specific atoms 
+    Bader3DCharge_fixV3_8_7B(XYZ(:,Al1,:), ABC, Qnet(Al1,:) , [] , 'ViewAxis', 'Y', 'LoopVideo', true); %only show specific atoms 
     
-    Bader3DCharge_fixV3_8_7(XYZ, ABC, Qnet ,[], 'ExcludedIndices', nonDL, 'ViewAxis', 'Y', 'LoopVideo', true); %Exclude Bulk water but show the rest
+    Bader3DCharge_fixV3_8_7B(XYZ, ABC, Qnet ,[], 'ExcludedIndices', nonDL, 'ViewAxis', 'Y', 'LoopVideo', true); %Exclude Bulk water but show the rest
 
     %% Example: Dynamic exclusion
     numFrames = nConfigs;
@@ -1699,12 +1699,11 @@ if test=='false'
         % Combine multiple index sets for this frame
         ExcludedIndices{f} = union(nonDL{f}, DL2nd{f}); % Use union to avoid duplicates
     end
-    Bader3DCharge_fixV3_8_7(XYZ, ABC, Qnet ,[], 'ExcludedIndices', ExcludedIndices, 'ViewAxis', 'Y', 'LoopVideo', true); 
+    Bader3DCharge_fixV3_8_7B(XYZ, ABC, Qnet ,[], 'ExcludedIndices', ExcludedIndices, 'ViewAxis', 'Y', 'LoopVideo', true); 
 
-    Bader3DCharge_fixV3_8_7(XYZ, ABC, Qnet ,Al1, 'AdditionalSelectionSets', {Al2 Alb Oxide_O}, 'ExcludedIndices', ExcludedIndices, 'ViewAxis', 'Y', 'LoopVideo', true); 
+    Bader3DCharge_fixV3_8_7B(XYZ, ABC, Qnet ,Al1, 'AdditionalSelectionSets', {Al2 Alb Oxide_O}, 'ExcludedIndices', ExcludedIndices, 'ViewAxis', 'Y', 'LoopVideo', true, 'FontSize', 16, 'Grid',''); 
 
-    Bader3DCharge_fixV3_8_7(XYZ, ABC, Qnet ,Al1, 'AdditionalSelectionSets', {Al2 Alb Oxide_O}, 'ViewAxis', 'Y', 'LoopVideo', true); 
-    Bader3DCharge_fixV3_8_7B(XYZ, ABC, Qnet ,Al1, 'AdditionalSelectionSets', {Al2 Alb Oxide_O}, 'ViewAxis', 'Y', 'LoopVideo', true, 'FontSize', 16); %fontsize fix
+    Bader3DCharge_fixV3_8_7B(XYZ, ABC, Qnet ,Al1, 'AdditionalSelectionSets', {Al2 Alb Oxide_O}, 'ViewAxis', 'Y', 'LoopVideo', true, 'FontSize', 16); %fontsize fix V3_8_7B
     
 
     %% Example: Exclude Two Static Groups

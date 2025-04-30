@@ -39,6 +39,7 @@ addParameter(p, 'VideoView', [], @isnumeric);
 addParameter(p, 'LoopVideo', false, @islogical);
 addParameter(p, 'ExcludedIndices', [], @(x) isempty(x) || isvector(x) || (iscell(x) && all(cellfun(@isvector, x))));
 addParameter(p, 'FontSize', 14, @isnumeric); % Default size: 14
+addParameter(p, 'Grid', 'off', @ischar); % Default size: 'off'
 parse(p, TrajXYZ, TrajABC, TrajQmc, varargin{:});
 
 params = p.Results;
@@ -46,7 +47,7 @@ SelectedIndices = params.SelectedIndices;
 AdditionalSets = params.AdditionalSelectionSets;
 
 fontSize = params.FontSize; % Set your desired font size
-
+Grid = params.Grid; 
 
 % Convert trajectory inputs to cells
 [TrajXYZ, TrajABC, TrajQmc] = convert_to_cells(TrajXYZ, TrajABC, TrajQmc);
@@ -143,6 +144,7 @@ ax = axes('Parent', fig, 'Position',[0.1 0.1 0.7 0.8]);
 hold(ax, 'on');
 axis(ax, 'equal');
 % grid(ax, 'on');
+grid(ax, Grid);
 
 % ==== ADD FONT SIZE PROPERTIES HERE ====
 ax.FontSize = fontSize; % Axis tick labels (values)
