@@ -8,8 +8,8 @@ close all;
 %% %%%%%%%%%%%%%% Data collections %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge_2/Phase_diagram_sys/';
-system = 'AlO_0.33ML_OH';
-Trajectory = 'AlO_0.33ML_OH_254000to297000_1000step.xyz';
+system = 'AlO_1ML_OH';
+Trajectory = 'AlO_1ML_OH_148000to160000_1000step.xyz';
 
 
 fldrname = [BaseFldr system '/Bader_Analysis/'];
@@ -1657,18 +1657,41 @@ if test=='false'
     Bader3DCharge_fixV3_7(XYZ, ABC, Qnet, AlDL,'ViewAxis', 'Y');
     
     
-    %V3_8; DON'T use 'PlayVideo' option as it has a bug 
+    %V3_8s; DON'T use 'PlayVideo' option as it has a bug 
     Bader3DCharge_fixV3_8_6(XYZ, ABC, Qnet,  DL2nd, 'AdditionalSelectionSets', {Al1 Al2 Alb Oxide_O DL1st},'ViewAxis', 'Y', 'LoopVideo', true);
     Bader3DCharge_fixV3_8_6(XYZ, ABC, Qnet,  DL2nd, 'AdditionalSelectionSets', {Al1 Al2 Oxide_O DL1st},...
         'SaveVideo', true,...
-        'OutputFileName', [BaseFldr system '/AlO_1ML_OH_charge_animation.mp4'],...
+        'OutputFileName', [BaseFldr system '/AlO_1ML_OH_charge_animation_v3_8_6.mp4'],...
         'FrameRate', 60, 'VideoView', [45 30]);
     
     
     Bader3DCharge_fixV3_8_6(XYZ(:,Al1,:), ABC, Qnet(Al1,:) , [] , 'ViewAxis', 'Y', 'LoopVideo', true); %only show specific atoms 
     
     Bader3DCharge_fixV3_8_6(XYZ, ABC, Qnet ,[], 'ExcludedIndices', nonDL, 'ViewAxis', 'Y', 'LoopVideo', true); %Exclude Bulk water but show the rest
+    %%V3_8_6 only hides the unselected atoms
+
+    %%% V3_8_7: For the unselected atoms, unless user used 'EcludedIndices'
+    %%% they will be shown greyed out, otherwise the Excluded..' will
+    %%% completely hide them.
+    Bader3DCharge_fixV3_8_7(XYZ, ABC, Qnet,  DL2nd, 'AdditionalSelectionSets', {Al1 Al2 Alb Oxide_O DL1st},'ViewAxis', 'Y', 'LoopVideo', true);
     
+    %Grey and Hidden atoms
+    Bader3DCharge_fixV3_8_7(XYZ, ABC, Qnet,  DL2nd, 'AdditionalSelectionSets', {Al1 Al2 Alb Oxide_O DL1st},...
+        'SaveVideo', true,...
+        'OutputFileName', [BaseFldr system '/AlO_1ML_OH_charge_animation_v3_8_7_Grey.mp4'],...
+        'FrameRate', 60, 'VideoView', [45 30]); %Grey
+
+    Bader3DCharge_fixV3_8_7(XYZ, ABC, Qnet,  DL2nd, 'AdditionalSelectionSets', {Al1 Al2 Alb Oxide_O DL1st},...
+        'ExcludedIndices', nonDL,...
+        'SaveVideo', true,...
+        'OutputFileName', [BaseFldr system '/AlO_1ML_OH_charge_animation_v3_8_7_Hidden.mp4'],...
+        'FrameRate', 60, 'VideoView', [45 30]); %Hidden
+    
+    
+    Bader3DCharge_fixV3_8_7(XYZ(:,Al1,:), ABC, Qnet(Al1,:) , [] , 'ViewAxis', 'Y', 'LoopVideo', true); %only show specific atoms 
+    
+    Bader3DCharge_fixV3_8_7(XYZ, ABC, Qnet ,[], 'ExcludedIndices', nonDL, 'ViewAxis', 'Y', 'LoopVideo', true); %Exclude Bulk water but show the rest
+
     
     % %V3_9 not working
     % % Bader3DCharge_fixV3_9(XYZ, ABC, Qnet, AlDL,'ViewAxis', 'Y','PlayVideo', true, 'LoopVideo', true);
