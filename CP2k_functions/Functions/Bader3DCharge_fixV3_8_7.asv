@@ -140,9 +140,17 @@ hold(ax, 'on');
 axis(ax, 'equal');
 grid(ax, 'on');
 
-xlabel(ax, 'X-axis');
-ylabel(ax, 'Y-axis');
-zlabel(ax, 'Z-axis');
+% ==== ADD FONT SIZE PROPERTIES HERE ====
+fontSize = 14; % Set your desired font size
+ax.FontSize = fontSize; % Axis tick labels (values)
+xlabel(ax, 'X-axis', 'FontSize', fontSize);
+ylabel(ax, 'Y-axis', 'FontSize', fontSize);
+zlabel(ax, 'Z-axis', 'FontSize', fontSize);
+
+% Add colorbar with font size
+hColorbar = colorbar(ax);
+hColorbar.FontSize = fontSize;
+% =======================================
 
 if strcmpi(params.ViewAxis, 'X')
     view(ax, [0 0]);
@@ -376,10 +384,12 @@ function [hAtoms, hVectors] = updatePlot(ax, XYZ, ABC, Qmc, xs, ys, zs, Radius,.
 
 delete(findobj(ax,'Type','text','Tag','FrameText'));
 
-if ~isempty(CombinedIndices)
-    [cmap, minQ, maxQ] = createColormap(Qmc(CombinedIndices));
+% ==== CHANGE 4: Colormap based on selected non-excluded atoms ====
+validSelected = setdiff(CombinedIndices, ExcludedIndices);
+if ~isempty(validSelected)
+    [cmap, minQ, maxQ] = createColormap(Qmc(validSelected));
 else
-    cmap = [0.7 0.7 0.7];
+    cmap = [0.7 0.7 0.7];  % Gray default
     minQ = 0;
     maxQ = 1;
 end
@@ -392,10 +402,13 @@ if isempty(CombinedIndices)
         set(hAtoms, 'Visible', 'off');
     end
 else
+% ==== CHANGE 5: Update atom creation/update with new logic ====
     if isempty(hAtoms) || ~isvalid(hAtoms(1))
-        hAtoms = createAtoms(ax, XYZ, xs, ys, zs, Radius, Qmc, CombinedIndices, cmap, minQ, maxQ);
+        hAtoms = createAtoms(ax, XYZ, xs, ys, zs, Radius, Qmc,...
+            CombinedIndices, ExcludedIndices, cmap, minQ, maxQ);  % Added ExcludedIndices
     else
-        updateAtoms(hAtoms, XYZ, xs, ys, zs, Radius, Qmc, CombinedIndices, cmap, minQ, maxQ);
+        updateAtoms(hAtoms, XYZ, xs, ys, zs, Radius, Qmc,...
+            CombinedIndices, ExcludedIndices, cmap, minQ, maxQ);  % Added ExcludedIndices
     end
 end
 
@@ -407,16 +420,31 @@ else
     updateVectors(hVectors, Vec);
 end
 
-text(ax, 0.05, 0.95, 0.9, sprintf('Frame: %d/%d', currentFrame, numFrames),...
-    'Units','normalized', 'Tag','FrameText');
+% text(ax, 0.05, 0.95, 0.9, sprintf('Frame: %d/%d', currentFrame, numFrames),...
+%     'Units','normalized', 'Tag','FrameText');
+
+    % ==== MODIFY FRAME TEXT =====
+    text(ax, 0.05, 0.95, 0.9, sprintf('Frame: %d/%d', currentFrame, numFrames),...
+        'Units','normalized', 'Tag','FrameText',...
+        'FontSize', fontSize); % Add this line
+    % ===========================
 end
 
-function hAtoms = createAtoms(ax, XYZ, xs, ys, zs, Radius, Qmc, CombinedIndices, cmap, minQ, maxQ)
-hAtoms = gobjects(size(XYZ,1), 1); % Preallocate but handle visibility
+%% ==== CHANGE 6: Modified atom creation function =========================
+function hAtoms = createAtoms(ax, XYZ, xs, ys, zs, Radius, Qmc,...
+    CombinedIndices, ExcludedIndices, cmap, minQ, maxQ)  % Added ExcludedIndices
+
+hAtoms = gobjects(size(XYZ,1), 1);
 
 for i = 1:size(XYZ,1)
-    if ismember(i, CombinedIndices)
-        % Compute color for included atoms
+    % ==== NEW LOGIC =====================================================
+    if ismember(i, ExcludedIndices)
+        % Case 1: Excluded atom - hide completely
+        visible = 'off';
+        color = [0 0 0];  % Arbitrary color (not shown)
+        alpha = 1;
+    elseif ismember(i, CombinedIndices)
+        % Case 2: Selected atom - color normally
         if maxQ ~= minQ
             cidx = round((Qmc(i) - minQ)/(maxQ - minQ) * (size(cmap,1)-1)) + 1;
         else
@@ -426,10 +454,10 @@ for i = 1:size(XYZ,1)
         alpha = 1;
         visible = 'on';
     else
-        % Excluded atoms: hide completely
-        visible = 'off';
-        color = [0 0 0]; % Arbitrary color (not shown)
-        alpha = 1; % Irrelevant
+        % Case 3: Unselected atom - gray out
+        color = [0.7 0.7 0.7];  % Gray color
+        alpha = 0.3;  % Slightly transparent
+        visible = 'on';
     end
     
     xAt = xs*Radius + XYZ(i,1);
@@ -440,14 +468,23 @@ for i = 1:size(XYZ,1)
         'FaceColor', color,...
         'EdgeColor', 'none',...
         'FaceAlpha', alpha,...
-        'Visible', visible); % Key change: control visibility
+        'Visible', visible);
 end
 end
 
-function updateAtoms(hAtoms, XYZ, xs, ys, zs, Radius, Qmc, CombinedIndices, cmap, minQ, maxQ)
+%% ==== CHANGE 7: Modified atom update function ===========================
+function updateAtoms(hAtoms, XYZ, xs, ys, zs, Radius, Qmc,...
+    CombinedIndices, ExcludedIndices, cmap, minQ, maxQ)  % Added ExcludedIndices
+
 for i = 1:size(XYZ,1)
-    if ismember(i, CombinedIndices)
-        % Update visible atoms
+    % ==== NEW LOGIC =====================================================
+    if ismember(i, ExcludedIndices)
+        % Case 1: Excluded atom
+        visible = 'off';
+        color = [0 0 0];
+        alpha = 1;
+    elseif ismember(i, CombinedIndices)
+        % Case 2: Selected atom
         if maxQ ~= minQ
             cidx = round((Qmc(i) - minQ)/(maxQ - minQ) * (size(cmap,1)-1)) + 1;
         else
@@ -457,10 +494,10 @@ for i = 1:size(XYZ,1)
         alpha = 1;
         visible = 'on';
     else
-        % Hide excluded atoms
-        visible = 'off';
-        color = [0 0 0]; % Irrelevant
-        alpha = 1; % Irrelevant
+        % Case 3: Unselected atom
+        color = [0.7 0.7 0.7];
+        alpha = 0.3;
+        visible = 'on';
     end
     
     xAt = xs*Radius + XYZ(i,1);
@@ -473,9 +510,12 @@ for i = 1:size(XYZ,1)
         'ZData', zAt,...
         'FaceColor', color,...
         'FaceAlpha', alpha,...
-        'Visible', visible); % Key change: update visibility
+        'Visible', visible);
 end
 end
+
+%% (Keep helper functions unchanged)
+% ... [rest of helper functions] ...
 
 function hVectors = createVectors(ax, Vec)
 hVectors = gobjects(12,1);
