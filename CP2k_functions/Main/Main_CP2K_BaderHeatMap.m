@@ -1,0 +1,59 @@
+clear all;  clc;
+close all;
+
+BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge_2/Phase_diagram_sys/';
+system = 'AlO_1ML_OH';
+Trajectory = 'AlO_1ML_OH-pos-1.xyz';
+% BaseFldr = 'G:\Imperial\MRes\Jad\';
+% system = 'Au_Junc';
+% Trajectory = 'Au_Junc.xyz';
+
+fldrname = [BaseFldr system '/Bader_Analysis/'];
+ACFfiles = dir([fldrname 'ACF_*.dat']);
+
+
+% % Call function to find ABC vectors from .inp file
+ABC = getABCvectors(BaseFldr, system);
+
+% % get the names of atoms from original xyz input file
+[Atoms, AtomList, Indx, Indxfns, Kinds, Elements, PP] = getAtomInfoFromInput(BaseFldr, system);
+
+% % find the indices of atoms containing myAtoms
+myAtoms = {'Al'};
+% myAtoms = {'all'};
+[Indx, myAtomList, myAtomNums, myAtomCore] = detectAtomsOfType(myAtoms, AtomList, Indx, Indxfns, Kinds, Elements, PP);
+
+% % parse coordinates of atoms along trajectory and wrap into cell
+% [xyz, XYZ, ~, ~, ~, nAtoms, startConfig, nConfigs, StepNum_Traj] = ReadAndParsexyz(BaseFldr, system, Trajectory, ABC, [0 0 0]);
+[xyz, XYZ, ~, ~, ~, nAtoms, startConfig, nConfigs, StepNum_Traj] = ReadAndParsexyz_new(BaseFldr, system, Trajectory, ABC, [0 0 0]);
+
+% % Read the Bader charge "ACF" files and extract the raw charge Q/net charge Qnet
+Q = zeros(length(Atoms),length(ACFfiles));
+Qnet = zeros(length(Atoms),length(ACFfiles));
+
+for n = 1:length(ACFfiles)
+    disp(['Extracting charge from ' ACFfiles(n).name]);
+    [Q(:,n), Qnet(:,n), StepNum(n)] = extractBaderCharges(fldrname, ACFfiles(n).name, Atoms, AtomList, Kinds, PP);
+end
+
+MeanCharge = zeros(length(AtomList),length(StepNum));
+StdCharge = zeros(length(AtomList),length(StepNum));
+SumCharge = zeros(length(AtomList),length(StepNum));
+
+for i = 1:length(StepNum)
+    for j = 1:length(AtomList)
+        MeanCharge(j,i) = mean(Qnet(Indx.(Indxfns{j}),i));
+        StdCharge(j,i) = std(Qnet(Indx.(Indxfns{j}),i));
+        SumCharge(j,i) = sum(Qnet(Indx.(Indxfns{j}),i));
+    end
+end
+
+[StepNum,sortIdx] = sort(StepNum,'ascend');
+SumCharge = SumCharge(:,sortIdx);
+MeanCharge = MeanCharge(:,sortIdx);
+StdCharge = StdCharge(:,sortIdx);
+
+XYZ_snap = reshape(XYZ(1,:,:), [size(XYZ,2) size(XYZ,3)]);
+
+MeanQnet = mean(Qnet(myAtomNums,:),2);
+Bader3DCharge(XYZ_snap(myAtomNums,:), ABC, MeanQnet);
