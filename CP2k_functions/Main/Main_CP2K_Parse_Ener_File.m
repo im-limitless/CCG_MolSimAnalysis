@@ -6,7 +6,7 @@ PathSep =  setOSpathSep;
 
 % Set the location of the calculation output
 BaseFldr = '/Users/rashidal-heidous/Google Drive (local)/Academic Career (Current:local)/UK Postgrad Journey (ICL)/PhD/PhD/cp2k jobs/Jobs/ARCHER2/AIMD/Grand_Challenge_2/Phase_diagram_sys/'; % Base directory containing calculation directory ("\" included at end)
-system = 'AlO_1ML_OH'; % Name of calculation directory (no "\")
+system = 'Al_water'; % Name of calculation directory (no "\")
 
 % Set the number of steps before the end that are used to compute averages
 % SampleRange = 100;

@@ -5,7 +5,8 @@ function Bader3DCharge_fixV2(XYZ, ABC, Qmc, SelectedIndices)
 
 disp('Creating 3D charge distribution map...');
 
-[xs,ys,zs] = sphere(10,100);   % Sphere with 10x10 faces
+% [xs,ys,zs] = sphere(10,100);   % Sphere with 10x10 faces (version 2023b)
+[xs,ys,zs] = sphere(10);   % Sphere with 10x10 faces (post version 2023b)
 Radius = 1;
 
 % Handle optional SelectedIndices parameter
